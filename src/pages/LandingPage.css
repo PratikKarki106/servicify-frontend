@@ -1,0 +1,109 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  color: #333;
+}
+
+.nav-button:hover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background-color: #1094E6;
+}
+
+.signup-button {
+  background-color: #1094E6;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: #f9f9f9;
+  padding: 90px 150px;
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 100px;
+  flex-wrap: wrap;
+}
+
+.hero-text {
+  max-width: 500px;
+}
+
+.hero-text h1 {
+  font-size: 54px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 24px;
+}
+
+.hero-text p {
+  font-size: 20px;
+  line-height: 1.8;
+  color: #444;
+}
+
+.hero-image-wrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+.hero-image {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #fff;
+  color: #888;
+  font-size: 14px;
+}
