@@ -1,0 +1,42 @@
+.services-section {
+  background-image: url('../assets/ServicesBackground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  max-width: 1200px;
+  max-height: 475px;
+  margin: 0 auto;
+  padding: 100px 60px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 140px;
+}
+
+.services-heading {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 20px;
+}
+
+.services-description {
+  font-size: 22px;
+  line-height: 1.6;
+  color: #444;
+  max-width: 700px;
+  margin: 0 auto 60px;
+}
+
+.services-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.service-image {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
