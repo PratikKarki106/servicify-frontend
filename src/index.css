@@ -24,4 +24,5 @@ p {
 
 a, button {
   font-weight: 500; /* medium */
+  cursor: pointer;
 }
