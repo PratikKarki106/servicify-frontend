@@ -6,14 +6,18 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Navbar */
+/* Navbar over video */
 .navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 60px;
-  background-color: #fff;
-  border-bottom: 1px solid #eee;
+  z-index: 3;
+  background: transparent;
 }
 
 .nav-links {
@@ -32,7 +36,7 @@
   font-size: 16px;
   cursor: pointer;
   position: relative;
-  color: #333;
+  color: #ffffff;
 }
 
 .nav-button:hover::after {
@@ -42,7 +46,7 @@
   bottom: -4px;
   width: 100%;
   height: 2px;
-  background-color: #1094E6;
+  background-color: #ffffff;
 }
 
 .signup-button {
@@ -55,48 +59,69 @@
   cursor: pointer;
 }
 
-/* Hero Section */
+/* Hero Section with Video */
 .hero-section {
-  background-color: #f9f9f9;
-  padding: 90px 150px;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.hero-content {
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  z-index: 0;
+}
+
+.hero-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 1;
+}
+
+.hero-overlay {
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 100px;
-  flex-wrap: wrap;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 0 20px;
 }
 
-.hero-text {
-  max-width: 500px;
+.hero-text h1,
+.hero-text p {
+  color: #ffffff;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.1),
+    0 0 4px rgba(255, 255, 255, 0.15);
 }
 
 .hero-text h1 {
   font-size: 54px;
   line-height: 1.2;
   font-weight: 800;
-  color: #111;
   margin-bottom: 24px;
 }
 
 .hero-text p {
   font-size: 20px;
   line-height: 1.8;
-  color: #444;
-}
-
-.hero-image-wrapper {
-  flex: 1;
-  min-width: 300px;
-}
-
-.hero-image {
-  width: 100%;
-  max-width: 600px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 0 auto;
+  font-weight: 500;
 }
 
 /* Footer */
@@ -106,4 +131,36 @@
   background-color: #fff;
   color: #888;
   font-size: 14px;
+}
+
+/* Arrow Stack */
+.arrow-stack {
+  position: absolute;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.arrow {
+  width: 14px;
+  height: 14px;
+  border-left: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  transform: rotate(-45deg);
+  opacity: 0.3;
+  animation: pulse 1.5s infinite;
+}
+
+.arrow-1 { animation-delay: 0s; }
+.arrow-2 { animation-delay: 0.3s; }
+.arrow-3 { animation-delay: 0.6s; }
+
+@keyframes pulse {
+  0%   { opacity: 0.3; }
+  33%  { opacity: 0.6; }
+  66%  { opacity: 1; }
+  100% { opacity: 0.3; }
 }
