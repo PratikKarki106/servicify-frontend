@@ -1,0 +1,138 @@
+.signin-container {
+  background-color: rgb(218, 218, 218);
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+  height: 600px;
+  border-radius: 30px;
+  margin: 65px auto; /* center horizontally */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.signin-left {
+  background-color: aliceblue;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* start from top */
+  padding: 40px 30px;
+  gap: 20px; /* consistent spacing between children */
+}
+
+.signin-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.signin-title {
+  font-size: 22px;
+  margin: 10px 0 20px 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 55%;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #1094E6;
+  box-shadow: 0 0 4px rgba(16, 148, 230, 0.4);
+}
+
+.Sign-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.signin-btn {
+  color: white;
+  background: #1094E6;
+  padding: 9px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.google-btn {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.google-btn img {
+  height: 40px;
+}
+
+.signup-text {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.signup-link {
+  color: #1094E6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.signin-right {
+    background-color: #e9e9e9;
+  width: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible
+}
+
+.Bubble {
+  height: 200px;
+  width: 700px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  z-index: 1;
+  transform: scale(1.15);       /* 1.3 = 130% size */
+  transform-origin: top right;
+}
+
+.signin-image {
+  height: 400px;
+  margin-top: 200px;
+  margin-left: 60px;
+}
+
+.signup-left {
+  background-color: aliceblue;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* start from top */
+  padding: 40px 30px;
+  gap: 10px; /* consistent spacing between children */
+}

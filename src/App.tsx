@@ -4,7 +4,8 @@ import LandingPage from "./pages/LandingPage";
 import AboutPage from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
-// import Login from "./pages/Login";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp"
 // import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -14,8 +15,9 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
-        {/* <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} /> */}
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        { /* <Route path="/dashboard" element={<Dashboard /> */ }
       </Routes>
   );
 }
