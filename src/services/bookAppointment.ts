@@ -182,3 +182,21 @@ export const updateBillItems = async (appointmentId: string | number, billItems:
     };
   }
 };
+
+// Fetch invoice details using secure invoice token (for email "View PDF" links)
+export const getPublicInvoiceByToken = async (appointmentId: string | number, token: string) => {
+  try {
+    const encodedId = encodeURIComponent(appointmentId.toString());
+    const response = await axiosInstance.get(`/appointments/appointment/${encodedId}/invoice`, {
+      params: { token }
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching public invoice:', error);
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Invalid or expired invoice link',
+      error: error.message
+    };
+  }
+};

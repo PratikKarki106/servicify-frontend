@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCar,
@@ -22,7 +21,6 @@ import { appConfirm } from '../services/dialogService';
 import './AdminManageVehicles.css';
 
 const AdminManageVehicles: React.FC = () => {
-  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'pending' | 'verified' | 'rejected'>('pending');
@@ -36,6 +34,7 @@ const AdminManageVehicles: React.FC = () => {
   const [statusChangeReason, setStatusChangeReason] = useState('');
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const vehiclesPerPage = 10;
 
   const fetchVehicles = async () => {
@@ -57,6 +56,10 @@ const AdminManageVehicles: React.FC = () => {
   const handleViewDetails = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
     setShowModal(true);
+  };
+
+  const handleImageClick = (imageUrl: string) => {
+    setFullscreenImage(imageUrl);
   };
 
   const handleVerify = async (vehicleId: string) => {
@@ -227,7 +230,7 @@ const AdminManageVehicles: React.FC = () => {
                   <th>Contact</th>
                   <th>Vehicle</th>
                   <th>Plate Number</th>
-                  <th>Bluebook</th>
+                  <th>Images</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -273,16 +276,29 @@ const AdminManageVehicles: React.FC = () => {
                       <span className="admin-manage-vehicle-plate-number">{vehicle.plateNumber}</span>
                     </td>
                     <td>
-                      {vehicle.bluebookImageUrl ? (
-                        <button
-                          className="admin-manage-vehicle-view-bluebook-btn"
-                          onClick={() => handleViewDetails(vehicle)}
-                        >
-                          <FontAwesomeIcon icon={faImage} /> View
-                        </button>
-                      ) : (
-                        <span className="admin-manage-vehicle-no-image">No Image</span>
-                      )}
+                      <div className="admin-manage-vehicle-image-links">
+                        {vehicle.bluebookImageUrl && (
+                          <button
+                            className="admin-manage-vehicle-view-image-btn"
+                            onClick={() => handleViewDetails(vehicle)}
+                            title="View Bluebook"
+                          >
+                            <FontAwesomeIcon icon={faImage} /> Bluebook
+                          </button>
+                        )}
+                        {vehicle.vehicleImageUrl && (
+                          <button
+                            className="admin-manage-vehicle-view-image-btn"
+                            onClick={() => handleViewDetails(vehicle)}
+                            title="View Vehicle"
+                          >
+                            <FontAwesomeIcon icon={faCar} /> Vehicle
+                          </button>
+                        )}
+                        {!vehicle.bluebookImageUrl && !vehicle.vehicleImageUrl && (
+                          <span className="admin-manage-vehicle-no-image">No Images</span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       {getStatusBadge(vehicle.status)}
@@ -406,18 +422,37 @@ const AdminManageVehicles: React.FC = () => {
                 </div>
               </div>
 
-              {selectedVehicle.bluebookImageUrl && (
-                <div className="admin-manage-vehicle-detail-section">
-                  <h3>Bluebook Image</h3>
-                  <div className="admin-manage-vehicle-bluebook-image">
-                    <img
-                      src={selectedVehicle.bluebookImageUrl}
-                      alt="Bluebook"
-                      className="admin-manage-vehicle-bluebook-img"
-                    />
+              <div className="admin-manage-vehicle-images-section">
+                {selectedVehicle.bluebookImageUrl && (
+                  <div className="admin-manage-vehicle-detail-section">
+                    <h3>Bluebook Image</h3>
+                    <div className="admin-manage-vehicle-image-container">
+                      <img
+                        src={selectedVehicle.bluebookImageUrl}
+                        alt="Bluebook"
+                        className="admin-manage-vehicle-detail-img clickable"
+                        onClick={() => handleImageClick(selectedVehicle.bluebookImageUrl!)}
+                        title="Click to enlarge"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+                
+                {selectedVehicle.vehicleImageUrl && (
+                  <div className="admin-manage-vehicle-detail-section">
+                    <h3>Vehicle Image</h3>
+                    <div className="admin-manage-vehicle-image-container">
+                      <img
+                        src={selectedVehicle.vehicleImageUrl}
+                        alt="Vehicle"
+                        className="admin-manage-vehicle-detail-img clickable"
+                        onClick={() => handleImageClick(selectedVehicle.vehicleImageUrl!)}
+                        title="Click to enlarge"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {selectedVehicle.rejectionReason && (
                 <div className="admin-manage-vehicle-detail-section">
@@ -570,6 +605,18 @@ const AdminManageVehicles: React.FC = () => {
                 {statusChangeLoading ? 'Updating...' : 'Update Status'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Viewer Modal */}
+      {fullscreenImage && (
+        <div className="admin-image-viewer-overlay" onClick={() => setFullscreenImage(null)}>
+          <div className="admin-image-viewer-content" onClick={(e) => e.stopPropagation()}>
+            <button className="admin-image-viewer-close" onClick={() => setFullscreenImage(null)}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            <img src={fullscreenImage} alt="Large view" className="admin-image-viewer-img" />
           </div>
         </div>
       )}

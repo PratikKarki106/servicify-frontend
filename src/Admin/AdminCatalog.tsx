@@ -88,15 +88,15 @@ const AdminCatalog = () => {
     const newStatus = !item.isActive;
     try {
       await updateCatalogItem(item._id, { isActive: newStatus });
-      setCatalogItems(prev => 
-        prev.map(i => 
+      setCatalogItems(prev =>
+        prev.map(i =>
           i._id === item._id ? { ...i, isActive: newStatus } : i
         )
       );
-      await appAlert({ 
-        title: 'Success', 
-        message: newStatus ? 'Item activated successfully' : 'Item deactivated successfully', 
-        variant: 'success' 
+      await appAlert({
+        title: 'Success',
+        message: newStatus ? 'Item activated successfully' : 'Item deactivated successfully',
+        variant: 'success'
       });
     } catch (err: any) {
       console.error('Error toggling item status:', err);
@@ -202,83 +202,83 @@ const AdminCatalog = () => {
                   const ccName = typeof item.ccId === 'object' && item.ccId ? item.ccId.name : 'N/A';
 
                   return (
-                  <div key={item._id} className={`admin-catalog-row ${!item.isActive ? 'admin-row-inactive' : ''}`}>
-                    <div className='admin-cell admin-image-cell'>
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.itemName} className="admin-item-image" />
-                      ) : (
-                        <div className="admin-item-image-placeholder">
-                          <FaPlus className="placeholder-icon" />
+                    <div key={item._id} className={`admin-catalog-row ${!item.isActive ? 'admin-row-inactive' : ''}`}>
+                      <div className='admin-cell admin-image-cell'>
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.itemName} className="admin-item-image" />
+                        ) : (
+                          <div className="admin-item-image-placeholder">
+                            <FaPlus className="placeholder-icon" />
+                          </div>
+                        )}
+                      </div>
+                      <div className='admin-cell admin-name-cell'>
+                        <div className='admin-service-name'>
+                          <span>{companyName}</span>
                         </div>
-                      )}
-                    </div>
-                    <div className='admin-cell admin-name-cell'>
-                      <div className='admin-service-name'>
-                        <span>{companyName}</span>
+                      </div>
+                      <div className='admin-cell admin-price-cell'>
+                        <div className='admin-service-name'>
+                          {productName}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-charge-cell'>
+                        <div className='admin-service-name'>
+                          {versionName}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-charge-cell'>
+                        <div className='admin-service-name'>
+                          {ccName}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-charge-cell'>
+                        <div className='admin-service-name'>
+                          <span>{item.itemName}</span>
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-charge-cell'>
+                        <div className='admin-charge-amount'>
+                          Nrs {item.serviceCharge.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-charge-cell'>
+                        <div className='admin-charge-amount'>
+                          Nrs {item.totalCost.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-time-cell'>
+                        <div className='admin-time-display'>
+                          <FaRegClock className="admin-time-icon" />
+                          {formatTime(item.estimatedTime)}
+                        </div>
+                      </div>
+                      <div className='admin-cell admin-actions-cell'>
+                        <div className='admin-action-buttons'>
+                          <button
+                            className={`admin-action-btn admin-toggle-btn ${item.isActive ? 'admin-active' : 'admin-inactive'}`}
+                            onClick={() => handleToggleActive(item)}
+                            title={item.isActive ? 'Deactivate' : 'Activate'}
+                          >
+                            {item.isActive ? <FaToggleOn /> : <FaToggleOff />}
+                          </button>
+                          <button
+                            className='admin-action-btn admin-edit-btn'
+                            onClick={() => handleEdit(item)}
+                            title="Edit"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            className='admin-action-btn admin-delete-btn'
+                            onClick={() => handleDelete(item._id)}
+                            title="Delete"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className='admin-cell admin-price-cell'>
-                      <div className='admin-service-name'>
-                        {productName}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-charge-cell'>
-                      <div className='admin-service-name'>
-                        {versionName}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-charge-cell'>
-                      <div className='admin-service-name'>
-                        {ccName}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-charge-cell'>
-                      <div className='admin-service-name'>
-                        <span>{item.itemName}</span>
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-charge-cell'>
-                      <div className='admin-charge-amount'>
-                        Nrs {item.serviceCharge.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-charge-cell'>
-                      <div className='admin-charge-amount'>
-                        Nrs {item.totalCost.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-time-cell'>
-                      <div className='admin-time-display'>
-                        <FaRegClock className="admin-time-icon" />
-                        {formatTime(item.estimatedTime)}
-                      </div>
-                    </div>
-                    <div className='admin-cell admin-actions-cell'>
-                      <div className='admin-action-buttons'>
-                        <button
-                          className={`admin-action-btn admin-toggle-btn ${item.isActive ? 'admin-active' : 'admin-inactive'}`}
-                          onClick={() => handleToggleActive(item)}
-                          title={item.isActive ? 'Deactivate' : 'Activate'}
-                        >
-                          {item.isActive ? <FaToggleOn /> : <FaToggleOff />}
-                        </button>
-                        <button
-                          className='admin-action-btn admin-edit-btn'
-                          onClick={() => handleEdit(item)}
-                          title="Edit"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className='admin-action-btn admin-delete-btn'
-                          onClick={() => handleDelete(item._id)}
-                          title="Delete"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                   );
                 })
               )}

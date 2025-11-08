@@ -7,7 +7,7 @@ import {
   faWrench,
   faFileInvoiceDollar,
   faCalendarCheck,
-  faStar
+  faStar,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import Components
@@ -30,11 +30,10 @@ const UserDashboard: React.FC = () => {
   const [refreshVehicles, setRefreshVehicles] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
 
- const handleEditVehicleClick = (vehicleId: string) => {
+  const handleEditVehicleClick = (vehicleId: string) => {
     setSelectedVehicleId(vehicleId);
     setShowEditModal(true);
   };
-
 
   const [newVehicleData, setNewVehicleData] = useState({
     name: '',
@@ -76,7 +75,7 @@ const UserDashboard: React.FC = () => {
   // Event Handlers
   const handleBookService = () => navigate('/book-appointment');
 
-    const handleBookServiceVehicle = (vehicle?: Vehicle) => {
+  const handleBookServiceVehicle = (vehicle?: Vehicle) => {
     if (vehicle) {
       localStorage.setItem('selectedVehicle', JSON.stringify(vehicle));
       console.log('Booking service for vehicle:', vehicle);
@@ -85,11 +84,10 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleViewDetails = (bookingId: string | number) => navigate(`/booking-details/${bookingId}`);
-  const handleTrackService = (bookingId: string | number) => navigate(`/track-service/${bookingId}`);
+  const handleTrackService = (bookingId: string | number) => navigate(`/track-service`);
   const handleReschedule = (bookingId: string | number) => navigate(`/reschedule/${bookingId}`);
   const handleCancelBooking = (bookingId: string | number) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
-      // Component now handles its own data
       alert('Booking cancellation will be handled by the component');
     }
   };
@@ -123,129 +121,127 @@ const UserDashboard: React.FC = () => {
 
   const handleSubmitVehicle = (e: React.FormEvent) => {
     e.preventDefault();
-    // Components handle their own data now
     alert('Vehicle will be added by the VehiclesSection component');
     handleCloseModal();
   };
 
-    const handleVehicleAdded = () => {
-    // This will trigger VehicleSection to refresh
+  const handleVehicleAdded = () => {
     setRefreshVehicles(prev => !prev);
   };
 
-    const handleVehicleUpdated = () => {
-      // Refresh vehicle list and close edit modal
-      setRefreshVehicles(prev => !prev);
-      setShowEditModal(false);
-    };
-
+  const handleVehicleUpdated = () => {
+    setRefreshVehicles(prev => !prev);
+    setShowEditModal(false);
+  };
 
   return (
     <div className="userdashboard-container">
-      {/* Welcome Section */}
-        <div className="userdashboard-welcome">
-          <div className="userdashboard-welcome-content">
-            <h1>Welcome back, {name} ! 🏍️</h1>
-            <p>Keep your 2-wheeler in top condition with our expert services</p>
+      {/* Welcome Section - Original */}
+      <div className="userdashboard-welcome">
+        <div className="userdashboard-welcome-content">
+          <h1>Welcome back, {name}! 🏍️</h1>
+          <p>Keep your 2-wheeler in top condition with our expert services</p>
+        </div>
+        <button className="userdashboard-book-btn" onClick={handleBookService}>
+          <FontAwesomeIcon icon={faCalendarPlus} />
+          <span>Book New Service</span>
+        </button>
+      </div>
+
+      {/* Stats Cards - Original */}
+      <div className="userdashboard-stats">
+        <div className="userdashboard-stat-card">
+          <div className="userdashboard-stat-icon" style={{ backgroundColor: '#E3F2FD' }}>
+            <FontAwesomeIcon icon={faWrench} style={{ color: '#2196F3' }} />
           </div>
-          <button className="userdashboard-book-btn" onClick={handleBookService}>
-            <FontAwesomeIcon icon={faCalendarPlus} />
-            <span>Book New Service</span>
+          <div className="userdashboard-stat-info">
+            <h3>{loading ? '...' : error ? 'N/A' : stats.totalServices}</h3>
+            <p>Total Services</p>
+          </div>
+        </div>
+        <div className="userdashboard-stat-card">
+          <div className="userdashboard-stat-icon" style={{ backgroundColor: '#E8F5E9' }}>
+            <FontAwesomeIcon icon={faFileInvoiceDollar} style={{ color: '#4CAF50' }} />
+          </div>
+          <div className="userdashboard-stat-info">
+            <h3>{loading ? '...' : error ? 'N/A' : `Rs. ${stats.totalSpent.toLocaleString()}`}</h3>
+            <p>Total Spent</p>
+          </div>
+        </div>
+        <div className="userdashboard-stat-card">
+          <div className="userdashboard-stat-icon" style={{ backgroundColor: '#FFF3E0' }}>
+            <FontAwesomeIcon icon={faCalendarCheck} style={{ color: '#FF9800' }} />
+          </div>
+          <div className="userdashboard-stat-info">
+            <h3>{loading ? '...' : error ? 'N/A' : stats.upcomingServices}</h3>
+            <p>Upcoming Services</p>
+          </div>
+        </div>
+        <div className="userdashboard-stat-card">
+          <div className="userdashboard-stat-icon" style={{ backgroundColor: '#F3E5F5' }}>
+            <FontAwesomeIcon icon={faStar} style={{ color: '#9C27B0' }} />
+          </div>
+          <button onClick={() => navigate('/user/settings')}>
+          <div className="userdashboard-stat-info1">
+            <h3>{loading ? '...' : error ? 'N/A' : stats.loyaltyPoints}</h3>
+            <p>Loyalty Points</p>
+          </div>
           </button>
         </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="userdashboard-stats">
-          <div className="userdashboard-stat-card">
-            <div className="userdashboard-stat-icon" style={{ backgroundColor: '#E3F2FD' }}>
-              <FontAwesomeIcon icon={faWrench} style={{ color: '#2196F3' }} />
-            </div>
-            <div className="userdashboard-stat-info">
-              <h3>{loading ? '...' : error ? 'N/A' : stats.totalServices}</h3>
-              <p>Total Services</p>
-            </div>
-          </div>
-          <div className="userdashboard-stat-card">
-            <div className="userdashboard-stat-icon" style={{ backgroundColor: '#E8F5E9' }}>
-              <FontAwesomeIcon icon={faFileInvoiceDollar} style={{ color: '#4CAF50' }} />
-            </div>
-            <div className="userdashboard-stat-info">
-              <h3>{loading ? '...' : error ? 'N/A' : `Rs. ${stats.totalSpent.toLocaleString()}`}</h3>
-              <p>Total Spent</p>
-            </div>
-          </div>
-          <div className="userdashboard-stat-card">
-            <div className="userdashboard-stat-icon" style={{ backgroundColor: '#FFF3E0' }}>
-              <FontAwesomeIcon icon={faCalendarCheck} style={{ color: '#FF9800' }} />
-            </div>
-            <div className="userdashboard-stat-info">
-              <h3>{loading ? '...' : error ? 'N/A' : stats.upcomingServices}</h3>
-              <p>Upcoming Services</p>
-            </div>
-          </div>
-          <div className="userdashboard-stat-card">
-            <div className="userdashboard-stat-icon" style={{ backgroundColor: '#F3E5F5' }}>
-              <FontAwesomeIcon icon={faStar} style={{ color: '#9C27B0' }} />
-            </div>
-            <div className="userdashboard-stat-info">
-              <h3>{loading ? '...' : error ? 'N/A' : stats.loyaltyPoints}</h3>
-              <p>Loyalty Points</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid with Separated Components */}
-        <div className="userdashboard-grid">
-          {/* Active Bookings Component - Manages its own data */}
-          <ActiveBookings
-            onBookService={handleBookService}
-            onTrackService={handleTrackService}
-            onViewDetails={handleViewDetails}
-            onReschedule={handleReschedule}
-            onCancelBooking={handleCancelBooking}
-          />
-
-          {/* Vehicles Section Component - Manages its own data */}
-          <VehiclesSection
-          key={refreshVehicles ? 'refresh' : 'normal'}
-            onAddVehicleClick={handleAddVehicleClick}
-            onBookService={handleBookServiceVehicle}
-            onEditVehicleClick={handleEditVehicleClick}
-          />
-
-          {/* Service Packages Component - Manages its own data */}
-          <ServicePackages
-            onViewAllPackages={handleViewAllPackages}
-            onPurchasePackage={handlePurchasePackage}
-          />
-
-          {/* Service Reminders Component - Manages its own data */}
-          <ServiceReminders />
-
-          {/* Quick Actions Component */}
-          <QuickActions
-            onBookService={handleBookService}
-            onTrackService={handleTrackServiceGeneral}
-            onViewHistory={handleViewHistory}
-            onEmergencyService={handleEmergencyService}
-          />
-
-          {/* Recent Activities Component - Manages its own data */}
-          <RecentActivities />
-        </div>
-
-        {/* Add Vehicle Modal Component */}
-        <AddVehicleModal
-          show={showAddVehicleModal}
-          onClose={handleCloseModal}
-          onVehicleAdded={handleVehicleAdded}
+      {/* Main Content Grid - Original Layout */}
+      <div className="userdashboard-grid">
+        {/* Active Bookings Component */}
+        <ActiveBookings
+          onBookService={handleBookService}
+          onTrackService={handleTrackService}
+          onViewDetails={handleViewDetails}
+          onReschedule={handleReschedule}
+          onCancelBooking={handleCancelBooking}
         />
 
-        <EditVehicleModal
-          show={showEditModal}
-          vehicleId={selectedVehicleId}
-          onClose={() => setShowEditModal(false)}
-          onVehicleUpdated={handleVehicleUpdated}
+        {/* Vehicles Section Component */}
+        <VehiclesSection
+          key={refreshVehicles ? 'refresh' : 'normal'}
+          onAddVehicleClick={handleAddVehicleClick}
+          onBookService={handleBookServiceVehicle}
+          onEditVehicleClick={handleEditVehicleClick}
+        />
+
+        {/* Service Packages Component */}
+        <ServicePackages
+          onViewAllPackages={handleViewAllPackages}
+          onPurchasePackage={handlePurchasePackage}
+        />
+
+        {/* Service Reminders Component */}
+        <ServiceReminders />
+
+        {/* Quick Actions Component */}
+        <QuickActions
+          onBookService={handleBookService}
+          onTrackService={handleTrackServiceGeneral}
+          onViewHistory={handleViewHistory}
+          onEmergencyService={handleEmergencyService}
+        />
+
+        {/* Recent Activities Component */}
+        <RecentActivities />
+      </div>
+
+      {/* Add Vehicle Modal Component */}
+      <AddVehicleModal
+        show={showAddVehicleModal}
+        onClose={handleCloseModal}
+        onVehicleAdded={handleVehicleAdded}
+      />
+
+      <EditVehicleModal
+        show={showEditModal}
+        vehicleId={selectedVehicleId}
+        onClose={() => setShowEditModal(false)}
+        onVehicleUpdated={handleVehicleUpdated}
       />
     </div>
   );

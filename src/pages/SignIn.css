@@ -5,7 +5,8 @@
   width: 1200px;
   height: 600px;
   border-radius: 30px;
-  margin: 65px auto; /* center horizontally */
+  margin: 65px auto;
+  /* center horizontally */
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
 }
@@ -16,9 +17,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* start from top */
+  justify-content: flex-start;
+  /* start from top */
   padding: 40px 30px;
-  gap: 25px; /* consistent spacing between children */
+  gap: 25px;
+  /* consistent spacing between children */
 }
 
 .signin-logo {
@@ -99,7 +102,7 @@
 }
 
 .signin-right {
-    background-color: #e9e9e9;
+  background-color: #e9e9e9;
   width: 50%;
   position: relative;
   display: flex;
@@ -115,7 +118,8 @@
   right: 0px;
   top: 0px;
   z-index: 1;
-  transform: scale(1.15);       /* 1.3 = 130% size */
+  transform: scale(1.15);
+  /* 1.3 = 130% size */
   transform-origin: top right;
 }
 
@@ -131,30 +135,30 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* start from top */
+  justify-content: flex-start;
+  /* start from top */
   padding: 40px 30px;
-  gap: 10px; /* consistent spacing between children */
+  gap: 10px;
+  /* consistent spacing between children */
 }
 
-.password-see {
-  position: absolute;
-  left: 38.5%;
-  top: 54.5%;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  padding: 0;
+.password-input-container {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 16px;
+  width: 100%;
 }
 
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px !important;
+  /* Make room for the eye icon */
+}
+
+.password-see,
 .password-see1 {
   position: absolute;
-  left: 38%;
-  top: 63.1%;
+  right: 10px;
   background: none;
   border: none;
   cursor: pointer;
@@ -163,7 +167,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
+  height: 100%;
+  z-index: 10;
 }
 
 

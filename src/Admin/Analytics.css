@@ -2,13 +2,17 @@
 
 .analytics-container {
   margin-left: 0;
-  padding: 70px 40px 40px;
+  padding: 80px 40px 40px;
   padding-left: 290px;
   min-height: 100vh;
   background: #f8f9fa;
   color: #333;
   font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content on ultra-wide screens */
 }
+
 
 /* ── Header ── */
 .analytics-header {
@@ -18,7 +22,8 @@
   margin-bottom: 28px;
   gap: 20px;
   flex-wrap: wrap;
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1800px;
 }
 
 .analytics-title {
@@ -173,7 +178,8 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-bottom: 24px;
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1800px;
 }
 
 .kpi-card {
@@ -234,7 +240,7 @@
 
 .analytics-card.full-width {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1800px;
   margin-bottom: 24px;
 }
 
@@ -243,7 +249,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 24px;
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1800px;
 }
 
 .analytics-card-header {
@@ -348,31 +355,34 @@
 }
 
 .analytics-refresh-hint {
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1800px;
   margin: -8px 0 16px;
   color: #6c757d;
   font-size: 13px;
 }
 
-/* ── Chart tooltip (Recharts) — light theme ── */
+/* ── Chart tooltip (Recharts) — dark slate theme ── */
 .dark-tooltip {
-  background: #fff;
-  border: 1px solid #e9ecef;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 13px;
-  color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #f8fafc !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
 }
 
 .tooltip-label {
   margin: 0;
-  font-weight: 600;
-  color: #6c757d;
+  font-weight: 500;
+  color: #94a3b8 !important;
 }
 
 .tooltip-value {
   margin: 4px 0 0;
+  font-weight: 600;
 }
 
 /* ── Loading Skeleton ── */
@@ -570,3 +580,18 @@
     display: none;
   }
 }
+
+.global-toggle {
+  margin-right: 10px;
+}
+
+.range-toggle.global-toggle .range-btn {
+  padding: 8px 16px;
+  font-weight: 500;
+}
+
+.range-toggle.global-toggle .range-btn.active {
+  background: #1094E6;
+  color: #fff;
+}
+

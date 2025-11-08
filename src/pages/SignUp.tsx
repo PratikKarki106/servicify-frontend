@@ -6,6 +6,7 @@ import SignInImage from '../assets/SignUpImage.png';
 
 // API function
 import { Register } from '../services/Auth';
+import { BASE_URL } from '../services/axiosInstance';
 
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -20,7 +21,7 @@ const SignUp: React.FC = () => {
   const [name, setname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+
   const [showPassword, setShowPassword] = useState(false);
 
 
@@ -29,17 +30,17 @@ const SignUp: React.FC = () => {
   };
   //oauth
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = `${BASE_URL}/auth/google`;
   };
 
-//manual login
+  //manual login
   const handleSignUp = async () => {
-    const result = await Register({name, email, password});
+    const result = await Register({ name, email, password });
     if (result.error) {
       alert(`Sign Up Failed: ${result.error}`);
       return;
     }
-    
+
     // Store email in localStorage for verification
     localStorage.setItem('verificationEmail', email);
     navigation('/user/verify-email');
@@ -64,7 +65,7 @@ const SignUp: React.FC = () => {
             onChange={(e) => setname(e.target.value)}
           />
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="email">Email:</label>
           <input
@@ -79,7 +80,7 @@ const SignUp: React.FC = () => {
 
         <div className="form-group">
           <label htmlFor="password">Password:</label>
-          <div>
+          <div className="password-input-container">
             <input
               type={showPassword ? "text" : "password"}
               id="password"

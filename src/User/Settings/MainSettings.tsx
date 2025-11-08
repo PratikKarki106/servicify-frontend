@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowLeft,
   faLock,
   faBell,
   faEye,
   faEyeSlash,
   faSave,
   faPalette,
-  faShieldAlt,
   faEnvelope,
   faCheck,
   faTimes,
@@ -18,6 +15,7 @@ import {
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './MainSettings.css';
+import { getLoyaltyBalance, getLoyaltyOffers, type LoyaltyOffer } from '../../services/loyaltyService';
 
 interface PasswordData {
   currentPassword: string;
@@ -35,8 +33,7 @@ interface NotificationSettings {
 }
 
 const MainSettings: React.FC = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'password' | 'notifications' | 'privacy' | 'appearance'>('password');
+  const [activeTab, setActiveTab] = useState<'redeem' | 'password' | 'notifications'  | 'appearance'>('redeem');
   const [loading, setLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -57,17 +54,23 @@ const MainSettings: React.FC = () => {
     serviceUpdates: true
   });
 
-  const [privacySettings, setPrivacySettings] = useState({
-    profileVisibility: 'public',
-    showEmail: false,
-    showPhone: false,
-    dataSharing: false
-  });
+  const [redeemOffers, setRedeemOffers] = useState<LoyaltyOffer[]>([]);
+  const [pointsBalance, setPointsBalance] = useState(0);
+  const [expiryWarning, setExpiryWarning] = useState<string | null>(null);
 
   const [appearance, setAppearance] = useState({
     theme: localStorage.getItem('theme') || 'light',
     fontSize: 'medium'
   });
+
+  const handleOfferRedeemHint = (offer: LoyaltyOffer) => {
+    if (pointsBalance < offer.pointsRequired) {
+      toast.error(`Points not enough. You need ${offer.pointsRequired - pointsBalance} more points.`);
+      return;
+    }
+
+    toast.success(`${offer.name} is available. You can apply this offer during payment.`);
+  };
 
   // Load saved settings on mount
   useEffect(() => {
@@ -76,15 +79,30 @@ const MainSettings: React.FC = () => {
       setNotificationSettings(JSON.parse(savedNotifications));
     }
 
-    const savedPrivacy = localStorage.getItem('privacySettings');
-    if (savedPrivacy) {
-      setPrivacySettings(JSON.parse(savedPrivacy));
-    }
-
     const savedAppearance = localStorage.getItem('appearanceSettings');
     if (savedAppearance) {
       setAppearance(JSON.parse(savedAppearance));
     }
+
+    const loadLoyalty = async () => {
+      try {
+        const [balance, offers] = await Promise.all([getLoyaltyBalance(), getLoyaltyOffers()]);
+        setPointsBalance(balance.pointsBalance || 0);
+        setRedeemOffers(offers || []);
+
+        const lastActivity = new Date(balance.lastActivityDate);
+        const expiryDate = new Date(lastActivity);
+        expiryDate.setMonth(expiryDate.getMonth() + 6);
+        const daysRemaining = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        setExpiryWarning(daysRemaining > 0 && daysRemaining < 30 ? `Your points may expire in ${daysRemaining} days.` : null);
+      } catch {
+        setPointsBalance(0);
+        setRedeemOffers([]);
+        setExpiryWarning(null);
+      }
+    };
+
+    loadLoyalty();
   }, []);
 
   // Handle password change
@@ -150,16 +168,6 @@ const MainSettings: React.FC = () => {
     toast.success('Notification settings updated');
   };
 
-  // Handle privacy settings change
-  const handlePrivacyChange = (key: string, value: any) => {
-    const updated = {
-      ...privacySettings,
-      [key]: value
-    };
-    setPrivacySettings(updated);
-    localStorage.setItem('privacySettings', JSON.stringify(updated));
-  };
-
   // Handle appearance change
   const handleAppearanceChange = (key: string, value: string) => {
     const updated = {
@@ -178,9 +186,9 @@ const MainSettings: React.FC = () => {
   };
 
   const tabs = [
+    { id: 'redeem', label: 'Redeem', icon: faGift },
     { id: 'password', label: 'Password', icon: faLock },
     { id: 'notifications', label: 'Notifications', icon: faBell },
-    { id: 'privacy', label: 'Privacy', icon: faShieldAlt },
     { id: 'appearance', label: 'Appearance', icon: faPalette }
   ];
 
@@ -406,75 +414,49 @@ const MainSettings: React.FC = () => {
             </div>
           )}
 
-          {/* Privacy Tab */}
-          {activeTab === 'privacy' && (
+          {/* Redeem Tab */}
+          {activeTab === 'redeem' && (
             <div className="settings-section">
               <div className="settings-section-header">
                 <h2>
-                  <FontAwesomeIcon icon={faShieldAlt} />
-                  Privacy Settings
+                  <FontAwesomeIcon icon={faGift} />
+                  Redeem Loyalty Points
                 </h2>
-                <p>Control your privacy and data sharing preferences</p>
               </div>
 
-              <div className="settings-form">
-                <div className="settings-form-group">
-                  <label className="settings-label">Profile Visibility</label>
-                  <select
-                    className="settings-select"
-                    value={privacySettings.profileVisibility}
-                    onChange={(e) => handlePrivacyChange('profileVisibility', e.target.value)}
-                  >
-                    <option value="public">Public - Anyone can see your profile</option>
-                    <option value="private">Private - Only you can see your profile</option>
-                    <option value="friends">Friends Only - Only friends can see your profile</option>
-                  </select>
+              <div className="settings-option-card">
+                <div className="settings-option-icon" style={{ background: '#fce4ec' }}>
+                  <FontAwesomeIcon icon={faGift} style={{ color: '#e91e63' }} />
                 </div>
+                <div className="settings-option-content">
+                  <h3>Available Points: {pointsBalance}</h3>
+                </div>
+              </div>
 
-                <div className="settings-option-card">
-                  <div className="settings-option-content">
-                    <h3>Show Email Address</h3>
-                    <p>Display your email on your public profile</p>
+              <div className="settings-options-grid">
+                {expiryWarning && (
+                  <div className="settings-option-card">
+                    <div className="settings-option-content">
+                      <h3>Expiry warning</h3>
+                      <p>{expiryWarning}</p>
+                    </div>
                   </div>
-                  <label className="settings-toggle">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.showEmail}
-                      onChange={(e) => handlePrivacyChange('showEmail', e.target.checked)}
-                    />
-                    <span className="settings-toggle-slider"></span>
-                  </label>
-                </div>
-
-                <div className="settings-option-card">
-                  <div className="settings-option-content">
-                    <h3>Show Phone Number</h3>
-                    <p>Display your phone number on your public profile</p>
+                )}
+                {redeemOffers.map((offer) => (
+                  <div className="settings-option-card" key={offer._id}>
+                    <div className="settings-option-content">
+                      <h3>{offer.name}</h3>
+                      <p>{offer.pointsRequired} points | Rs. {offer.valueInRupees} value</p>
+                      <button
+                        className="settings-btn settings-btn-primary"
+                        type="button"
+                        onClick={() => handleOfferRedeemHint(offer)}
+                      >
+                        Redeem
+                      </button>
+                    </div>
                   </div>
-                  <label className="settings-toggle">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.showPhone}
-                      onChange={(e) => handlePrivacyChange('showPhone', e.target.checked)}
-                    />
-                    <span className="settings-toggle-slider"></span>
-                  </label>
-                </div>
-
-                <div className="settings-option-card">
-                  <div className="settings-option-content">
-                    <h3>Data Sharing</h3>
-                    <p>Allow anonymized data sharing for service improvement</p>
-                  </div>
-                  <label className="settings-toggle">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.dataSharing}
-                      onChange={(e) => handlePrivacyChange('dataSharing', e.target.checked)}
-                    />
-                    <span className="settings-toggle-slider"></span>
-                  </label>
-                </div>
+                ))}
               </div>
             </div>
           )}

@@ -15,7 +15,12 @@ interface UserPackage {
   purchasedAt: string;
   expiryDate: string;
   isActive: boolean;
-  originalPackage?: any;
+  originalPackage?: {
+    description?: string;
+    features?: string[];
+    serviceType?: string;
+  };
+  isTemplateActive?: boolean;
   purchaseId: string;
 }
 
@@ -45,28 +50,51 @@ const UserPackages: React.FC = () => {
     try {
       setLoading(true);
 
+      // Add small delay to ensure backend has processed the purchase
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       // Fetch user's packages
-      const userPackages = await packageService.getUserPackages();
+      const userPackagesResponse = await packageService.getUserPackages();
+      console.log('[DEBUG] User Packages Response:', userPackagesResponse);
+
+      let userPackages: UserPackage[] = [];
+      if (Array.isArray(userPackagesResponse)) {
+        userPackages = userPackagesResponse;
+      } else if (userPackagesResponse && typeof userPackagesResponse === 'object' && 'data' in userPackagesResponse) {
+        userPackages = (userPackagesResponse as any).data;
+      }
+
       setMyPackages(userPackages);
 
-      // Extract purchased package IDs
-      const purchasedIds = new Set<string>(userPackages.map((pkg: UserPackage) => pkg.packageId).filter(Boolean));
+      // Extract purchased package IDs (using both packageId and _id for backward compatibility)
+      const purchasedIds = new Set<string>(
+        userPackages
+          .flatMap((pkg: UserPackage) => [pkg.packageId, pkg._id].filter(Boolean))
+      );
       setPurchasedPackageIds(purchasedIds);
 
-      // Fetch available packages
-      const response = await fetch('http://localhost:5000/api/packages');
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          const activePackages = result.data
-            .filter((pkg: any) => pkg.isActive && !pkg.isExpired)
-            .map((pkg: any) => ({
-              ...pkg,
-              id: pkg._id
-            }));
-          setAvailablePackages(activePackages);
-        }
+      // Fetch available packages using the service instead of hardcoded fetch
+      const packagesResponse = await packageService.getAllPackages();
+      
+      let allPackages: any[] = [];
+      if (Array.isArray(packagesResponse)) {
+        allPackages = packagesResponse;
+      } else if (packagesResponse && 'packages' in packagesResponse) {
+        allPackages = packagesResponse.packages;
       }
+
+      const activePackages = allPackages
+        .filter((pkg: any) => 
+          // Show if active (regardless of deadline if admin explicitly activated it)
+          // OR if the user has already purchased it (so they can see it in Available tab with "Purchased" status)
+          pkg.isActive || purchasedIds.has(pkg._id)
+        )
+        .map((pkg: any) => ({
+          ...pkg,
+          id: pkg._id
+        }));
+      
+      setAvailablePackages(activePackages);
     } catch (error) {
       console.error('Error fetching packages:', error);
     } finally {
@@ -85,10 +113,10 @@ const UserPackages: React.FC = () => {
   };
 
   // Handle payment success
-  const handlePaymentSuccess = () => {
-    fetchData(); // Refresh packages list
+  const handlePaymentSuccess = async () => {
     setIsPayNowOpen(false);
     setSelectedPackage(null);
+    await fetchData(); // Refresh packages list
     setActiveTab('my-packages'); // Switch to my packages tab
   };
 
@@ -186,15 +214,25 @@ const UserPackages: React.FC = () => {
 
                 return (
                   <div key={pkg._id} style={styles.packageCard}>
-                    {/* Status Badge */}
-                    <div style={{ ...styles.statusBadge, backgroundColor: status.bg, color: status.color }}>
-                      <FontAwesomeIcon icon={pkg.isActive ? faCheckCircle : faExclamationTriangle} />
-                      {' '}{status.text}
+                    {/* Status Badges */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                      <div style={{ ...styles.statusBadge, backgroundColor: status.bg, color: status.color, marginBottom: 0 }}>
+                        <FontAwesomeIcon icon={pkg.isActive ? faCheckCircle : faExclamationTriangle} />
+                        {' '}{status.text}
+                      </div>
+                      {pkg.isTemplateActive === false && (
+                        <div style={{ ...styles.statusBadge, backgroundColor: '#f5f5f5', color: '#616161', marginBottom: 0 }}>
+                          No longer available
+                        </div>
+                      )}
                     </div>
 
                     {/* Package Info */}
                     <div style={styles.packageInfo}>
                       <h3 style={styles.packageName}>{pkg.packageName}</h3>
+                      {pkg.originalPackage?.description && (
+                        <p style={styles.packageDescription}>{pkg.originalPackage.description}</p>
+                      )}
                       <div style={styles.packageDetails}>
                         <div style={styles.detailItem}>
                           <FontAwesomeIcon icon={faCreditCard} style={{ marginRight: '8px' }} />
@@ -206,6 +244,21 @@ const UserPackages: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Features if available */}
+                    {pkg.originalPackage?.features && pkg.originalPackage.features.length > 0 && (
+                      <div style={styles.featuresSection}>
+                        <h4 style={styles.featuresTitle}>Package Features:</h4>
+                        <ul style={styles.featuresList}>
+                          {pkg.originalPackage.features.map((feature, index) => (
+                            <li key={index} style={styles.featureItem}>
+                              <FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4CAF50', marginRight: '8px' }} />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
                     {/* Credits Progress */}
                     <div style={styles.creditsSection}>
@@ -232,13 +285,22 @@ const UserPackages: React.FC = () => {
 
                     {/* Expiry */}
                     <div style={styles.expirySection}>
-                      <FontAwesomeIcon icon={faClock} style={{ marginRight: '8px' }} />
-                      <span>
-                        {pkg.isActive
-                          ? `${daysRemaining} days remaining (Expires: ${formatDate(pkg.expiryDate)})`
-                          : `Expired on ${formatDate(pkg.expiryDate)}`
-                        }
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <FontAwesomeIcon icon={faClock} style={{ marginRight: '8px' }} />
+                          <span>
+                            {pkg.isActive
+                              ? `${daysRemaining} days remaining (Expires: ${formatDate(pkg.expiryDate)})`
+                              : `Expired on ${formatDate(pkg.expiryDate)}`
+                            }
+                          </span>
+                        </div>
+                        {pkg.isTemplateActive === false && (
+                          <div style={{ fontSize: '12px', color: '#f57c00', marginTop: '4px' }}>
+                            Note: This package template has been deactivated by the administrator.
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -460,7 +522,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '18px',
     fontWeight: '600',
     color: '#1a1a1a',
-    marginBottom: '12px'
+    marginBottom: '8px'
+  },
+  packageDescription: {
+    fontSize: '14px',
+    color: '#666',
+    marginBottom: '16px',
+    lineHeight: '1.4'
   },
   packageDetails: {
     display: 'flex',
@@ -514,6 +582,18 @@ const styles: { [key: string]: React.CSSProperties } = {
   remainingCredits: {
     color: '#4CAF50',
     fontWeight: '500'
+  },
+  featuresSection: {
+    marginBottom: '20px',
+    padding: '16px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px'
+  },
+  featuresTitle: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: '10px'
   },
   expirySection: {
     display: 'flex',

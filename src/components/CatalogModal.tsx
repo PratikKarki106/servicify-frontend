@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './CatalogModal.css';
 import { FaTimes, FaPlus } from 'react-icons/fa';
-import { createCatalogItem, updateCatalogItem } from '../services/catalogService';
+import { createCatalogItem, updateCatalogItem, uploadCatalogItemImage } from '../services/catalogService';
 import type { CatalogItem, CreateCatalogItemData } from '../services/catalogService';
 import { getAllCompanies, createCompany } from '../services/companyService';
 import { getAllProducts, createProduct } from '../services/productService';
@@ -53,9 +53,11 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
     itemPrice: 0,
     serviceCharge: 0,
     estimatedTime: 60,
-    imageUrl: ''
+    imageObjectKey: ''
   });
-  
+
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -123,9 +125,10 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
         itemPrice: item.itemPrice,
         serviceCharge: item.serviceCharge,
         estimatedTime: item.estimatedTime,
-        imageUrl: item.imageUrl || '',
+        imageObjectKey: item.imageObjectKey || '',
       });
 
+      setImagePreviewUrl(item.imageUrl || '');
       setCompanySearch(companyName);
       setProductSearch(productName);
       setVersionSearch(versionName);
@@ -208,8 +211,9 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
       itemPrice: 0,
       serviceCharge: 0,
       estimatedTime: 60,
-      imageUrl: '',
+      imageObjectKey: '',
     });
+    setImagePreviewUrl('');
     setCompanySearch('');
     setProductSearch('');
     setVersionSearch('');
@@ -347,7 +351,7 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
 
   const handleAddNewCompany = async () => {
     if (!newCompanyName.trim()) return;
-    
+
     try {
       const response = await createCompany({ name: newCompanyName });
       if (response.success) {
@@ -365,11 +369,11 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
 
   const handleAddNewProduct = async () => {
     if (!newProductName.trim() || !formData.companyId) return;
-    
+
     try {
-      const response = await createProduct({ 
-        name: newProductName, 
-        companyId: formData.companyId 
+      const response = await createProduct({
+        name: newProductName,
+        companyId: formData.companyId
       });
       if (response.success) {
         setFormData(prev => ({ ...prev, productId: response.product._id }));
@@ -386,10 +390,10 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
 
   const handleAddNewVersion = async () => {
     if (!newVersionName.trim() || !formData.companyId || !formData.productId) return;
-    
+
     try {
-      const response = await createVersion({ 
-        name: newVersionName, 
+      const response = await createVersion({
+        name: newVersionName,
         companyId: formData.companyId,
         productId: formData.productId
       });
@@ -422,30 +426,33 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload a valid image file');
-        return;
-      }
+    e.target.value = '';
+    if (!file) return;
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image size should be less than 5MB');
-        return;
-      }
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload a valid image file');
+      return;
+    }
 
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          imageUrl: reader.result as string
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setImageUploading(true);
+      setError(null);
+      const res = await uploadCatalogItemImage(file);
+      if (res.success && res.imageObjectKey) {
+        setFormData(prev => ({ ...prev, imageObjectKey: res.imageObjectKey }));
+        setImagePreviewUrl(res.imageUrl);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload image');
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -453,7 +460,7 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
     e.preventDefault();
 
     if (!formData.companyId || !formData.productId || !formData.versionId || !formData.ccId ||
-        !formData.itemName || formData.itemPrice <= 0 || formData.serviceCharge < 0 || formData.estimatedTime <= 0) {
+      !formData.itemName || formData.itemPrice <= 0 || formData.serviceCharge < 0 || formData.estimatedTime <= 0) {
       setError('Please fill in all required fields with valid values');
       return;
     }
@@ -692,13 +699,16 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
                 <div className="form-group full-width">
                   <label>Item Image</label>
                   <div className="image-upload-container">
-                    {formData.imageUrl ? (
+                    {imagePreviewUrl ? (
                       <div className="image-preview-wrapper">
-                        <img src={formData.imageUrl} alt="Preview" className="image-preview" />
+                        <img src={imagePreviewUrl} alt="Preview" className="image-preview" />
                         <button
                           type="button"
                           className="remove-image-btn"
-                          onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, imageObjectKey: '' }));
+                            setImagePreviewUrl('');
+                          }}
                         >
                           <FaTimes />
                         </button>
@@ -711,10 +721,11 @@ const CatalogModal: React.FC<CatalogModalProps> = ({ isOpen, onClose, onSuccess,
                           accept="image/*"
                           onChange={(e) => handleImageUpload(e)}
                           className="image-input"
+                          disabled={imageUploading}
                         />
                         <label htmlFor="imageUpload" className="image-upload-label">
                           <FaPlus className="upload-icon" />
-                          Click to upload image
+                          {imageUploading ? 'Uploading…' : 'Click to upload image'}
                         </label>
                       </div>
                     )}

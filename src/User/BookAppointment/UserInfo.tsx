@@ -85,6 +85,15 @@ const UserInfo: React.FC<UserInfoProps> = ({
         [field]: value as boolean,
         pickupAddress: value ? userData.pickupAddress : ''
       });
+    } else if (field === 'phoneNumber') {
+      // Only allow digits and limit to 10 characters
+      const numericValue = (value as string).replace(/\D/g, '');
+      if (numericValue.length <= 10) {
+        setUserData({
+          ...userData,
+          [field]: numericValue,
+        });
+      }
     } else {
       setUserData({
         ...userData,
@@ -106,6 +115,11 @@ const UserInfo: React.FC<UserInfoProps> = ({
     // Basic validation
     if (!userData.phoneNumber || userData.phoneNumber.trim() === '') {
       alert('Phone number is required!');
+      return;
+    }
+
+    if (userData.phoneNumber.length !== 10) {
+      alert('Phone number must be exactly 10 digits!');
       return;
     }
     
@@ -164,7 +178,7 @@ const UserInfo: React.FC<UserInfoProps> = ({
           <input
             type="text"
             className="vehicle-info-input2"
-            placeholder="+1 (555) 123-4567"
+            placeholder="98XXXXXXXX"
             value={userData.phoneNumber}
             onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
           />

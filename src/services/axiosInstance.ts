@@ -3,13 +3,12 @@ import axios from 'axios';
 // 1. Get the current IP/Hostname from the browser's URL bar
 const hostname = window.location.hostname;
 
-// 2. Set the Backend Port
+// 2. Set the Backend Port (Matches backend/index.js default)
 const BACKEND_PORT = 5000;
 
-// 3. Logic: If I am on localhost, use localhost. Otherwise, use the IP I'm currently on.
-const BASE_URL = hostname === 'localhost'
-    ? `http://localhost:${BACKEND_PORT}`
-    : `http://${hostname}:${BACKEND_PORT}`;
+// 3. Logic: Automatically point to the backend on the SAME IP/Host as the frontend
+// This ensures that if you access via localhost, 127.0.0.1, or a Network IP, it just works.
+export const BASE_URL = `http://${hostname}:${BACKEND_PORT}`;
 
 
 const axiosInstance = axios.create({

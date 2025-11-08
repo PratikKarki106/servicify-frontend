@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments, faUser } from "@fortawesome/free-solid-svg-icons";
 import Sidebar from "../components/Sidebar";
-import { getConversations, getMessages, getUserById, type Message, type Conversation } from "../services/messageService";
+import { getConversations, getMessages, getUserById, markMessagesAsRead, type Message, type Conversation } from "../services/messageService";
 import { websocketService } from "../services/websocketService";
 import "./AdminMessages.css";
 
@@ -105,6 +105,9 @@ const AdminMessages: React.FC = () => {
         if (mounted) setLoadingMessages(false);
       });
 
+    // Mark messages as read when opening conversation
+    markMessagesAsRead(selectedUserId).catch(err => console.error("Error marking messages as read:", err));
+
     // Set up WebSocket listener for new messages
     const onNew = (msg: { _id: string; senderId: string; senderRole: string; receiverId: string; content: string; createdAt?: string }) => {
       const isForThisChat =
@@ -125,6 +128,9 @@ const AdminMessages: React.FC = () => {
         };
         return [...prev, newMsg];
       });
+
+      // Also mark as read if it's currently open
+      markMessagesAsRead(selectedUserId).catch(err => console.error("Error marking incoming message as read:", err));
     };
     
     websocketService.onNewMessage(onNew);
@@ -177,35 +183,39 @@ const AdminMessages: React.FC = () => {
   return (
     <>
       <Sidebar />
-      <div className="admin-main-container admin-messages-container">
+      <div className="admin-messages-container msg-fade-in">
         <div className="admin-messages-page">
-          {/* Left: conversation overview (20%) - Shows users who messaged admin */}
+          {/* Left: Sidebar (Conversations) */}
           <aside className="admin-messages-sidebar">
             <div className="admin-messages-sidebar-header">
               <h2 className="admin-messages-sidebar-title">
                 <FontAwesomeIcon icon={faComments} />
-                <span>Messages</span>
+                <span>Customer Support</span>
               </h2>
-              <p className="admin-messages-sidebar-subtitle">Select a conversation to start chatting</p>
+              <p className="admin-messages-sidebar-subtitle">Manage customer inquiries</p>
             </div>
-            {error && !selectedUserId && <div className="admin-messages-error">{error}</div>}
-            {loadingConversations ? (
-              <div className="admin-messages-loading">Loading conversations…</div>
-            ) : conversations.length === 0 ? (
-              <div className="admin-messages-empty-state">No customer messages yet. When customers contact you, they will appear here.</div>
-            ) : (
-              <div className="admin-messages-conversation-list">
-                {conversations.map((c) => {
+            
+            <div className="admin-messages-conversation-list msg-scrollbar">
+              {error && !selectedUserId && <div className="admin-messages-error">{error}</div>}
+              
+              {loadingConversations ? (
+                <div className="admin-messages-loading">
+                  <div className="loading-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <p>Loading conversations...</p>
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="admin-messages-empty-state msg-fade-in">
+                  <p>No customer messages yet. When customers contact you, they will appear here.</p>
+                </div>
+              ) : (
+                conversations.map((c, index) => {
                   const preview = c.lastMessage?.content
                     ? c.lastMessage.content.slice(0, 50) + (c.lastMessage.content.length > 50 ? "…" : "")
                     : "No messages yet";
                   const time = c.lastMessage?.createdAt
-                    ? new Date(c.lastMessage.createdAt).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                    ? new Date(c.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     : "";
                   const isFromUser = c.lastMessage?.senderId !== ADMIN_ID;
                   const isSelected = selectedUserId === c.userId;
@@ -214,57 +224,69 @@ const AdminMessages: React.FC = () => {
                     <button
                       key={c.userId}
                       type="button"
-                      className={`admin-messages-conversation-card ${isSelected ? "active" : ""} ${isFromUser && !isSelected ? "has-new-message" : ""}`}
-                      onClick={() => {
-                        console.log("Clicked on user:", c.userId);
-                        setSelectedUserId(c.userId);
-                      }}
+                      className={`admin-messages-conversation-card ${isSelected ? "active" : ""} ${isFromUser && !isSelected ? "has-new-message" : ""} msg-slide-in`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                      onClick={() => setSelectedUserId(c.userId)}
                     >
                       <div className="admin-messages-card-avatar">
                         <FontAwesomeIcon icon={faUser} />
                       </div>
                       <div className="admin-messages-card-body">
-                        <div className="admin-messages-card-header">
+                        <div className="card-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span className="admin-messages-card-name">{c.userName || `User #${c.userId}`}</span>
+                          {time && <span className="admin-messages-card-time">{time}</span>}
                         </div>
                         {c.userEmail && <span className="admin-messages-card-email">{c.userEmail}</span>}
                         <p className="admin-messages-card-preview">{preview}</p>
-                        {time && <span className="admin-messages-card-time">{time}</span>}
                       </div>
                     </button>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </aside>
-          {/* Right: message box (80%) - Shows conversation with selected user */}
+
+          {/* Right: Chat Main Area */}
           <main className="admin-messages-main">
             {!selectedUserId ? (
-              <div className="admin-messages-placeholder">
+              <div className="admin-messages-placeholder msg-fade-in">
                 <div className="admin-messages-placeholder-icon">
                   <FontAwesomeIcon icon={faComments} />
                 </div>
-                <p className="admin-messages-placeholder-title">Select a conversation</p>
-                <p className="admin-messages-placeholder-desc">Choose a customer from the left to view and send messages.</p>
+                <h1 className="admin-messages-placeholder-title">Support Dashboard</h1>
+                <p className="admin-messages-placeholder-desc">
+                  Choose a customer from the sidebar to view their message history and reply.
+                </p>
               </div>
             ) : (
-              <div className="admin-messages-box">
+              <div className="admin-messages-box msg-fade-in">
                 <div className="admin-messages-box-header">
-                  <h2>{getUserName(selectedUserId)}</h2>
-                  {getUserEmail(selectedUserId) && (
-                    <span className="admin-messages-user-email">{getUserEmail(selectedUserId)}</span>
-                  )}
+                  <div className="user-info">
+                    <h2>{getUserName(selectedUserId)}</h2>
+                    {getUserEmail(selectedUserId) && (
+                      <span className="admin-messages-user-email">{getUserEmail(selectedUserId)}</span>
+                    )}
+                  </div>
+                  <div className="header-actions">
+                    <span className="status-badge">Active Session</span>
+                  </div>
                 </div>
-                {error && <div className="admin-messages-error">{error}</div>}
-                <div className="admin-messages-chat-messages">
-                  {loadingMessages && <div className="admin-messages-loading">Loading messages…</div>}
+
+                <div className="admin-messages-chat-messages msg-scrollbar">
+                  {error && <div className="admin-messages-error">{error}</div>}
+                  {loadingMessages && <div className="admin-messages-loading">Loading message history...</div>}
+                  
                   {!loadingMessages && messages.length === 0 && (
-                    <div className="admin-messages-empty">No messages yet.</div>
+                    <div className="admin-messages-empty">
+                      <p>Start the conversation with {getUserName(selectedUserId)}</p>
+                    </div>
                   )}
-                  {messages.map((m) => (
+
+                  {messages.map((m, index) => (
                     <div
                       key={m._id}
-                      className={`admin-messages-bubble ${m.senderId === ADMIN_ID ? "me" : "them"}`}
+                      className={`admin-messages-bubble ${m.senderId === ADMIN_ID ? "me" : "them"} msg-fade-in`}
+                      style={{ animationDelay: `${index * 0.02}s` }}
                     >
                       <div className="admin-messages-bubble-content">{m.content}</div>
                       <div className="admin-messages-bubble-time">
@@ -277,10 +299,11 @@ const AdminMessages: React.FC = () => {
                   ))}
                   <div ref={messagesEndRef} />
                 </div>
+
                 <div className="admin-messages-chat-input-wrap">
                   <textarea
                     className="admin-messages-chat-input"
-                    placeholder="Type your message to customer…"
+                    placeholder={`Reply to ${getUserName(selectedUserId)}...`}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -293,7 +316,7 @@ const AdminMessages: React.FC = () => {
                     onClick={handleSend}
                     disabled={sending || !input.trim()}
                   >
-                    Send
+                    Send Reply
                   </button>
                 </div>
               </div>
