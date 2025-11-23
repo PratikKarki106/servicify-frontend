@@ -6,7 +6,7 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Navbar over video */
+/* Navbar */
 .navbar {
   position: absolute;
   top: 0;
@@ -59,7 +59,7 @@
   cursor: pointer;
 }
 
-/* Hero Section with Video */
+/* Hero Section */
 .hero-section {
   position: relative;
   width: 100%;
@@ -74,8 +74,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 1;
-  z-index: 0;
 }
 
 .hero-section::after {
@@ -92,45 +90,25 @@
 .hero-overlay {
   position: relative;
   z-index: 2;
+  text-align: center;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100%;
-  text-align: center;
-  padding: 0 20px;
-}
-
-.hero-text h1,
-.hero-text p {
-  color: #ffffff;
-  text-shadow:
-    0 0 2px rgba(255, 255, 255, 0.1),
-    0 0 4px rgba(255, 255, 255, 0.15);
 }
 
 .hero-text h1 {
   font-size: 54px;
-  line-height: 1.2;
+  color: #fff;
   font-weight: 800;
-  margin-bottom: 24px;
 }
 
 .hero-text p {
-  font-size: 20px;
-  line-height: 1.8;
   max-width: 700px;
   margin: 0 auto;
-  font-weight: 500;
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  padding: 40px 0;
-  background-color: #fff;
-  color: #888;
-  font-size: 14px;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.7;
 }
 
 /* Arrow Stack */
@@ -139,9 +117,6 @@
   bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  z-index: 2;
 }
 
 .arrow {
@@ -159,8 +134,76 @@
 .arrow-3 { animation-delay: 0.6s; }
 
 @keyframes pulse {
-  0%   { opacity: 0.3; }
-  33%  { opacity: 0.6; }
-  66%  { opacity: 1; }
+  0% { opacity: 0.3; }
+  33% { opacity: 0.6; }
+  66% { opacity: 1; }
   100% { opacity: 0.3; }
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #fff;
+  color: #888;
+}
+
+/* ========================================================= */
+/* ⭐ NEW SECTION (Converted from Tailwind to CSS)            */
+/* ========================================================= */
+
+.new-landing-section {
+  padding: 80px 20px;
+  margin: 25px;
+  border-radius: 25px;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(140deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
+}
+
+.new-landing-container {
+  max-width: 900px;
+  text-align: center;
+  color: white;
+}
+
+.new-title {
+  font-size: 42px;
+  font-weight: 900;
+  margin-bottom: 20px;
+}
+
+.new-subtitle {
+  font-size: 18px;
+  color: #e5e5e5;
+  margin-bottom: 40px;
+  line-height: 1.7;
+}
+
+.new-book-btn {
+  background-color: #137fec;
+  color: white;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.new-book-btn:hover {
+  background-color: #0f6ac5;
+}
+
+.Landing-TextOnly{
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+.Landing-TextOnly h1{
+  font-size: 36px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 20px;
 }

@@ -5,7 +5,9 @@ import AboutPage from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
 import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp"
+import SignUp from "./pages/SignUp";
+import Home from "./pages/Home";
+import AuthSuccess from "./services/AuthSuccess";
 // import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -17,6 +19,9 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/home" element={<Home currentStatus="Pickup"/>} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
+
         { /* <Route path="/dashboard" element={<Dashboard /> */ }
       </Routes>
   );
