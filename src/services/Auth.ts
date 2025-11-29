@@ -4,6 +4,7 @@ interface AuthPayload {
     name?: string;
     email: string;
     password: string;
+    role?: 'user' | 'admin';
 }
 
 interface AuthResponse {
@@ -12,6 +13,7 @@ interface AuthResponse {
         id: string;
         name: string;
         email: string;
+        role?: 'user' | 'admin';
     };
     message?: string;
     error?: string;

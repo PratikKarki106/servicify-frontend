@@ -58,8 +58,16 @@ const SignIn: React.FC = () => {
 
     localStorage.setItem('token', result.token);
 
-    // Navigate to home
-    navigation('/home');
+    // If backend provides a role or this specific admin email, navigate to admin
+    const isAdminByRole = result.user?.role === 'admin';
+    const isAdminByEmail = result.user?.email === 'heyt03279@gmail.com';
+
+    if (isAdminByRole || isAdminByEmail) {
+      // Navigate to admin home
+      navigation('/admin');
+    } else {
+      navigation('/home');
+    }
   };
 
   // Navigate to signup
