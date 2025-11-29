@@ -16,7 +16,7 @@
   flex-direction: row;
 }
 .service-card{
-  width: 240px;
+  width: 260px;
   background-color: #ffffff;
   border: 1px solid #c4c4c4;
   border-radius: 15px;
@@ -29,7 +29,7 @@
 }
 .progress-container {
   display: flex;
-  margin-top: 20px;
+  margin-top: 35px;
   margin-left: -100px;
 }
 
@@ -93,4 +93,91 @@
 
 .progress-line-inactive {
   background-color: #e0e0e0;
+}
+
+.days-vehicle{
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+}
+.circle{
+  background-color: #ffffff;
+  padding: 30px 30px;
+  border: 1px solid rgb(201, 201, 201);
+  border-radius: 25px;
+  width: 700px;
+  display: flex;
+  gap: 25px;
+}
+
+.vehicle-overview{
+  background-color: #ffffff;
+  border: 1px solid rgb(201, 201, 201);
+  border-radius: 25px;
+  width: 350px;
+  padding: 30px 40px;
+  margin-right: 75px;
+}
+.vehicle-data {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vehicle-row {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+}
+
+.label {
+  color: #888;
+  font-size: 16px;
+}
+
+.value {
+  margin: 0;
+    font-weight: 500;
+}
+.quick-action {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+.quick-action {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.offers-table {
+  width: 94%;
+  background-color: #ffffff;
+  border-collapse: collapse;
+  border-radius: 10px;
+}
+
+.offers-table th,
+.offers-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.button {
+  padding: 8px 16px;
+  background-color: #1094E6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: darkblue;
 }
