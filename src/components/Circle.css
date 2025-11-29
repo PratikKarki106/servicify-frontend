@@ -1,0 +1,28 @@
+
+.ndpc {
+  --ndpc-size: 140px;
+  --ndpc-stroke: 8px;
+  --ndpc-base: #c4c4c4;     /* grey */
+  --ndpc-progress: #ffc107; /* yellow */
+  display: inline-block;
+}
+
+.ndpc-svg {
+  width: var(--ndpc-size);
+  height: var(--ndpc-size);
+  overflow: visible;
+}
+
+.ndpc-base {
+  stroke: var(--ndpc-base);
+}
+
+.ndpc-progress {
+  stroke: var(--ndpc-progress);
+}
+
+.ndpc-label {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-size: 14px;
+  fill: #333;
+}
