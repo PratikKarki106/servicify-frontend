@@ -1,0 +1,69 @@
+.admin-main-container {
+  padding: 40px 160px;
+}
+
+.admin-greetings-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.admin-greetings-text {
+  padding-left: 20px;
+}
+
+.admin-quick-action {
+  margin-top: 40px;
+  padding: 20px;
+}
+
+.admin-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.admin-services-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.admin-service-card {
+  width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #c4c4c4;
+  border-radius: 15px;
+  margin-top: 20px;
+  margin-right: 20px;
+  padding: 20px 20px;
+}
+
+.admin-service-card p {
+  color: #aca7a7;
+}
+
+/* Table styling */
+.admin-offers-table {
+  width: 94%;
+  background-color: #ffffff;
+  border-collapse: collapse;
+  border-radius: 10px;
+}
+
+.admin-offers-table th,
+.admin-offers-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+/* Reuse button globally */
+.button {
+  padding: 8px 16px;
+  background-color: #1094E6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: darkblue;
+}
