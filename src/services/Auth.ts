@@ -36,7 +36,6 @@ export const Login = async (formData: AuthPayload): Promise<AuthResponse> => {
     return response.data;
   } catch (err: any) {
     if (err.response && err.response.data) {
-      // err.response.data may already contain { error: '...' } or { message: '...' }
       return err.response.data;
     }
     return { error: err.message || 'Login failed' };

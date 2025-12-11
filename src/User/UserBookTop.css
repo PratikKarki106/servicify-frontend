@@ -1,0 +1,73 @@
+.beginning{
+    padding: 50px 410px;
+}
+.beginning-top{
+    display: flex;
+    gap: 520px;
+}
+.beginning-vehicle{
+    display: flex;
+    gap: 25px;
+}
+.Cancel-button{
+    width: 32px;
+    padding: 3px;
+    border: 1px solid #e0dcdc;
+    border-radius: 20px;
+    background-color: #e0dcdc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.middle{
+    padding: 0px 425px;
+}
+.options-button{
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.options-button button{
+    background-color: #137fec;
+    width: 140px;
+    height: 50px;
+    color: #2d3035;
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.options-button button.active{
+    background-color: #137fec;
+}
+.options-button button.inactive{
+    background-color: #f3f4f6;
+}
+
+.flow {
+    display: flex;
+    justify-content: space-between;
+    color: #2d3035;
+    margin-top: 40px;
+}
+.OneFlow {
+    border: 1px solid #d1d5db;
+    background-color: #d1d5db;
+    border-radius: 100px;
+    width: 35px;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0px 20px;
+}
+.OneFlow-Label{
+    font-size: 14px;
+    font-weight: 500;
+    margin: 5px 10px;
+}
+.OneFlow-Label1{
+    font-size: 14px;
+    margin: 5px 20px;
+    font-weight: 500;
+}
