@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import AuthSuccess from "./services/AuthSuccess";
 import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
+import VehicleInfo from "./User/VehicleInfo";
+import Time from "./User/Time";
 // import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -29,7 +31,8 @@ function App() {
         <Route path="/auth/success" element={<AuthSuccess />} />
         <Route path="/circle" element={<CirclePage />} />
         <Route path="/admin" element={<AdminHome />} />
-
+        <Route path="/vehicle-info" element={<VehicleInfo />} />
+        <Route path="/time" element={<Time />} />
       </Routes>
   );
 }
