@@ -20,9 +20,12 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  //oauth
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/auth/google";
   };
+
+//manual login
   const handleSignUp = async () => {
     const result = await Register({name, email, password});
     if (result.error) {
