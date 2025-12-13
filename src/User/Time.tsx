@@ -1,5 +1,7 @@
 import "./Time.css";
 import { useState, useEffect } from "react";
+import left from "../assets/left-arrow.png";
+import right from "../assets/right-arrow.png";
 
 const Time = () => {
   const [today] = useState(new Date());
@@ -12,30 +14,17 @@ const Time = () => {
     setSelectedDate(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
   }, [today]);
 
-  // Time slots from 9:00 AM to 6:00 PM with 30 min interval, excluding 1:00, 1:30 and 2:00 PM
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour <= 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        // Skip 1:00 PM, 1:30 PM, and 2:00 PM
-        if ((hour === 13 && minute === 0) || (hour === 13 && minute === 30) || (hour === 14 && minute === 0)) {
-          continue;
-        }
-        
-        const time = new Date();
-        time.setHours(hour, minute, 0, 0);
-        const timeString = time.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        });
-        slots.push(timeString);
-      }
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
+  const timeSlots = [
+    '09:00 AM', '09:30 AM',
+    '10:00 AM', '10:30 AM',
+    '11:00 AM', '11:30 AM',
+    '12:00 PM', '12:30 PM',
+    '02:00 PM',
+    '02:30 PM', '03:00 PM', 
+    '03:30 PM', '04:00 PM', 
+    '04:30 PM', '05:00 PM', 
+    '05:30 PM', '06:00 PM'
+  ];
 
   // Generate calendar days for current month
 const generateCalendarDays = () => {
@@ -145,7 +134,7 @@ const generateCalendarDays = () => {
         <span className="today-date">{formatTodayDate()}</span>
       </div> */}
 
-      <p style={{ fontWeight: "700", fontSize: "20px", marginTop: "10px", marginBottom: "20px" }}>
+      <p style={{ fontWeight: "700", fontSize: "20px", marginTop: "10px", marginBottom: "40px" }}>
         Select Date and time
       </p>
 
@@ -153,13 +142,13 @@ const generateCalendarDays = () => {
         {/* Calendar Header with Navigation */}
         <div className="calendar-header">
           <button className="nav-button" onClick={goToPreviousMonth}>
-            <span className="material-symbols-outlined">chevron_left</span>
+            <img src={left} style={{height: "16px", marginLeft: "20px"}}/> 
           </button>
           <h3 className="calendar-month-year">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h3>
           <button className="nav-button" onClick={goToNextMonth}>
-            <span className="material-symbols-outlined">chevron_right</span>
+            <img src={right} style={{height: "16px", marginRight: "20px"}}/> 
           </button>
         </div>
 
@@ -204,7 +193,7 @@ const generateCalendarDays = () => {
             <button
               key={index}
               className={`time-slot ${selectedTime === time ? "selected" : ""} ${
-                (time === "01:00 PM" || time === "01:30 PM" || time === "02:00 PM") ? "disabled" : ""
+                (time === "01:00 PM" || time === "01:30 PM" ) ? "disabled" : ""
               }`}
               onClick={() => setSelectedTime(time)}
               disabled={time === "01:00 PM" || time === "01:30 PM" || time === "02:00 PM"}
