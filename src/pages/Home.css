@@ -27,13 +27,15 @@
 .service-card p{
   color: #aca7a7;
 }
-.progress-container {
+
+/* Home-specific progress styles with "home-" prefix */
+.home-progress-container {
   display: flex;
   margin-top: 35px;
   margin-left: -100px;
 }
 
-.stage {
+.home-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,7 +43,7 @@
   flex: 1;
 }
 
-.progress-icon-wrapper {
+.home-progress-icon-wrapper {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -51,34 +53,34 @@
   justify-content: center;
 }
 
-.progress-icon {
+.home-progress-icon {
   font-size: 24px;
 }
 
-.progress-label {
+.home-progress-label {
   margin-top: 8px;
   font-size: 14px;
   text-align: center;
 }
 
-/* Status styles */
-.progress-completed {
+/* Home status styles */
+.home-progress-completed {
   background-color: #4caf50;
   color: white;
 }
 
-.progress-active {
+.home-progress-active {
   background-color: orange;
   color: white;
 }
 
-.progress-inactive {
+.home-progress-inactive {
   background-color: #e0e0e0;
   color: #888;
 }
 
-/* Line styles */
-.progress-line {
+/* Home line styles */
+.home-progress-line {
   position: absolute;
   top: 20px;
   right: -50%;
@@ -87,11 +89,11 @@
   z-index: -1;
 }
 
-.progress-line-completed {
+.home-progress-line-completed {
   background-color: #4caf50;
 }
 
-.progress-line-inactive {
+.home-progress-line-inactive {
   background-color: #e0e0e0;
 }
 
