@@ -46,16 +46,16 @@ export default function LandingPage() {
         <header className="navbar">
           <img src={Logo} alt="Servicify Logo" className="logo" />
           <nav className="nav-links">
-            <button className="nav-button" onClick={scrollToAbout}>
+            <button className="navigation-button" onClick={scrollToAbout}>
               About Us
             </button>
-            <button className="nav-button" onClick={scrollToContact}>
+            <button className="navigation-button" onClick={scrollToContact}>
               Contact
             </button>
           </nav>
 
           <div className="auth-buttons">
-            <button className="nav-button" onClick={handleLogin}>Log In</button>
+            <button className="navigation-button" onClick={handleLogin}>Log In</button>
             <button className="signup-button" onClick={handleSignUp}>Sign Up</button>
           </div>
         </header>
