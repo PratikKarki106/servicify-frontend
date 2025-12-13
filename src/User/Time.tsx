@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import left from "../assets/left-arrow.png";
 import right from "../assets/right-arrow.png";
 
-const Time = () => {
+interface TimeProps {
+  onNext: (data: { date: Date | null; time: string }) => void;
+  onBack: () => void;
+}
+
+const Time: React.FC<TimeProps> = ({ onNext, onBack }) => {
   const [today] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -27,7 +32,7 @@ const Time = () => {
   ];
 
   // Generate calendar days for current month
-const generateCalendarDays = () => {
+  const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     
@@ -91,7 +96,7 @@ const generateCalendarDays = () => {
     
     // If days array is still less than 35, something went wrong, just return what we have
     return days;
-};
+  };
 
   const days = generateCalendarDays();
 
@@ -116,24 +121,19 @@ const generateCalendarDays = () => {
     }
   };
 
-  // Format today's date for display
-  const formatTodayDate = () => {
-    return today.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  const handleContinue = () => {
+    onNext({
+      date: selectedDate,
+      time: selectedTime
     });
+  };
+
+  const handleBackClick = () => {
+    onBack();
   };
 
   return (
     <div className="vehicle-info-main">
-      {/* Today's Date Display */}
-      {/* <div className="today-display">
-        <span className="today-label">Today:</span>
-        <span className="today-date">{formatTodayDate()}</span>
-      </div> */}
-
       <p style={{ fontWeight: "700", fontSize: "20px", marginTop: "10px", marginBottom: "40px" }}>
         Select Date and time
       </p>
@@ -142,13 +142,13 @@ const generateCalendarDays = () => {
         {/* Calendar Header with Navigation */}
         <div className="calendar-header">
           <button className="nav-button" onClick={goToPreviousMonth}>
-            <img src={left} style={{height: "16px", marginLeft: "20px"}}/> 
+            <img src={left} style={{height: "16px", marginLeft: "20px"}} alt="Previous month" /> 
           </button>
           <h3 className="calendar-month-year">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h3>
           <button className="nav-button" onClick={goToNextMonth}>
-            <img src={right} style={{height: "16px", marginRight: "20px"}}/> 
+            <img src={right} style={{height: "16px", marginRight: "20px"}} alt="Next month" /> 
           </button>
         </div>
 
@@ -223,8 +223,14 @@ const generateCalendarDays = () => {
 
       {/* Buttons */}
       <div className="vehicle-info-last-button">
-        <button className="vehicle-info-back">Back</button>
-        <button className="vehicle-info-continue">Continue</button>
+        <button className="vehicle-info-back" onClick={handleBackClick}>Back</button>
+        <button 
+          className="vehicle-info-continue" 
+          onClick={handleContinue}
+          disabled={!selectedDate}
+        >
+          Continue
+        </button>
       </div>
     </div>
   );

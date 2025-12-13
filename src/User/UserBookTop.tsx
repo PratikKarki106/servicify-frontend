@@ -1,16 +1,22 @@
 import Bike from "../assets/Bike.png"
 import Cancel from "../assets/Cancel.png";
-import { useState } from 'react';
 import Servicing from "../assets/servicing.png";
 import Repair from "../assets/repair.png";
 import Checkup from "../assets/check-list.png";
 import Wash from "../assets/motorcycle.png";
 import "./UserBookTop.css"
 
-const UserBookTop = () => {
-    const [currentStep, setCurrentStep] = useState<number>(1);
-    const [active, setActive] = useState<string>("Servicing");
+interface UserBookTopProps {
+  currentStep: number;
+  selectedService: string;
+  onServiceChange: (service: string) => void;
+}
 
+const UserBookTop: React.FC<UserBookTopProps> = ({ 
+  currentStep, 
+  selectedService, 
+  onServiceChange 
+}) => {
     const services = [
         { name: "Servicing", icon: Servicing },
         { name: "Repair", icon: Repair },
@@ -18,15 +24,20 @@ const UserBookTop = () => {
         { name: "Wash", icon: Wash },
     ];
 
-    const getStepStatus = (step: number) => {
-        if (step < currentStep) return "completed";
-        if (step === currentStep) return "current";
-        return "upcoming";
+    const handleServiceClick = (serviceName: string) => {
+        onServiceChange(serviceName);
     };
 
-    const goToStep = (step: number) => {
-        setCurrentStep(step);
+    const getStepClass = (stepNumber: number) => {
+        if (currentStep > stepNumber) {
+            return "completed-step";
+        } else if (currentStep === stepNumber) {
+            return "current-step";
+        } else {
+            return "upcoming-step";
+        }
     };
+
   return (
     <>
       <div className="beginning">
@@ -49,8 +60,8 @@ const UserBookTop = () => {
               {services.map((service) => (
                   <button
                       key={service.name}
-                      className={active === service.name ? "active" : "inactive"}
-                      onClick={() => setActive(service.name)}
+                      className={selectedService === service.name ? "active" : "inactive"}
+                      onClick={() => handleServiceClick(service.name)}
                       >
                       <img src={service.icon} alt={service.name} style={{width: "20px", height: "20px"}}/>
                       <p style={{fontSize: "14px", fontWeight:"700"}}>{service.name}</p>
@@ -58,19 +69,23 @@ const UserBookTop = () => {
               ))}
           </div>
           <div className="flow">
-            <div className="flow1">
-              <p className="OneFlow"> 1 </p>
-              <p className="OneFlow-Label"> Vehicle Info</p>
+            <div className="flow-step">
+              <p className={`step-circle ${getStepClass(1)}`}>1</p>
+              <p className="step-label">Vehicle Info</p>
             </div>
-            <p style={{color: "#cacaca", fontWeight: "800", marginTop: "-4px"}}>_______________________</p>
-            <div className="flow2">
-              <p className="OneFlow"> 2 </p>
-              <p className="OneFlow-Label1"> Time</p>
+            <div className="progress-line-container">
+              <div className={`progress-line ${currentStep > 1 ? 'completed' : ''}`}></div>
             </div>
-            <p style={{color: "#cacaca", fontWeight: "800", marginTop: "-4px"}}>_______________________</p>
-            <div className="flow3">
-              <p className="OneFlow"> 3 </p>
-              <p className="OneFlow-Label">User Info</p>
+            <div className="flow-step">
+              <p className={`step-circle ${getStepClass(2)}`}>2</p>
+              <p className="step-label">Time</p>
+            </div>
+            <div className="progress-line-container">
+              <div className={`progress-line ${currentStep > 2 ? 'completed' : ''}`}></div>
+            </div>
+            <div className="flow-step">
+              <p className={`step-circle ${getStepClass(3)}`}>3</p>
+              <p className="step-label">User Info</p>
             </div>
           </div>
       </div>
@@ -78,4 +93,4 @@ const UserBookTop = () => {
   )
 }
 
-export default UserBookTop
+export default UserBookTop;
