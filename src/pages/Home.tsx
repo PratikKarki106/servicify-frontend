@@ -82,37 +82,37 @@ const Home: React.FC<Props> = ({ currentStatus }) => {
 
         <div className="quick-action">
           <h1 style={{fontSize: "24px"}}> Active Service Progress </h1>
-          <div className="progress-container">
-            {stages.map((stage, index) => {
-              const isCompleted = index < currentIndex;
-              const isActive = index === currentIndex;
+<div className="home-progress-container">
+  {stages.map((stage, index) => {
+    const isCompleted = index < currentIndex;
+    const isActive = index === currentIndex;
 
-              return (
-                <div key={stage.name} className="stage">
-                  <div
-                    className={`progress-icon-wrapper ${
-                      isCompleted ? 'progress-completed' : isActive ? 'progress-active' : 'progress-inactive'
-                    }`}
-                  >
-                    {isCompleted ? (
-                                <span className="progress-icon">&#10003;</span> 
-                              ) : (
-                                <span className="progress-icon">{stage.icon}</span> 
-                              )}
-                            </div>
+    return (
+      <div key={stage.name} className="home-stage">
+        <div
+          className={`home-progress-icon-wrapper ${
+            isCompleted ? 'home-progress-completed' : isActive ? 'home-progress-active' : 'home-progress-inactive'
+          }`}
+        >
+          {isCompleted ? (
+            <span className="home-progress-icon">&#10003;</span> 
+          ) : (
+            <span className="home-progress-icon">{stage.icon}</span> 
+          )}
+        </div>
 
-                  <div className="progress-label">{stage.name}</div>
-                  {index < stages.length - 1 && (
-                    <div
-                      className={`progress-line ${
-                        index < currentIndex ? 'progress-line-completed' : 'progress-line-inactive'
-                      }`}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        <div className="home-progress-label">{stage.name}</div>
+        {index < stages.length - 1 && (
+          <div
+            className={`home-progress-line ${
+              index < currentIndex ? 'home-progress-line-completed' : 'home-progress-line-inactive'
+            }`}
+          />
+        )}
+      </div>
+    );
+  })}
+</div>
           <div className="days-vehicle">
             <div className="circle">
               <Circle startDate={new Date("2025-11-01")} totalDays={90} size={200} strokeWidth={15} />
