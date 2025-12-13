@@ -12,6 +12,8 @@ import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
 import VehicleInfo from "./User/VehicleInfo";
 import Time from "./User/Time";
+import UserInfo from "./User/UserInfo";
+import BookAppointment from "./User/BookAppointment";
 // import Dashboard from "./pages/Dashboard";
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/vehicle-info" element={<VehicleInfo />} />
         <Route path="/time" element={<Time />} />
+        <Route path="/user-info" element={<UserInfo />} />
+        <Route path="/book-appointment" element={<BookAppointment />} />
       </Routes>
   );
 }
