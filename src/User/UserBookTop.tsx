@@ -4,12 +4,14 @@ import Servicing from "../assets/servicing.png";
 import Repair from "../assets/repair.png";
 import Checkup from "../assets/check-list.png";
 import Wash from "../assets/motorcycle.png";
-import "./UserBookTop.css"
+import "./UserBookTop.css";
+
+import type { ServiceType } from "../types/appointment";
 
 interface UserBookTopProps {
   currentStep: number;
-  selectedService: string;
-  onServiceChange: (service: string) => void;
+  selectedService: ServiceType;
+  onServiceChange: (service: ServiceType) => void;
 }
 
 const UserBookTop: React.FC<UserBookTopProps> = ({ 
@@ -18,13 +20,13 @@ const UserBookTop: React.FC<UserBookTopProps> = ({
   onServiceChange 
 }) => {
     const services = [
-        { name: "Servicing", icon: Servicing },
-        { name: "Repair", icon: Repair },
-        { name: "Check up", icon: Checkup },
-        { name: "Wash", icon: Wash },
+        { name: "servicing", icon: Servicing },
+        { name: "repair", icon: Repair },
+        { name: "check up", icon: Checkup },
+        { name: "wash", icon: Wash },
     ];
 
-    const handleServiceClick = (serviceName: string) => {
+    const handleServiceClick = (serviceName: ServiceType) => {
         onServiceChange(serviceName);
     };
 
@@ -61,7 +63,7 @@ const UserBookTop: React.FC<UserBookTopProps> = ({
                   <button
                       key={service.name}
                       className={selectedService === service.name ? "active" : "inactive"}
-                      onClick={() => handleServiceClick(service.name)}
+                      onClick={() => handleServiceClick(service.name as ServiceType)}
                       >
                       <img src={service.icon} alt={service.name} style={{width: "20px", height: "20px"}}/>
                       <p style={{fontSize: "14px", fontWeight:"700"}}>{service.name}</p>

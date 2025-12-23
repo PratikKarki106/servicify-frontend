@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './VehicleInfo.css';
+import type { VehicleData } from '../types/appointment';
 
-interface VehicleInfoProps {
-  onNext: (data: any) => void;
+ export interface VehicleInfoProps {
+  onNext: (data: VehicleData) => void;
   onBack: () => void;
 }
 
