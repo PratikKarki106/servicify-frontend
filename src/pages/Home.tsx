@@ -8,6 +8,7 @@ import Package from "../assets/package.png";
 import Catalogue from "../assets/catalogue.png";
 import Circle from "../components/Circle";
 import Contact from "../components/Contact";
+import { useNavigate } from "react-router-dom";
 
 type Status = 'Pending' | 'Confirmed' | 'In Progress' | 'Pickup' | 'Completed';
 
@@ -30,6 +31,7 @@ const offers = [
 
 const Home: React.FC<Props> = ({ currentStatus }) => {
   const currentIndex = stages.findIndex(stage => stage.name === currentStatus);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -49,7 +51,7 @@ const Home: React.FC<Props> = ({ currentStatus }) => {
 
         <div className="services-container">
           <div className="service-card">
-            <button>
+            <button onClick={() => navigate('/book-appointment')}>
               <img src={Calendar} style={{width: "25px", height: "25px"}} />
               <h3 style={{ marginTop: "15px", marginRight: "42px"}}> Book Service </h3>
               <p> Schedule a new service</p>

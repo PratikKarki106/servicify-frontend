@@ -10,7 +10,7 @@ interface AuthPayload {
 interface AuthResponse {
     token?: string;
     user?: {
-        id: string;
+        userId: string;
         name: string;
         email: string;
         role?: 'user' | 'admin';
@@ -33,7 +33,17 @@ export const Register = async (formData: AuthPayload): Promise<AuthResponse> => 
 export const Login = async (formData: AuthPayload): Promise<AuthResponse> => {
   try {
     const response = await axiosInstance.post('/auth/login', formData);
-    return response.data;
+    const data: AuthResponse = response.data;
+    console.log(data);
+    console.log(response);
+
+    if(data.token && data.user){
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.user.userId);
+      localStorage.setItem('userName', data.user.name);
+      localStorage.setItem('userEmail', data.user.email);
+    }
+    return data;
   } catch (err: any) {
     if (err.response && err.response.data) {
       return err.response.data;
