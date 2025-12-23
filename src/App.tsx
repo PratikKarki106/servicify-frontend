@@ -10,11 +10,8 @@ import Home from "./pages/Home";
 import AuthSuccess from "./services/AuthSuccess";
 import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
-import VehicleInfo from "./User/VehicleInfo";
-import Time from "./User/Time";
-import UserInfo from "./User/UserInfo";
 import BookAppointment from "./User/BookAppointment";
-// import Dashboard from "./pages/Dashboard";
+
 
 function App() {
   function CirclePage() {
@@ -23,7 +20,7 @@ function App() {
 
   return (
       <Routes>
-        <Route path="/" element={<LandingPage />} />  {/* 👈 This shows first */}
+        <Route path="/" element={<LandingPage />} /> 
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
@@ -33,10 +30,8 @@ function App() {
         <Route path="/auth/success" element={<AuthSuccess />} />
         <Route path="/circle" element={<CirclePage />} />
         <Route path="/admin" element={<AdminHome />} />
-        <Route path="/vehicle-info" element={<VehicleInfo />} />
-        <Route path="/time" element={<Time />} />
-        <Route path="/user-info" element={<UserInfo />} />
         <Route path="/book-appointment" element={<BookAppointment />} />
+
       </Routes>
   );
 }
