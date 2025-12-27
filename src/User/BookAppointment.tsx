@@ -107,7 +107,9 @@ const BookAppointment = () => {
       case 1:
         return <VehicleInfo onNext={handleVehicleInfoSubmit} onBack={handleBack} />;
       case 2:
-        return <Time onNext={handleTimeSubmit} onBack={handleBack} />;
+        return <Time  selectedService={selectedService} 
+        onNext={handleTimeSubmit} 
+        onBack={handleBack} />;
       case 3:
         return (
           <UserInfo
