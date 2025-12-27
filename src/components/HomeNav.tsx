@@ -27,10 +27,12 @@ const HomeNav: React.FC = () => {
         </button>
 
         <div className="Home-profile-avatar" style={{marginLeft: "30px"}}>
-          <img
-            src= {userAvatar}
-            alt="profile"
-          />
+          <button>
+            <img
+              src= {userAvatar}
+              alt="profile"
+            />
+          </button>
         </div>
       </div>
     </nav>
