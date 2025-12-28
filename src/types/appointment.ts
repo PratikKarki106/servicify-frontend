@@ -40,3 +40,40 @@ export interface FormData {
   timeSlot: TimeData;
   userInfo: UserInfoData;
 }
+
+// types.ts
+export interface VehicleInfo {
+  model: string;
+  color: string;
+  numberPlate: string;
+  kilometerRun: number;
+  notes?: string;
+  imageUrl?: string;
+}
+
+export interface Appointment {
+  _id: string;
+  userId: number;
+  name?: string;
+  email?: string;
+  serviceType: string;
+  vehicleInfo: VehicleInfo;
+  date: string;
+  time: string;
+  pickupRequired: boolean;
+  pickupAddress?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  appointments: Appointment[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
