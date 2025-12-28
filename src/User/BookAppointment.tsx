@@ -91,6 +91,9 @@ const BookAppointment = () => {
       time: formData.timeSlot.time,
       pickupRequired: data.needPickup,
       pickupAddress: data.pickupAddress,
+      email: data.email,
+      name: data.fullName,
+      contactNumber: data.phoneNumber,
     };
 
     try {

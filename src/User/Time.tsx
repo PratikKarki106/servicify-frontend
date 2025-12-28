@@ -16,7 +16,7 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
-  const [availableSlots, setAvailableSlots] = useState<String[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
 
   useEffect(() =>{
   if (!selectedDate) return;
@@ -25,9 +25,11 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
       const dateStr = selectedDate.toISOString().split("T")[0];
       const res = await axiosInstance.get(
         `/appointments/availability?date=${dateStr}&serviceType=${selectedService}` );
-      setAvailableSlots(res.data.availableSlots);
+        const slots = res.data?.availability?.filter((s: any) => s.available).map((s: any) => s.time) ?? [];
+      setAvailableSlots(slots);
     } catch (error){
       console.error("Error fetching availability", error);
+      setAvailableSlots([]);
     }
   };
 
@@ -71,8 +73,9 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
       const minutes = current.getMinutes();
       const ampm = hours >= 12 ? "PM" : "AM";
       const h12 = hours % 12 || 12;
+      const h = h12.toString().padStart(2, "0");
       const m = minutes.toString().padStart(2, "0");
-      slots.push(`${h12}:${m} ${ampm}`);
+      slots.push(`${h}:${m} ${ampm}`);
 
       current.setMinutes(current.getMinutes() + interval);
     }
@@ -214,8 +217,8 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
               key={time}
               className={`time-slot ${selectedTime === time ? "selected" : ""}`}
               onClick={() => setSelectedTime(time)}
-              disabled={!availableSlots.includes(time)} // disable if not available
-              title={!availableSlots.includes(time) ? "Slot full" : ""}
+              disabled={!availableSlots.includes(time)}
+              // title={!availableSlots.includes(time) ? "Slot full" : ""}
             >
               {time}
             </button>

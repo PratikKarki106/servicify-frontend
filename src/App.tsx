@@ -11,6 +11,7 @@ import AuthSuccess from "./services/AuthSuccess";
 import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
 import BookAppointment from "./User/BookAppointment";
+import ViewAppointment from "./Admin/viewAppointment";
 
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
         <Route path="/circle" element={<CirclePage />} />
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/book-appointment" element={<BookAppointment />} />
-
+        <Route path="/admin/view-appointment" element={<ViewAppointment />} />
       </Routes>
   );
 }

@@ -6,8 +6,10 @@ import Package from "../assets/package.png";
 import Catalogue from "../assets/catalogue.png";
 import Calendar from "../assets/calendar.png";
 import History from "../assets/history.png";
+import { useNavigate } from "react-router-dom";
 
 const AdminHome: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <>
       <HomeNav />
@@ -46,7 +48,7 @@ const AdminHome: React.FC = () => {
             </button>
           </div>
           <div className="service-card">
-            <button>
+            <button onClick={() => navigate('/admin/view-appointment')}>
               <img src={Calendar} style={{ width: "25px", height: "25px" }} />
               <h3 style={{ marginTop: "15px" }}>View Bookings</h3>
               <p> See upcoming services</p>
