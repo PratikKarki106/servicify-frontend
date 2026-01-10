@@ -58,7 +58,7 @@ const Home: React.FC<Props> = ({ currentStatus }) => {
             </button>
           </div>
           <div className="service-card">
-            <button>
+            <button onClick={() => navigate('/catalog')}>
               <img src={Catalogue} style={{width: "25px", height: "25px"}} />
               <h3 style={{ marginTop: "15px"}}>Browse Catalog</h3>
               <p style={{marginRight: "10px"}}>Find parts and price</p>

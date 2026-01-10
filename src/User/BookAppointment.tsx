@@ -77,6 +77,13 @@ const BookAppointment = () => {
       return;
     }
 
+    // Format date as local YYYY-MM-DD
+    const selectedDate = formData.timeSlot.date;
+    const year = selectedDate.getFullYear();
+    const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = selectedDate.getDate().toString().padStart(2, '0');
+    const localDate = `${year}-${month}-${day}`;
+
     const payload = {
       userId,
       serviceType,
@@ -87,7 +94,7 @@ const BookAppointment = () => {
         kilometerRun: Number(formData.vehicle.kilometers),
         notes: formData.vehicle.optionalNotes,
       },
-      date: formData.timeSlot.date.toISOString(),
+      date: localDate,
       time: formData.timeSlot.time,
       pickupRequired: data.needPickup,
       pickupAddress: data.pickupAddress,
