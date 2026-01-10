@@ -12,7 +12,9 @@ import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
 import BookAppointment from "./User/BookAppointment";
 import ViewAppointment from "./Admin/viewAppointment";
-
+import AdminCatalog from './Admin/AdminCatalog';
+import UserCatalog from './User/UserCatalog';
+import AdminAppointment from "./Admin/AdminAppointment";
 
 function App() {
   function CirclePage() {
@@ -33,6 +35,9 @@ function App() {
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/book-appointment" element={<BookAppointment />} />
         <Route path="/admin/view-appointment" element={<ViewAppointment />} />
+        <Route path="/admin/catalog" element={<AdminCatalog />} />
+        <Route path="/catalog" element={<UserCatalog />} />
+        <Route path="/admin/confirmed-appointments" element={<AdminAppointment />} />
       </Routes>
   );
 }

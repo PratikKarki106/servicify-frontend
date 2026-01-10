@@ -3,8 +3,10 @@ import "./HomeNav.css";
 import userAvatar from "../assets/User-Avatar.png";
 import bell from "../assets/bell.png";
 import logo from "../assets/Servicify.png";
+import { useNavigate } from "react-router-dom";
 
 const HomeNav: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <nav className="Home-Navbar">
       <div className="Home-nav-left">
@@ -15,10 +17,10 @@ const HomeNav: React.FC = () => {
 
       {/* Middle Section: Links */}
       <div className="Home-nav-links">
-        <a href="#" className="Home-nav-link active">Home</a>
-        <a href="#" className="Home-nav-link">Services</a>
-        <a href="#" className="Home-nav-link">History</a>
-        <a href="#" className="Home-nav-link">Packages</a>
+        <button className="Home-nav-link active" onClick={() => navigate("/home")}>Home</button>
+        <button className="Home-nav-link" onClick={() => navigate("/services")}>Services</button>
+        <button className="Home-nav-link" onClick={() => navigate("/history")}>History</button>
+        <button className="Home-nav-link" onClick={() => navigate("/packages")}>Packages</button>
       </div>
 
       <div className="Home-nav-right">

@@ -1,5 +1,6 @@
 .main-container-viewappointment {
-    padding: 20px 140px;
+    padding: 80px 40px;
+    padding-left: 290px;
     min-height: 100vh;
     background-color: #f8f9fa;
     transition: all 0.3s ease;
@@ -85,7 +86,7 @@
 
 .appointments-header {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1.2fr 1.2fr 0.7fr;
     background-color: #f8f9fa;
     padding: 20px 30px;
     border-bottom: 1px solid #e9ecef;
@@ -104,7 +105,7 @@
 
 .appointment-row {
     display: grid;
-    grid-template-columns: 1.4fr 1.6fr 1fr 1fr;
+    grid-template-columns: 2.5fr 1.3fr 2fr 1.5fr;
     padding: 20px 30px;
     border-bottom: 1px solid #e9ecef;
     align-items: center;
@@ -489,7 +490,7 @@
     color: #6c757d;
 }
 
-.action-buttons {
+.appointment-action-buttons {
     display: flex;
     gap: 15px;
     margin-top: 40px;
@@ -497,7 +498,7 @@
     border-top: 1px solid #e9ecef;
 }
 
-.action-btn {
+.appointment-action-btn {
     padding: 12px 24px;
     border-radius: 8px;
     font-size: 15px;
@@ -609,4 +610,453 @@
         padding-bottom: 5px;
         border-bottom: 1px solid #dee2e6;
     }
+}
+
+/* Status Column in Table */
+.status-header {
+    width: 100px;
+    flex: 0 0 100px;
+    text-align: center;
+}
+
+.status-cell {
+    width: 100px;
+    flex: 0 0 100px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.status-container {
+    position: relative;
+    display: inline-block;
+}
+
+.status-badge-table {
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    min-width: 80px;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-badge-table:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-dropdown-icon {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* Status Dropdown */
+.status-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    margin-top: 8px;
+    min-width: 180px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.status-dropdown-item {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.status-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.status-dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.status-dropdown-item.current {
+    background-color: #e3f2fd;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-label {
+    font-size: 13px;
+    flex: 1;
+    color: #495057;
+}
+
+.current-badge {
+    font-size: 11px;
+    color: #6c757d;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Status Colors - Table View */
+.status-booked {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-confirmed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-in-progress {
+    background: #fff3e0;
+    color: #f57c00;
+    border: 1px solid #ffe0b2;
+}
+
+.status-completed {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Status Colors - Dropdown */
+.status-dropdown .status-booked .status-indicator {
+    background-color: #ffc107;
+}
+
+.status-dropdown .status-confirmed .status-indicator {
+    background-color: #28a745;
+}
+
+.status-dropdown .status-in-progress .status-indicator {
+    background-color: #fd7e14;
+}
+
+.status-dropdown .status-completed .status-indicator {
+    background-color: #17a2b8;
+}
+
+.status-dropdown .status-cancelled .status-indicator {
+    background-color: #dc3545;
+}
+
+/* Status Select in Details */
+.status-select-container {
+    display: flex;
+    align-items: center;
+}
+
+.status-select {
+    padding: 8px 16px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #495057;
+    cursor: pointer;
+    min-width: 180px;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: #1094E6;
+    box-shadow: 0 0 0 3px rgba(16, 148, 230, 0.1);
+}
+
+.status-select:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.status-select option {
+    padding: 8px;
+    font-size: 14px;
+}
+
+/* Service badges in table - shorter version */
+.service-cell .service-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    min-width: 45px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Update grid templates for new status column */
+.appointments-header {
+    display: grid;
+    grid-template-columns: 2fr 0.8fr 0.8fr 1fr 0.7fr;
+}
+
+.appointment-row {
+    display: grid;
+    grid-template-columns: 2.5fr 0.8fr 0.8fr 1.3fr 1.5fr;
+}
+
+/* Spinner for loading states */
+.spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Loading overlay for status updates */
+.status-updating {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.status-updating::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(16, 148, 230, 0.3);
+    border-radius: 50%;
+    border-top-color: #1094E6;
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* No appointments message */
+.no-appointments {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.no-appointments p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Filter button active state */
+.filter-button-appointment.active {
+    background-color: #1094E6;
+    color: white;
+    border-color: #1094E6;
+}
+
+/* Update action cell for better alignment */
+.action-cell {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .appointments-header,
+    .appointment-row {
+        grid-template-columns: 2fr 0.8fr 0.8fr 1fr 0.7fr;
+    }
+    
+    .status-header,
+    .status-cell {
+        width: 90px;
+        flex: 0 0 90px;
+    }
+    
+    .status-badge-table {
+        min-width: 70px;
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .appointments-header,
+    .appointment-row {
+        grid-template-columns: 2fr 0.7fr 0.7fr 0.9fr 0.7fr;
+    }
+    
+    .status-badge-table {
+        min-width: 65px;
+    }
+    
+    .status-dropdown {
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 992px) {
+    .appointments-header,
+    .appointment-row {
+        grid-template-columns: 1.5fr 0.6fr 0.6fr 0.8fr 0.6fr;
+    }
+    
+    .status-badge-table {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+    
+    .service-cell .service-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .appointments-header,
+    .appointment-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .status-header,
+    .service-header,
+    .time-header,
+    .action-header {
+        display: none;
+    }
+    
+    .status-cell,
+    .service-cell,
+    .time-cell,
+    .action-cell {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .status-container {
+        width: 100%;
+    }
+    
+    .status-badge-table {
+        justify-content: flex-start;
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .status-dropdown {
+        left: 0;
+        transform: translateX(0);
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .appointment-row {
+        position: relative;
+    }
+    
+    .appointment-row::before {
+        content: attr(data-status);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+}
+
+/* Mobile-specific status display */
+@media (max-width: 480px) {
+    .status-select {
+        min-width: 100%;
+        font-size: 16px; /* Larger for mobile touch */
+    }
+    
+    .details-section .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .details-section .info-label {
+        min-width: auto;
+        font-weight: 600;
+    }
+    
+    .status-select-container {
+        width: 100%;
+    }
+}
+
+/* Scrollbar styling for details panel */
+.details-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.details-content::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.details-content::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 10px;
+}
+
+.details-content::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
 }

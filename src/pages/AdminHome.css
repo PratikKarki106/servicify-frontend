@@ -1,69 +1,557 @@
 .admin-main-container {
-  padding: 40px 160px;
+  padding: 70px 40px;
+  padding-left: 290px;
+  min-height: 100vh;
+  background-color: #f8f9fa;
 }
 
-.admin-greetings-container {
+/* Header Row - Greeting left, Buttons right */
+.dashboard-header-row {
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.admin-greetings-text {
-  padding-left: 20px;
+.welcome-section {
+  flex: 1;
+  min-width: 300px;
 }
 
-.admin-quick-action {
-  margin-top: 40px;
-  padding: 20px;
+.welcome-title {
+  font-weight: 800;
+  font-size: 30px;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
-.admin-title {
-  font-size: 24px;
-  margin-bottom: 16px;
+.date-display {
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
 }
 
-.admin-services-container {
+/* Action Buttons - Right side */
+.action-buttons-horizontal {
   display: flex;
-  flex-direction: row;
+  gap: 15px;
+  align-items: center;
+  margin-top: 1%;
 }
 
-.admin-service-card {
-  width: 260px;
-  background-color: #ffffff;
-  border: 1px solid #c4c4c4;
-  border-radius: 15px;
-  margin-top: 20px;
-  margin-right: 20px;
-  padding: 20px 20px;
-}
-
-.admin-service-card p {
-  color: #aca7a7;
-}
-
-/* Table styling */
-.admin-offers-table {
-  width: 94%;
-  background-color: #ffffff;
-  border-collapse: collapse;
-  border-radius: 10px;
-}
-
-.admin-offers-table th,
-.admin-offers-table td {
-  padding: 12px;
-  text-align: left;
-}
-
-/* Reuse button globally */
-.button {
-  padding: 8px 16px;
-  background-color: #1094E6;
-  color: white;
+.export-btn, .new-entry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
+  height: 44px;
+  white-space: nowrap;
 }
 
-.button:hover {
-  background-color: darkblue;
+.export-btn {
+  background: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.export-btn:hover {
+  background: #dee2e6;
+  transform: translateY(-1px);
+}
+
+.new-entry-btn {
+  background: #1094E6;
+  color: white;
+  border: 1px solid #0d7dc2;
+}
+
+.new-entry-btn:hover {
+  background: #0d7dc2;
+  transform: translateY(-1px);
+}
+
+/* Stats Grid Container */
+.stats-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin-bottom: 40px;
+}
+
+/* Stat Card - Adjusted size and spacing */
+.stat-card-container {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.stat-icon-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.stat-icon-container.appointments {
+  background: rgba(16, 148, 230, 0.1);
+  color: #1094E6;
+}
+
+.stat-icon-container.repairs {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+}
+
+.stat-icon-container.completed {
+  background: rgba(121, 82, 179, 0.1);
+  color: #7952b3;
+}
+
+.stat-trend-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 12px;
+}
+
+.stat-trend-container.up {
+  background: rgba(81, 207, 102, 0.1);
+  color: #51cf66;
+}
+
+.stat-trend-container.down {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+}
+
+.stat-content-container {
+  margin-top: auto;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1;
+}
+
+.stat-label {
+  color: #6c757d;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Content Grid - Recent Appointments & Quick Actions */
+.content-grid-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.view-all-btn {
+  background: transparent;
+  border: 1px solid #dee2e6;
+  color: #1094E6;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+  background: rgba(16, 148, 230, 0.05);
+  border-color: #1094E6;
+}
+
+/* Recent Appointments Section */
+.recent-appointments-section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+}
+
+.appointments-table-container {
+  overflow-x: auto;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-table th {
+  text-align: left;
+  padding: 16px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 2px solid #e9ecef;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.appointments-table td {
+  padding: 20px 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.appointments-table tr:last-child td {
+  border-bottom: none;
+}
+
+.appointments-table tr:hover td {
+  background-color: rgba(248, 249, 250, 0.5);
+}
+
+/* Vehicle Info */
+.vehicle-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vehicle-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(16, 148, 230, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1094E6;
+  font-size: 16px;
+}
+
+.vehicle-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-model {
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.vehicle-plate {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+/* Customer Info */
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-icon {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Service Type Badge */
+.service-type-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(16, 148, 230, 0.1);
+  color: #1094E6;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Time Slot */
+.time-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.time-slot svg {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.date-display-small {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #6c757d;
+}
+
+.spinner {
+  font-size: 24px;
+  color: #1094E6;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #dee2e6;
+  margin-bottom: 15px;
+}
+
+/* Quick Actions Section */
+.quick-actions-section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  height: fit-content;
+}
+
+.quick-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #1094E6;
+}
+
+.quick-action-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.quick-action-content {
+  flex: 1;
+}
+
+.quick-action-content h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.quick-action-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .admin-main-container {
+    padding-left: 100px;
+    padding: 30px;
+  }
+  
+  .content-grid-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .stats-grid-container {
+    gap: 25px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .stats-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+  }
+  
+  .content-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-main-container {
+    padding: 20px;
+    padding-left: 20px;
+  }
+  
+  .dashboard-header-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .action-buttons-horizontal {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .stats-grid-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .stat-card-container {
+    height: 150px;
+  }
+  
+  .recent-appointments-section,
+  .quick-actions-section {
+    padding: 20px;
+  }
+  
+  .appointments-table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-title {
+    font-size: 24px;
+  }
+  
+  .section-title {
+    font-size: 18px;
+  }
+  
+  .action-buttons-horizontal {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .export-btn, .new-entry-btn {
+    width: 100%;
+  }
+  
+  .appointments-table th,
+  .appointments-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .vehicle-model {
+    font-size: 14px;
+  }
+  
+  .quick-action-btn {
+    padding: 15px;
+  }
+  
+  .quick-action-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
 }

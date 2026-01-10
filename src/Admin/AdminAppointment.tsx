@@ -1,43 +1,43 @@
 import HomeNav from '../components/HomeNav';
 import './viewAppointment.css'
-import { FaChevronRight, FaCar, FaCalendarAlt, FaClock, FaStickyNote, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaChevronRight, FaCar, FaCalendarAlt, FaClock, FaStickyNote, FaMapMarkerAlt, FaEllipsisH } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import { getAllAppointments, updateAppointmentStatus } from '../services/bookAppointment'; // Add updateAppointmentStatus
-import type { Appointment, ApiResponse } from '../types/appointment';
+import { getAllAppointments, updateAppointmentStatus } from '../services/bookAppointment';
+import type { Appointment } from '../types/appointment';
 import Sidebar from '../components/Sidebar';
 
-// Define TypeScript interfaces
-interface VehicleInfo {
-  model: string;
-  color: string;
-  numberPlate: string;
-  kilometerRun: number;
-  notes?: string;
-  imageUrl?: string;
-}
+// Define status options
+const STATUS_OPTIONS = [
+  { value: 'confirmed', label: 'Confirmed', short: 'Conf' },
+  { value: 'in-progress', label: 'In Progress', short: 'In Prog' },
+  { value: 'completed', label: 'Completed', short: 'Comp' },
+  { value: 'cancelled', label: 'Cancelled', short: 'Cancel' }
+];
 
-const ViewAppointment = () => {
+
+const AdminAppointment = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('All');
-  const [isUpdating, setIsUpdating] = useState<boolean>(false); // For confirmation loading state
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [showStatusDropdown, setShowStatusDropdown] = useState<string | null>(null);
 
-  // Fetch appointments from API - Only "booked" status
-  const fetchAppointments = async (serviceType: string | null = null) => {
+  // Fetch appointments from API - All statuses
+  const fetchAppointments = async (status?: string | null) => {
     try {
       setLoading(true);
       setError(null);
       
       const params: any = {
         sortBy: 'createdAt',
-        sortOrder: 'desc',
-        status: 'booked' // Only fetch appointments with "booked" status
+        sortOrder: 'desc'
       };
       
-      if (serviceType && serviceType !== 'All') {
-        params.serviceType = serviceType.toLowerCase();
+      // Add status filter if provided
+      if (status && status !== 'All') {
+        params.status = status.toLowerCase();
       }
       
       const response = await getAllAppointments(params);
@@ -55,70 +55,62 @@ const ViewAppointment = () => {
     }
   };
 
-  // Handle confirming an appointment
-  const handleConfirmAppointment = async () => {
-    if (!selectedAppointment) return;
-    
+  // Handle status change
+  const handleStatusChange = async (appointmentId: string, newStatus: string, fromTable: boolean = false) => {
     try {
       setIsUpdating(true);
       
       // Call API to update appointment status
-      const response = await updateAppointmentStatus(selectedAppointment._id, 'confirmed');
+      const response = await updateAppointmentStatus(appointmentId, newStatus);
       
       if (response.success) {
         // Update local state
-        const updatedAppointment = { ...selectedAppointment, status: 'confirmed' };
-        setSelectedAppointment(updatedAppointment);
+        const updatedAppointments = appointments.map(app => 
+          app._id === appointmentId ? { ...app, status: newStatus } : app
+        );
+        setAppointments(updatedAppointments);
         
-        // Remove from appointments list (since it's no longer "booked")
-        setAppointments(prev => prev.filter(app => app._id !== selectedAppointment._id));
+        // Update selected appointment if it's the one being changed
+        if (selectedAppointment && selectedAppointment._id === appointmentId) {
+          setSelectedAppointment({ ...selectedAppointment, status: newStatus });
+        }
         
-        // Show success message (you could add toast notification here)
-        alert('Appointment confirmed successfully!');
+        // Show success message
+        if (!fromTable) {
+          alert(`Status updated to ${STATUS_OPTIONS.find(s => s.value === newStatus)?.label || newStatus}!`);
+        }
+        
+        // Close dropdown if changing from table
+        if (fromTable) {
+          setShowStatusDropdown(null);
+        }
       } else {
-        alert('Failed to confirm appointment. Please try again.');
+        alert('Failed to update status. Please try again.');
       }
     } catch (err: any) {
-      console.error('Error confirming appointment:', err);
-      alert(err.message || 'Error confirming appointment');
+      console.error('Error updating status:', err);
+      alert(err.message || 'Error updating status');
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Handle canceling an appointment
-  const handleCancelAppointment = async () => {
-    if (!selectedAppointment) return;
-    
-    if (!window.confirm('Are you sure you want to cancel this appointment?')) {
-      return;
-    }
-    
-    try {
-      setIsUpdating(true);
-      
-      // Call API to update appointment status
-      const response = await updateAppointmentStatus(selectedAppointment._id, 'cancelled');
-      
-      if (response.success) {
-        const updatedAppointment = { ...selectedAppointment, status: 'cancelled' };
-        setSelectedAppointment(updatedAppointment);
-        
-        // Remove from appointments list (since it's no longer "booked")
-        setAppointments(prev => prev.filter(app => app._id !== selectedAppointment._id));
-        
-        // Show success message
-        alert('Appointment cancelled successfully!');
-      } else {
-        alert('Failed to cancel appointment. Please try again.');
-      }
-    } catch (err: any) {
-      console.error('Error cancelling appointment:', err);
-      alert(err.message || 'Error cancelling appointment');
-    } finally {
-      setIsUpdating(false);
-    }
+  // Toggle status dropdown in table
+  const toggleStatusDropdown = (appointmentId: string) => {
+    setShowStatusDropdown(showStatusDropdown === appointmentId ? null : appointmentId);
   };
+
+  // Close dropdown when clicking elsewhere
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!(event.target as Element).closest('.status-cell')) {
+        setShowStatusDropdown(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Initial fetch on component mount
   useEffect(() => {
@@ -127,6 +119,7 @@ const ViewAppointment = () => {
 
   const handleDetailsClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
+    setShowStatusDropdown(null); // Close any open dropdowns
   };
 
   const handleCloseDetails = () => {
@@ -138,6 +131,18 @@ const ViewAppointment = () => {
     setFilter(filterType);
     fetchAppointments(filterType === 'All' ? null : filterType);
   };
+
+  // Get short form of status for table view
+  const getStatusShortForm = (status: string) => {
+    const statusOption = STATUS_OPTIONS.find(s => s.value === status);
+    return statusOption?.short || status.substring(0, 4);
+  };
+
+  // Get full form of status for details view
+  // const getStatusFullForm = (status: string) => {
+  //   const statusOption = STATUS_OPTIONS.find(s => s.value === status);
+  //   return statusOption?.label || status.charAt(0).toUpperCase() + status.slice(1);
+  // };
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -292,7 +297,8 @@ const ViewAppointment = () => {
           <div className='appointment-list-container'>
             <div className='appointments-header'>
               <div className='header-cell name-header'>NAME</div>
-              <div className='header-cell service-header'>SERVICE TYPE</div>
+              <div className='header-cell service-header'>SERVICE</div>
+              <div className='header-cell status-header'>STATUS</div>
               <div className='header-cell time-header'>TIME</div>
               <div className='header-cell action-header'>ACTION</div>
             </div>
@@ -300,7 +306,7 @@ const ViewAppointment = () => {
             <div className='appointments-list'>
               {appointments.length === 0 ? (
                 <div className="no-appointments">
-                  <p>No booked appointments found</p>
+                  <p>No appointments found</p>
                 </div>
               ) : (
                 appointments.map((appointment: Appointment) => (
@@ -318,8 +324,40 @@ const ViewAppointment = () => {
                     </div>
                     <div className='cell service-cell'>
                       <span className={`service-badge service-${appointment.serviceType ? appointment.serviceType.toLowerCase() : 'default'}`}>
-                        {appointment.serviceType || 'Unknown'}
+                        {appointment.serviceType?.substring(0, 3) || 'N/A'}
                       </span>
+                    </div>
+                    <div className='cell status-cell'>
+                      <div className='status-container'>
+                        <div 
+                          className={`status-badge-table status-${appointment.status || 'confirmed'}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleStatusDropdown(appointment._id);
+                          }}
+                        >
+                          {getStatusShortForm(appointment.status || 'confirmed')}
+                          <FaEllipsisH className='status-dropdown-icon' />
+                        </div>
+                        
+                        {showStatusDropdown === appointment._id && (
+                          <div className='status-dropdown'>
+                            {STATUS_OPTIONS.map((statusOption) => (
+                              <div
+                                key={statusOption.value}
+                                className={`status-dropdown-item ${appointment.status === statusOption.value ? 'current' : ''}`}
+                                onClick={() => handleStatusChange(appointment._id, statusOption.value, true)}
+                              >
+                                <span className={`status-indicator status-${statusOption.value}`}></span>
+                                <span className='status-label'>{statusOption.label}</span>
+                                {appointment.status === statusOption.value && (
+                                  <span className='current-badge'>Current</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className='cell time-cell'>
                       <div className='appointment-time'>
@@ -394,8 +432,23 @@ const ViewAppointment = () => {
                       </span>
                     </div>
                     <div className='info-item'>
-                      <div className={`status-badge status-${selectedAppointment.status || 'booked'}`}>
-                        {(selectedAppointment.status || 'booked').charAt(0).toUpperCase() + (selectedAppointment.status || 'booked').slice(1)}
+                      <span className='info-label'>Status:</span>
+                      <div className='status-select-container'>
+                        <select 
+                          className='status-select'
+                          value={selectedAppointment.status || 'confirmed'}
+                          onChange={(e) => handleStatusChange(selectedAppointment._id, e.target.value)}
+                          disabled={isUpdating}
+                        >
+                          {STATUS_OPTIONS.map((statusOption) => (
+                            <option key={statusOption.value} value={statusOption.value}>
+                              {statusOption.label}
+                            </option>
+                          ))}
+                        </select>
+                        {isUpdating && (
+                          <div className="spinner-small"></div>
+                        )}
                       </div>
                     </div>
                     <div className='info-item'>
@@ -508,39 +561,6 @@ const ViewAppointment = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Action Buttons */}
-                <div className='appointment-action-buttons'>
-                  <button 
-                    className={`appointment-action-btn confirm-btn ${isUpdating ? 'loading' : ''}`}
-                    onClick={handleConfirmAppointment}
-                    disabled={isUpdating || selectedAppointment.status !== 'booked'}
-                  >
-                    {isUpdating ? (
-                      <>
-                        <div className="spinner-small"></div>
-                        Confirming...
-                      </>
-                    ) : (
-                      <>
-                        <FaCheckCircle /> Confirm Appointment
-                      </>
-                    )}
-                  </button>
-                  <button 
-                    className={`appointment-action-btn cancel-btn ${isUpdating ? 'loading' : ''}`}
-                    onClick={handleCancelAppointment}
-                    disabled={isUpdating || selectedAppointment.status !== 'booked'}
-                  >
-                    <FaTimesCircle /> Cancel Appointment
-                  </button>
-                  <button 
-                    className='appointment-action-btn edit-btn'
-                    disabled={isUpdating}
-                  >
-                    Edit Details
-                  </button>
-                </div>
               </div>
             </div>
           )}
@@ -550,4 +570,4 @@ const ViewAppointment = () => {
   )
 }
 
-export default ViewAppointment;
+export default AdminAppointment;
