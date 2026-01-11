@@ -1,5 +1,7 @@
 // src/App.tsx
 import {  Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./components/About";
 import Services from "./components/Services";
@@ -15,6 +17,7 @@ import ViewAppointment from "./Admin/viewAppointment";
 import AdminCatalog from './Admin/AdminCatalog';
 import UserCatalog from './User/UserCatalog';
 import AdminAppointment from "./Admin/AdminAppointment";
+import AdminPackage from "./Admin/AdminPackage";
 
 function App() {
   function CirclePage() {
@@ -22,6 +25,18 @@ function App() {
 }
 
   return (
+    <>
+    <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover   
+    />
       <Routes>
         <Route path="/" element={<LandingPage />} /> 
         <Route path="/about" element={<AboutPage />} />
@@ -38,7 +53,9 @@ function App() {
         <Route path="/admin/catalog" element={<AdminCatalog />} />
         <Route path="/catalog" element={<UserCatalog />} />
         <Route path="/admin/confirmed-appointments" element={<AdminAppointment />} />
+        <Route path="/admin/packages" element={<AdminPackage />} />
       </Routes>
+    </>
   );
 }
 

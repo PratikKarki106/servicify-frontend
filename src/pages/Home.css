@@ -183,3 +183,134 @@
 .button:hover {
   background-color: darkblue;
 }
+
+/* Add these styles to your existing Home.css */
+
+/* Loading, Error, and Empty States */
+.loading-state {
+  padding: 40px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.error-state {
+  padding: 40px;
+  text-align: center;
+}
+
+.error-text {
+  color: #dc3545;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.retry-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.retry-button:hover {
+  background: #0056b3;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* Package table enhancements */
+.package-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.package-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  display: inline-block;
+  width: fit-content;
+}
+
+.price-cell {
+  font-weight: 700;
+  color: #2e7d32;
+  font-size: 16px;
+}
+
+.benefit-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.services-cell {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.expiry-badge {
+  background: #d4edda;
+  color: #155724;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.expiry-badge.expired {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.details-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.details-btn:hover {
+  background: #bbdefb;
+}
+
+.purchase-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.purchase-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
