@@ -57,6 +57,8 @@ const Sidebar = () => {
       setActiveItem('catalogue');
     } else if (path.includes('confirmed-appointments')) {
       setActiveItem('ongoing-service');
+    } else if (path.includes('packages')) {
+      setActiveItem('manage-packages');
     }
   }, [location.pathname]);
 
@@ -96,7 +98,7 @@ const Sidebar = () => {
       id: 'manage-packages', 
       label: 'Manage Packages', 
       icon: <FaCubes />,
-      // path: '/manage-packages' // Commented out - no route yet
+      path: 'admin/packages' 
     },
     { 
       id: 'logout', 
@@ -119,6 +121,9 @@ const Sidebar = () => {
         break;
       case 'catalogue':
         navigate('/admin/catalog'); // Fixed route
+        break;
+      case 'manage-packages':
+        navigate('/admin/packages');
         break;
       case 'logout':
         // Clear all stored data
