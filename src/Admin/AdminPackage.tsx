@@ -8,11 +8,11 @@ import type{   Package, CreatePackageData } from '../services/Package';
 
 interface FormData {
   name: string;
-  price: string;
-  serviceCount: string;
-  purchaseDeadline: string;
   description: string;
-  benefits: string;
+  actualPrice: string;
+  discountedPrice: string;
+  purchaseDeadline: string;
+  features: string[];
   serviceType: 'general' | 'premium' | 'detailing' | 'repair' | 'all';
   isActive: boolean;
 }
@@ -33,11 +33,11 @@ const AdminPackage: React.FC = () => {
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    price: '',
-    serviceCount: '10',
-    purchaseDeadline: '',
     description: '',
-    benefits: '',
+    actualPrice: '',
+    discountedPrice: '',
+    purchaseDeadline: '',
+    features: [],
     serviceType: 'general',
     isActive: true
   });
@@ -92,7 +92,7 @@ const AdminPackage: React.FC = () => {
   useEffect(() => {
     const expiredPackages = packages.filter(pkg => pkg.isExpired).length;
     const activePackages = packages.filter(pkg => pkg.isActive && !pkg.isExpired).length;
-    const totalRevenue = packages.reduce((sum, pkg) => sum + (pkg.price * pkg.totalPurchases), 0);
+    const totalRevenue = packages.reduce((sum, pkg) => sum + (pkg.discountedPrice * pkg.totalPurchases), 0);
     
     setStatistics(prev => ({
       ...prev,
@@ -106,7 +106,7 @@ const AdminPackage: React.FC = () => {
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
@@ -115,21 +115,47 @@ const AdminPackage: React.FC = () => {
     }
   };
 
+  // Handle feature input change
+  const handleFeatureChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newFeatures = [...prev.features];
+      newFeatures[index] = value;
+      return { ...prev, features: newFeatures };
+    });
+  };
+
+  // Add new feature
+  const handleAddFeature = () => {
+    if (formData.features.length < 5) {
+      setFormData(prev => ({ ...prev, features: [...prev.features, ''] }));
+    } else {
+      toast.warning('Maximum 5 features allowed');
+    }
+  };
+
+  // Remove feature
+  const handleRemoveFeature = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
   // Open modal for creating new package
   const handleCreateNew = () => {
     setEditingPackage(null);
-    
+
     // Set purchase deadline to 30 days from now by default
     const defaultDeadline = new Date();
     defaultDeadline.setDate(defaultDeadline.getDate() + 30);
-    
+
     setFormData({
       name: '',
-      price: '',
-      serviceCount: '10',
-      purchaseDeadline: defaultDeadline.toISOString().split('T')[0],
       description: '',
-      benefits: '',
+      actualPrice: '',
+      discountedPrice: '',
+      purchaseDeadline: defaultDeadline.toISOString().split('T')[0],
+      features: [],
       serviceType: 'general',
       isActive: true
     });
@@ -141,11 +167,11 @@ const AdminPackage: React.FC = () => {
     setEditingPackage(pkg);
     setFormData({
       name: pkg.name,
-      price: pkg.price.toString(),
-      serviceCount: pkg.serviceCount.toString(),
+      description: pkg.description,
+      actualPrice: pkg.actualPrice.toString(),
+      discountedPrice: pkg.discountedPrice.toString(),
       purchaseDeadline: new Date(pkg.purchaseDeadline).toISOString().split('T')[0],
-      description: pkg.description || '',
-      benefits: pkg.benefits?.join('\n') || '',
+      features: pkg.features || [],
       serviceType: pkg.serviceType,
       isActive: pkg.isActive
     });
@@ -160,14 +186,24 @@ const AdminPackage: React.FC = () => {
         toast.error('Package name is required!');
         return;
       }
-      
-      if (!formData.price.trim() || parseInt(formData.price) <= 0) {
-        toast.error('Please enter a valid price!');
+
+      if (!formData.description.trim()) {
+        toast.error('Package description is required!');
         return;
       }
 
-      if (!formData.serviceCount.trim() || parseInt(formData.serviceCount) <= 0) {
-        toast.error('Please enter a valid service count!');
+      if (!formData.actualPrice.trim() || parseInt(formData.actualPrice) < 0) {
+        toast.error('Please enter a valid actual price!');
+        return;
+      }
+
+      if (!formData.discountedPrice.trim() || parseInt(formData.discountedPrice) <= 0) {
+        toast.error('Please enter a valid discounted price!');
+        return;
+      }
+
+      if (parseInt(formData.discountedPrice) > parseInt(formData.actualPrice)) {
+        toast.error('Discounted price cannot be greater than actual price!');
         return;
       }
 
@@ -176,14 +212,19 @@ const AdminPackage: React.FC = () => {
         return;
       }
 
+      if (formData.features.length === 0) {
+        toast.error('At least one feature is required!');
+        return;
+      }
+
       // Prepare data for API
       const packageData: CreatePackageData = {
         name: formData.name.trim(),
-        price: parseInt(formData.price),
-        serviceCount: parseInt(formData.serviceCount),
-        purchaseDeadline: new Date(formData.purchaseDeadline).toISOString(),
         description: formData.description.trim(),
-        benefits: formData.benefits.split('\n').filter(benefit => benefit.trim() !== ''),
+        actualPrice: parseInt(formData.actualPrice),
+        discountedPrice: parseInt(formData.discountedPrice),
+        purchaseDeadline: new Date(formData.purchaseDeadline).toISOString(),
+        features: formData.features.filter(f => f.trim() !== ''),
         serviceType: formData.serviceType,
         isActive: formData.isActive
       };
@@ -204,7 +245,7 @@ const AdminPackage: React.FC = () => {
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to save package';
       toast.error(errorMessage);
-      
+
       // Handle specific errors
       if (errorMessage.includes('already exists')) {
         toast.info('A package with this name already exists. Please choose a different name.');
@@ -310,7 +351,7 @@ const AdminPackage: React.FC = () => {
             <div className="admin-package-stat-icon">💰</div>
             <div>
               <h3 className="admin-package-stat-title">Total Revenue</h3>
-              <p className="admin-package-stat-value">Rs. {statistics.totalRevenue.toLocaleString('en-IN')}</p>
+              <p className="admin-package-stat-value">Rs. {statistics.totalRevenue?.toLocaleString('en-IN') || '0'}</p>
             </div>
           </div>
           
@@ -388,9 +429,10 @@ const AdminPackage: React.FC = () => {
               {/* Table Header */}
               <div className="admin-package-table-header">
                 <div className="admin-package-table-col" style={{ flex: 2 }}>Package Name</div>
-                <div className="admin-package-table-col" style={{ flex: 1 }}>Price</div>
-                <div className="admin-package-table-col" style={{ flex: 1 }}>Services</div>
+                <div className="admin-package-table-col" style={{ flex: 1 }}>Actual Price</div>
+                <div className="admin-package-table-col" style={{ flex: 1 }}>Discounted Price</div>
                 <div className="admin-package-table-col" style={{ flex: 1.5 }}>Purchase Deadline</div>
+                <div className="admin-package-table-col" style={{ flex: 1 }}>Features</div>
                 <div className="admin-package-table-col" style={{ flex: 1 }}>Purchases</div>
                 <div className="admin-package-table-col" style={{ flex: 1 }}>Status</div>
                 <div className="admin-package-table-col" style={{ flex: 2 }}>Actions</div>
@@ -408,43 +450,47 @@ const AdminPackage: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="admin-package-table-cell" style={{ flex: 1 }}>
-                      <span className="admin-package-price">Rs. {pkg.price.toLocaleString('en-IN')}</span>
+                      <span className="admin-package-price">Rs. {pkg.actualPrice?.toLocaleString('en-IN') || '0'}</span>
                     </div>
-                    
+
                     <div className="admin-package-table-cell" style={{ flex: 1 }}>
-                      <span className="admin-package-service-count">{pkg.serviceCount} services</span>
+                      <span className="admin-package-price-discounted">Rs. {pkg.discountedPrice?.toLocaleString('en-IN') || '0'}</span>
                     </div>
-                    
+
                     <div className="admin-package-table-cell" style={{ flex: 1.5 }}>
                       <span className="admin-package-deadline">{formatDate(pkg.purchaseDeadline)}</span>
                       {pkg.isExpired && (
                         <span className="admin-package-expired-badge">Expired</span>
                       )}
                     </div>
-                    
+
+                    <div className="admin-package-table-cell" style={{ flex: 1 }}>
+                      <span className="admin-package-features-count">{pkg.features.length} features</span>
+                    </div>
+
                     <div className="admin-package-table-cell" style={{ flex: 1 }}>
                       <span className="admin-package-purchases">{pkg.totalPurchases} buys</span>
                     </div>
-                    
+
                     <div className="admin-package-table-cell" style={{ flex: 1 }}>
                       <div className={`admin-package-status ${getStatusClass(pkg)}`}>
                         <span className="admin-package-status-dot"></span>
                         {getStatusText(pkg)}
                       </div>
                     </div>
-                    
+
                     <div className="admin-package-table-cell" style={{ flex: 2 }}>
                       <div className="admin-package-actions">
-                        <button 
+                        <button
                           className="admin-package-action-btn edit-btn"
                           onClick={() => handleEditPackage(pkg)}
                           title="Edit Package"
                         >
                           Edit
                         </button>
-                        <button 
+                        <button
                           className={`admin-package-action-btn ${pkg.isActive ? 'deactivate-btn' : 'activate-btn'}`}
                           onClick={() => togglePackageStatus(pkg)}
                           title={pkg.isActive ? 'Deactivate Package' : 'Activate Package'}
@@ -452,7 +498,7 @@ const AdminPackage: React.FC = () => {
                         >
                           {pkg.isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button 
+                        <button
                           className="admin-package-action-btn delete-btn"
                           onClick={() => handleDeletePackage(pkg)}
                           title="Delete Package"
@@ -506,113 +552,128 @@ const AdminPackage: React.FC = () => {
                       required
                     />
                   </div>
-                  
-                  <div className="admin-package-form-row">
-                    <div className="admin-package-form-group">
-                      <label className="admin-package-form-label">
-                        Price (Rs.) *
-                      </label>
-                      <input
-                        type="number"
-                        className="admin-package-form-input"
-                        name="price"
-                        value={formData.price}
-                        onChange={handleInputChange}
-                        placeholder="2000"
-                        min="1"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="admin-package-form-group">
-                      <label className="admin-package-form-label">
-                        Number of Services *
-                      </label>
-                      <input
-                        type="number"
-                        className="admin-package-form-input"
-                        name="serviceCount"
-                        value={formData.serviceCount}
-                        onChange={handleInputChange}
-                        placeholder="10"
-                        min="1"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
+
                   <div className="admin-package-form-group">
                     <label className="admin-package-form-label">
-                      Purchase Deadline *
-                    </label>
-                    <input
-                      type="date"
-                      className="admin-package-form-input"
-                      name="purchaseDeadline"
-                      value={formData.purchaseDeadline}
-                      onChange={handleInputChange}
-                      min={new Date().toISOString().split('T')[0]}
-                      required
-                    />
-                    <div className="admin-package-form-hint">
-                      Users can purchase until this date
-                    </div>
-                  </div>
-                  
-                  <div className="admin-package-form-group">
-                    <label className="admin-package-form-label">
-                      Service Type
-                    </label>
-                    <select
-                      className="admin-package-form-select"
-                      name="serviceType"
-                      value={formData.serviceType}
-                      onChange={handleInputChange}
-                    >
-                      <option value="general">General Service</option>
-                      <option value="premium">Premium Service</option>
-                      <option value="detailing">Detailing</option>
-                      <option value="repair">Repair</option>
-                      <option value="all">All Services</option>
-                    </select>
-                  </div>
-                  
-                  <div className="admin-package-form-group">
-                    <label className="admin-package-form-label">
-                      Benefits/Features
-                    </label>
-                    <textarea
-                      className="admin-package-form-textarea"
-                      name="benefits"
-                      value={formData.benefits}
-                      onChange={handleInputChange}
-                      placeholder="Enter each benefit on a new line:
-• No payment for X months
-• Access to premium features
-• Priority support
-• Use for any vehicle
-• Services never expire"
-                      rows={4}
-                    />
-                    <div className="admin-package-form-hint">
-                      Each line will become a separate bullet point
-                    </div>
-                  </div>
-                  
-                  <div className="admin-package-form-group">
-                    <label className="admin-package-form-label">
-                      Description
+                      Description *
                     </label>
                     <textarea
                       className="admin-package-form-textarea"
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="Detailed description of the package..."
+                      placeholder="Describe this package..."
                       rows={3}
+                      required
                     />
                   </div>
-                  
+
+                  <div className="admin-package-form-row">
+                    <div className="admin-package-form-group">
+                      <label className="admin-package-form-label">
+                        Actual Price (Rs.) *
+                      </label>
+                      <input
+                        type="number"
+                        className="admin-package-form-input"
+                        name="actualPrice"
+                        value={formData.actualPrice}
+                        onChange={handleInputChange}
+                        placeholder="5000"
+                        min="0"
+                        required
+                      />
+                    </div>
+
+                    <div className="admin-package-form-group">
+                      <label className="admin-package-form-label">
+                        Discounted Price (Rs.) *
+                      </label>
+                      <input
+                        type="number"
+                        className="admin-package-form-input"
+                        name="discountedPrice"
+                        value={formData.discountedPrice}
+                        onChange={handleInputChange}
+                        placeholder="3000"
+                        min="1"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-package-form-group">
+                    <label className="admin-package-form-label">
+                      Purchase Deadline *
+                    </label>
+                    <div className="admin-package-date-picker-wrapper">
+                      <input
+                        type="date"
+                        className="admin-package-form-input"
+                        name="purchaseDeadline"
+                        value={formData.purchaseDeadline}
+                        onChange={handleInputChange}
+                        min={new Date().toISOString().split('T')[0]}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="admin-package-calendar-btn"
+                        onClick={() => {
+                          const dateInput = document.querySelector('input[name="purchaseDeadline"]') as HTMLInputElement;
+                          if (dateInput) {
+                            dateInput.showPicker();
+                          }
+                        }}
+                        title="Open calendar"
+                      >
+                        📅
+                      </button>
+                    </div>
+                    <div className="admin-package-form-hint">
+                      Users can purchase until this date
+                    </div>
+                  </div>
+
+                  <div className="admin-package-form-group">
+                    <label className="admin-package-form-label">
+                      Features (Max 5) *
+                    </label>
+                    <div className="admin-package-features-container">
+                      {formData.features.map((feature, index) => (
+                        <div key={index} className="admin-package-feature-item">
+                          <input
+                            type="text"
+                            className="admin-package-feature-input"
+                            value={feature}
+                            onChange={(e) => handleFeatureChange(index, e.target.value)}
+                            placeholder={`Feature ${index + 1}`}
+                          />
+                          <button
+                            type="button"
+                            className="admin-package-feature-remove"
+                            onClick={() => handleRemoveFeature(index)}
+                            title="Remove feature"
+                          >
+                            −
+                          </button>
+                        </div>
+                      ))}
+                      {formData.features.length < 5 && (
+                        <button
+                          type="button"
+                          className="admin-package-feature-add"
+                          onClick={handleAddFeature}
+                        >
+                          + Add Feature
+                        </button>
+                      )}
+                    </div>
+                    <div className="admin-package-form-hint">
+                      {formData.features.length}/5 features added
+                    </div>
+                  </div>
+
                   <div className="admin-package-form-group">
                     <label className="admin-package-form-checkbox">
                       <input
@@ -626,16 +687,16 @@ const AdminPackage: React.FC = () => {
                       </span>
                     </label>
                   </div>
-                  
+
                   <div className="admin-package-modal-buttons">
-                    <button 
+                    <button
                       type="button"
                       className="admin-package-modal-btn cancel-btn"
                       onClick={() => setShowModal(false)}
                     >
                       Cancel
                     </button>
-                    <button 
+                    <button
                       type="submit"
                       className="admin-package-modal-btn save-btn"
                     >
