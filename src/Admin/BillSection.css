@@ -1,0 +1,371 @@
+/* BillSection.css */
+
+.bill-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.bill-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.saving-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.saved-indicator {
+  font-size: 0.85rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.save-error {
+  font-size: 0.85rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.spinner-small {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #f0f0f0;
+  border-top-color: #f57c00;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.bill-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.bill-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Bill Table */
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.bill-table thead {
+  background-color: #f8f9fa;
+}
+
+.bill-table th {
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.bill-table th:last-child {
+  text-align: right;
+}
+
+.bill-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.bill-item-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.bill-amount {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.remove-item-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #dc3545;
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.remove-item-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Bill Summary */
+.bill-summary {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.bill-label {
+  font-weight: 500;
+  color: #555;
+}
+
+.bill-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.bill-total {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid #dee2e6;
+  font-size: 1.1rem;
+}
+
+.bill-total .bill-label {
+  font-weight: 700;
+  color: #333;
+}
+
+.bill-total .bill-value {
+  font-weight: 700;
+  color: #28a745;
+}
+
+/* Empty Bill */
+.empty-bill {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+/* Add Bill Item Section */
+.add-bill-item {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.add-bill-item h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Catalog Search */
+.catalog-search-container {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.catalog-search-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.catalog-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.catalog-search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.catalog-search-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+/* Suggestions Dropdown */
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.suggestion-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+.suggestion-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.suggestion-price {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* No Results */
+.no-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Form Row */
+.bill-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.bill-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.bill-form-group label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.bill-form-group input {
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.bill-form-group input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.bill-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.add-item-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.add-item-btn:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.add-item-btn.cancel-btn {
+  background-color: #6c757d;
+}
+
+.add-item-btn.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bill-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .bill-form-actions {
+    flex-direction: column;
+  }
+  
+  .add-item-btn {
+    width: 100%;
+  }
+}
