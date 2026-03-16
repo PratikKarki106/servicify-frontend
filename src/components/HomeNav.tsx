@@ -24,9 +24,6 @@ const HomeNav: React.FC = () => {
       </div>
 
       <div className="Home-nav-right">
-        <button className="Home-button icon-btn"  style={{width: "35px", height: "35px"}}>
-          <img src={bell} alt="notifications" />
-        </button>
 
         <div className="Home-profile-avatar" style={{marginLeft: "30px"}}>
           <button>
