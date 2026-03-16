@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { getMessages, getConversations, type Message } from "../services/messageService";
+import { getMessages, type Message } from "../services/messageService";
 import { websocketService } from "../services/websocketService";
 import "./ChatComponent.css";
 
@@ -39,11 +39,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userId, showHeader = true
 
   useEffect(() => {
     if (!userId) return;
-    const socket = websocketService.connect(userId, "user");
-    const onNew = (msg: Message & { createdAt?: string }) => {
+    const onNew = (msg: { _id: string; senderId: string; senderRole: string; receiverId: string; content: string; createdAt: string }) => {
       setMessages((prev) => {
         if (prev.some((m) => m._id === msg._id)) return prev;
-        return [...prev, { ...msg, createdAt: msg.createdAt || new Date().toISOString() }];
+        return [...prev, msg as Message];
       });
     };
     websocketService.onNewMessage(onNew);
