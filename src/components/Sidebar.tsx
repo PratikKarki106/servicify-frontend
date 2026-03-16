@@ -2,21 +2,23 @@
 import React from 'react';
 import './Sidebar.css'
 import { useState, useEffect } from 'react'
-import { 
-  FaTachometerAlt, 
-  FaCalendarAlt, 
-  FaBox, 
-  FaHistory, 
+import {
+  FaTachometerAlt,
+  FaCalendarAlt,
+  FaBox,
+  FaHistory,
   FaSignOutAlt,
   FaChevronLeft,
   FaChevronRight,
   FaBars,
   FaCubes,
   FaUserCircle,
-  FaTools
+  FaTools,
+  FaComments,
 } from 'react-icons/fa'
 import Logo from '../assets/Servicify.png';
 import { useNavigate, useLocation } from 'react-router-dom';
+import AdminNotifications from '../Admin/AdminNotifications';
 
 interface MenuItem {
   id: string;
@@ -59,6 +61,8 @@ const Sidebar = () => {
       setActiveItem('ongoing-service');
     } else if (path.includes('packages')) {
       setActiveItem('manage-packages');
+    } else if (path.includes('messages')) {
+      setActiveItem('messages');
     }
   }, [location.pathname]);
 
@@ -101,6 +105,12 @@ const Sidebar = () => {
       path: 'admin/packages' 
     },
     { 
+      id: 'messages', 
+      label: 'Messages', 
+      icon: <FaComments />,
+      path: 'admin/messages' 
+    },
+    { 
       id: 'logout', 
       label: 'Logout', 
       icon: <FaSignOutAlt />,
@@ -124,6 +134,9 @@ const Sidebar = () => {
         break;
       case 'manage-packages':
         navigate('/admin/packages');
+        break;
+      case 'messages':
+        navigate('/admin/messages');
         break;
       case 'logout':
         // Clear all stored data
@@ -180,9 +193,10 @@ const Sidebar = () => {
           <img src={Logo} alt="Servicify Logo" className="top-bar-title" />
         </div>
         <div className="top-bar-right">
+          <AdminNotifications />
           <div className="user-profile">
             <FaUserCircle className="user-icon" />
-            <span className="user-name">Super Administrator</span>
+            <span className="user-name">Admin</span>
           </div>
         </div>
       </div>
