@@ -7,19 +7,21 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 80px;
+  gap: clamp(40px, 8vw, 80px);
   flex-wrap: wrap;
 }
 
 .about-image-wrapper {
   flex: 1;
   min-width: 300px;
+  max-width: 500px;
 }
 
 .about-image {
-    height: 600px;
   width: 100%;
-  max-width: 500px;
+  height: auto;
+  max-height: 600px;
+  object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
@@ -68,4 +70,119 @@
   font-weight: 500;
   cursor: pointer;
   margin-top: 10px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+  .about-section {
+    padding: 70px 100px;
+  }
+
+  .about-content {
+    gap: clamp(30px, 6vw, 60px);
+  }
+
+  .about-text h2 {
+    font-size: 28px;
+  }
+
+  .about-text p {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .about-section {
+    padding: 60px 50px;
+  }
+
+  .about-content {
+    gap: clamp(20px, 5vw, 40px);
+  }
+
+  .about-image-wrapper {
+    min-width: 250px;
+  }
+
+  .about-text {
+    max-width: 500px;
+  }
+
+  .about-text h2 {
+    font-size: 26px;
+  }
+
+  .about-text p {
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .about-section {
+    padding: 50px 30px;
+  }
+
+  .about-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .about-image-wrapper {
+    min-width: 100%;
+    max-width: 500px;
+  }
+
+  .about-text {
+    max-width: 100%;
+  }
+
+  .about-heading {
+    justify-content: center;
+  }
+
+  .about-text h2 {
+    font-size: 24px;
+  }
+
+  .about-text p {
+    font-size: 16px;
+  }
+
+  .about-image {
+    max-height: 400px;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .about-section {
+    padding: 40px 20px;
+  }
+
+  .about-content {
+    gap: 25px;
+  }
+
+  .about-text h2 {
+    font-size: 22px;
+  }
+
+  .about-text p {
+    font-size: 14px;
+  }
+
+  .about-image {
+    max-height: 300px;
+  }
+
+  .learn-more-button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .about-icon {
+    height: 24px;
+  }
 }

@@ -1,9 +1,9 @@
 import "./Time.css";
 import { useState, useEffect, useMemo } from "react";
-import left from "../assets/left-arrow.png";
-import right from "../assets/right-arrow.png";
-import type { ServiceType } from "../types/appointment";
-import axiosInstance from "../services/axiosInstance";
+import left from "../../assets/left-arrow.png";
+import right from "../../assets/right-arrow.png";
+import type { ServiceType } from "../../types/appointment";
+import axiosInstance from "../../services/axiosInstance";
 
 interface TimeProps {
   selectedService: ServiceType;
@@ -212,17 +212,46 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
       <div className="slots-section">
         <h3 className="slots-title">Available Slots</h3>
         <div className="slots-grid">
-          {timeSlots.map((time) => (
-            <button
-              key={time}
-              className={`time-slot ${selectedTime === time ? "selected" : ""}`}
-              onClick={() => setSelectedTime(time)}
-              disabled={!availableSlots.includes(time)}
-              // title={!availableSlots.includes(time) ? "Slot full" : ""}
-            >
-              {time}
-            </button>
-          ))}
+          {timeSlots.map((time) => {
+            // Check if the selected date is today and if the time has already passed
+            const isToday = selectedDate && 
+              selectedDate.toDateString() === new Date().toDateString();
+            
+            let isTimePassed = false;
+            if (isToday) {
+              // Convert the time string to a Date object for comparison
+              const [timePart, period] = time.split(' ');
+              let [hours, minutes] = timePart.split(':').map(Number);
+              
+              // Convert to 24-hour format for comparison
+              if (period === 'PM' && hours !== 12) {
+                hours += 12;
+              } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+              }
+              
+              const currentTime = new Date();
+              const slotTime = new Date();
+              slotTime.setHours(hours, minutes, 0, 0);
+              
+              isTimePassed = currentTime > slotTime;
+            }
+            
+            // Determine if the slot should be disabled
+            const isDisabled = !availableSlots.includes(time) || isTimePassed;
+            
+            return (
+              <button
+                key={time}
+                className={`time-slot ${selectedTime === time ? "selected" : ""} ${isTimePassed ? "time-passed" : ""}`}
+                onClick={() => !isTimePassed && setSelectedTime(time)}
+                disabled={isDisabled}
+                title={isTimePassed ? "Time has already passed" : (!availableSlots.includes(time) ? "Slot full" : "")}
+              >
+                {time}
+              </button>
+            );
+          })}
         </div>
       </div>
 

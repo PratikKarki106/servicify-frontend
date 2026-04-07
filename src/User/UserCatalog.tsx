@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import HomeNav from '../components/HomeNav';
 import './UserCatalog.css';
-import { 
+import {
   FaSearch,
   FaRegClock,
 } from 'react-icons/fa';
 import { getUserCatalogItems } from '../services/catalogService';
 import type { CatalogItem } from '../services/catalogService';
+import UserSideTop from './UserSideTop';
 
 const UserCatalog = () => {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
@@ -55,41 +55,38 @@ const UserCatalog = () => {
 
   if (loading) {
     return (
-      <>
-        <HomeNav />
+      <UserSideTop>
         <div className="user-catalog-container">
           <div className="loading-container">
             <div className="spinner"></div>
             <p>Loading services...</p>
           </div>
         </div>
-      </>
+      </UserSideTop>
     );
   }
 
   if (error) {
     return (
-      <>
-        <HomeNav />
+      <UserSideTop>
         <div className="user-catalog-container">
           <div className="error-container">
             <h3>Error Loading Services</h3>
             <p>{error}</p>
-            <button 
-              onClick={() => fetchCatalogItems()} 
+            <button
+              onClick={() => fetchCatalogItems()}
               className="retry-button"
             >
               Retry
             </button>
           </div>
         </div>
-      </>
+      </UserSideTop>
     );
   }
 
   return (
-    <>
-      <HomeNav />
+    <UserSideTop>
       <div className="user-catalog-container">
 
         <div className="search-bar">
@@ -107,7 +104,7 @@ const UserCatalog = () => {
             Showing {filteredItems.length} services
           </div>
         </div>
-        
+
         <div className='catalog-content-wrapper'>
           <div className='catalog-list-container'>
             <div className='catalog-header'>
@@ -117,7 +114,7 @@ const UserCatalog = () => {
               <div className='header-cell total-header'>TOTAL</div>
               <div className='header-cell time-header'>ESTIMATED TIME</div>
             </div>
-            
+
             <div className='catalog-list'>
               {filteredItems.length === 0 ? (
                 <div className="no-items">
@@ -174,7 +171,7 @@ const UserCatalog = () => {
           </div>
         </div>
       </div>
-    </>
+    </UserSideTop>
   );
 };
 

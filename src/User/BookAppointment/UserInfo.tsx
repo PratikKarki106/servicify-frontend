@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import "./UserInfo.css";
+import { useNavigate } from 'react-router-dom';
 
 interface UserInfoProps {
   onSubmit: (data: UserFormData) => void;
@@ -28,13 +29,20 @@ interface UserFormData {
   pickupAddress: string;
 }
 
-const UserInfo: React.FC<UserInfoProps> = ({ 
-  onSubmit, 
-  onBack, 
-  selectedService, 
-  timeSlot, 
-  vehicle 
+interface UserProfile {
+  name: string;
+  email: string;
+  contactNumber?: string;
+}
+
+const UserInfo: React.FC<UserInfoProps> = ({
+  onSubmit,
+  onBack,
+  selectedService,
+  timeSlot,
+  vehicle
 }) => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserFormData>({
     fullName: '',
     phoneNumber: '',
@@ -42,12 +50,53 @@ const UserInfo: React.FC<UserInfoProps> = ({
     needPickup: false,
     pickupAddress: '',
   });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user profile data from localStorage when component mounts
+  useEffect(() => {
+    const storedName = localStorage.getItem('userName');
+    const storedEmail = localStorage.getItem('userEmail');
+    const storedContactNumber = localStorage.getItem('contactNumber'); // Check if contact number is stored
+    
+    if (storedName || storedEmail) {
+      const profileData: UserProfile = {
+        name: storedName || '',
+        email: storedEmail || '',
+        contactNumber: storedContactNumber || ''
+      };
+      
+      setUserProfile(profileData);
+      setUserData(prev => ({
+        ...prev,
+        fullName: profileData.name || '',
+        email: profileData.email || '',
+        phoneNumber: profileData.contactNumber || '', // Use stored contact number if available
+      }));
+    }
+    
+    setLoading(false);
+  }, []);
 
   const handleInputChange = (field: keyof UserFormData, value: string | boolean) => {
-    setUserData({
-      ...userData,
-      [field]: value,
-    });
+    // Only allow phone number to be changed
+    if (field === 'phoneNumber') {
+      setUserData({
+        ...userData,
+        [field]: value as string,
+      });
+    } else if (field === 'needPickup') {
+      setUserData({
+        ...userData,
+        [field]: value as boolean,
+      });
+    } else if (field === 'pickupAddress') {
+      // Allow pickup-related fields to be changed
+      setUserData({
+        ...userData,
+        [field]: value as string,
+      });
+    }
   };
 
   const handleToggle = () => {
@@ -60,7 +109,17 @@ const UserInfo: React.FC<UserInfoProps> = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(userData);
+    // Submit only the phone number and pickup-related data
+    const submitData = {
+      fullName: userProfile?.name || userData.fullName, // Use the original profile data
+      phoneNumber: userData.phoneNumber,
+      email: userProfile?.email || userData.email, // Use the original profile data
+      needPickup: userData.needPickup,
+      pickupAddress: userData.pickupAddress,
+    };
+    
+    onSubmit(submitData);
+    navigate('/user/dashboard');
   };
 
   const handleBackClick = () => {
@@ -82,11 +141,22 @@ const UserInfo: React.FC<UserInfoProps> = ({
     return time;
   };
 
+  if (loading) {
+    return (
+      <div className="user-info-main-container">
+        <div className="user-info-container">
+          <p style={{fontWeight: "700", fontSize: "20px", marginTop: "-15px" }}>Loading your information...</p>
+          <div className="loading-spinner">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="user-info-main-container">
       <div className="user-info-container">
         <p style={{fontWeight: "700", fontSize: "20px", marginTop: "-15px" }}>Your Information</p>
-        
+
         <div className="vehicle-info-first-second">
           <p className="vehicle-info-title">Full Name</p>
           <input
@@ -94,10 +164,11 @@ const UserInfo: React.FC<UserInfoProps> = ({
             className="vehicle-info-input2"
             placeholder="John Doe"
             value={userData.fullName}
-            onChange={(e) => handleInputChange('fullName', e.target.value)}
+            readOnly
+            style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
           />
-        </div> 
-        
+        </div>
+
         <div className="vehicle-info-first-second">
           <p className="vehicle-info-title">Phone Number</p>
           <input
@@ -107,8 +178,8 @@ const UserInfo: React.FC<UserInfoProps> = ({
             value={userData.phoneNumber}
             onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
           />
-        </div> 
-        
+        </div>
+
         <div className="vehicle-info-first-second">
           <p className="vehicle-info-title">Email</p>
           <input
@@ -116,9 +187,10 @@ const UserInfo: React.FC<UserInfoProps> = ({
             className="vehicle-info-input2"
             placeholder="you@example.com"
             value={userData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
+            readOnly
+            style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
           />
-        </div> 
+        </div>
 
         {/* Toggle button for Pickup Service */}
         <div className="pickup-toggle-container">

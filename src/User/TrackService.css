@@ -1,0 +1,552 @@
+/* --- TrackService Modern Theme --- */
+/* Uses CSS Variables assumed from UserSideTop (e.g., --slate-50, --primary-500) */
+
+.trackService-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: trackService-fadeIn 0.5s ease-out;
+}
+
+@keyframes trackService-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.trackService-header {
+  margin-bottom: 2rem;
+}
+
+.trackService-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--slate-800);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.trackService-subtitle {
+  color: var(--slate-500);
+  margin-top: 0.25rem;
+  font-size: 1rem;
+}
+
+/* Layout Grid */
+.trackService-dashboard {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Sidebar (Appointment List) */
+.trackService-sidebar {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid var(--slate-200);
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 90px;
+}
+
+.trackService-sidebar-title {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-400);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.trackService-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Appointment Card */
+.trackService-card {
+  border: 1px solid var(--slate-100);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--slate-50);
+}
+
+.trackService-card:hover {
+  border-color: var(--primary-200);
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.trackService-card--active {
+  border-color: #137fec;
+  background: white;
+  box-shadow: 0 0 0 1px #137fec, 0 4px 12px rgba(19, 127, 236, 0.1);
+}
+
+.trackService-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.trackService-card-id {
+  font-weight: 700;
+  color: var(--slate-700);
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.trackService-card-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trackService-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trackService-card-vehicle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--slate-800);
+  font-size: 0.95rem;
+}
+
+.trackService-card-vehicle svg {
+  color: #137fec;
+}
+
+.trackService-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--slate-500);
+}
+
+.trackService-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Status Colors */
+.trackService-status-booked { background: #E3F2FD; color: #1565C0; }
+.trackService-status-confirmed { background: #E8F5E9; color: #2E7D32; }
+.trackService-status-progress { background: #E3F2FD; color: #1976D2; }
+.trackService-status-payment { background: #FFF8E1; color: #F57C00; }
+.trackService-status-completed { background: #E0F2F1; color: #00796B; }
+.trackService-status-cancelled { background: #FFEBEE; color: #C62828; }
+
+/* Main Content Area */
+.trackService-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.trackService-status-header {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid var(--slate-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.trackService-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.trackService-pay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+}
+
+.trackService-pay-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+}
+
+.trackService-pay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.trackService-status-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--slate-800);
+}
+
+.trackService-status-header p {
+  margin: 0.25rem 0 0 0;
+  color: var(--slate-500);
+  font-size: 0.9rem;
+}
+
+.trackService-status-pill {
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Tracker Visualization */
+.trackService-tracker-container {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.trackService-tracker {
+  position: relative;
+  width: 100%;
+}
+
+/* Connecting Lines */
+.trackService-tracker-line-bg {
+  position: absolute;
+  top: 24px; /* Center of icon (48px height / 2) */
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--slate-100);
+  z-index: 0;
+  border-radius: 2px;
+}
+
+.trackService-tracker-line-fill {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #137fec, #3b95f7);
+  z-index: 1;
+  border-radius: 2px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trackService-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.trackService-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  position: relative;
+}
+
+.trackService-step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--slate-400);
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.trackService-step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trackService-step-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--slate-500);
+  transition: color 0.3s ease;
+}
+
+.trackService-step-desc {
+  font-size: 0.75rem;
+  color: var(--slate-400);
+  max-width: 100px;
+  line-height: 1.2;
+}
+
+/* Active State */
+.trackService-step--active .trackService-step-icon {
+  border-color: #137fec;
+  color: #137fec;
+  box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.2);
+  transform: scale(1.1);
+}
+
+.trackService-step--active .trackService-step-title {
+  color: #137fec;
+  font-weight: 700;
+}
+
+/* Completed State */
+.trackService-step--completed .trackService-step-icon {
+  background: #137fec;
+  border-color: #137fec;
+  color: white;
+}
+
+.trackService-step--completed .trackService-step-title {
+  color: var(--slate-700);
+}
+
+/* Details Grid */
+.trackService-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.trackService-detail-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.trackService-detail-box--wide {
+  grid-column: span 2;
+  background: linear-gradient(to right, var(--slate-50), white);
+}
+
+.trackService-detail-box h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-400);
+}
+
+.trackService-detail-box p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.trackService-bill-amount {
+  color: #28a745 !important;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Bill Details Table */
+.trackService-bill-details {
+  margin-top: 0.5rem;
+}
+
+.trackService-bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.trackService-bill-table thead {
+  background: var(--slate-100);
+}
+
+.trackService-bill-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-600);
+  border-bottom: 2px solid var(--slate-300);
+}
+
+.trackService-bill-table th:nth-child(2),
+.trackService-bill-table th:nth-child(3) {
+  text-align: right;
+}
+
+.trackService-bill-table td {
+  padding: 0.75rem 1rem;
+  color: var(--slate-700);
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.trackService-bill-table td:nth-child(2),
+.trackService-bill-table td:nth-child(3) {
+  text-align: right;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.trackService-bill-table tbody tr:hover {
+  background: var(--slate-50);
+}
+
+.trackService-bill-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.trackService-bill-total-row {
+  background: var(--slate-100);
+}
+
+.trackService-bill-total-row td {
+  padding: 1rem;
+  font-weight: 700;
+  color: var(--slate-800);
+  border-top: 2px solid var(--slate-300);
+}
+
+.trackService-bill-total-row td:nth-child(2) {
+  color: #28a745;
+  font-size: 1.1rem;
+}
+
+.trackService-pulse-text {
+  color: #137fec !important;
+  animation: trackService-pulse 2s infinite;
+}
+
+@keyframes trackService-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Empty & Error States */
+.trackService-empty,
+.trackService-error,
+.trackService-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid var(--slate-200);
+  color: var(--slate-500);
+}
+
+.trackService-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.trackService-error {
+  color: var(--danger-500);
+  background: #FEF2F2;
+  border-color: #FECACA;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .trackService-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .trackService-sidebar {
+    height: auto;
+    max-height: 400px;
+    position: relative;
+    top: 0;
+    order: 2;
+  }
+
+  .trackService-main {
+    order: 1;
+  }
+  
+  .trackService-steps {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .trackService-step {
+    flex-direction: row;
+    text-align: left;
+    gap: 1rem;
+  }
+
+  .trackService-tracker-line-bg,
+  .trackService-tracker-line-fill {
+    display: none; /* Hide horizontal line on mobile, maybe add vertical later if needed */
+  }
+  
+  .trackService-step-icon {
+    margin-bottom: 0;
+  }
+
+  .trackService-details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trackService-detail-box--wide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .trackService-page {
+    padding: 1rem;
+  }
+  
+  .trackService-status-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}

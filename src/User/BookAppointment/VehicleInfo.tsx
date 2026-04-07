@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './VehicleInfo.css';
-import type { VehicleData } from '../types/appointment';
+import type { VehicleData } from '../../types/appointment';
+import { type Vehicle } from '../../services/vehicleService';
 
- export interface VehicleInfoProps {
+export interface VehicleInfoProps {
   onNext: (data: VehicleData) => void;
   onBack: () => void;
 }
@@ -18,6 +19,7 @@ interface VehicleFormData {
 }
 
 const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [formData, setFormData] = useState<VehicleFormData>({
     vehicleInfo: '',
     versionModel: '',
@@ -27,12 +29,21 @@ const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
     optionalNotes: '',
     image: null,
   });
+  const [errors, setErrors] = useState<Partial<VehicleFormData>>({});
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     setFormData({
       ...formData,
       [field]: value,
     });
+    
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +56,36 @@ const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
   };
 
   const handleContinue = () => {
+    // Validate required fields
+    const newErrors: Partial<VehicleFormData> = {};
+    
+    if (!formData.vehicleInfo.trim()) {
+      newErrors.vehicleInfo = 'Vehicle name is required';
+    }
+    
+    if (!formData.versionModel.trim()) {
+      newErrors.versionModel = 'Version/Model is required';
+    }
+    
+    if (!formData.color.trim()) {
+      newErrors.color = 'Color is required';
+    }
+    
+    if (!formData.numberPlate.trim()) {
+      newErrors.numberPlate = 'Number plate is required';
+    }
+    
+    if (!formData.kilometers.trim()) {
+      newErrors.kilometers = 'Kilometers run is required';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    // Clear any existing errors if validation passes
+    setErrors({});
     onNext(formData);
   };
 
@@ -52,30 +93,78 @@ const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
     onBack();
   };
 
+  // Load vehicle data from localStorage when component mounts
+  useEffect(() => {
+    const storedVehicle = localStorage.getItem('selectedVehicle');
+    if (storedVehicle) {
+      try {
+        const vehicleData = JSON.parse(storedVehicle) as Vehicle;
+        setSelectedVehicle(vehicleData);
+        // Auto-fill form with vehicle data
+        setFormData(prev => ({
+          ...prev,
+          vehicleInfo: vehicleData.name || '',
+          versionModel: vehicleData.version || '',
+          color: vehicleData.color || '',
+          numberPlate: vehicleData.plateNumber || '',
+          kilometers: vehicleData.mileage ? vehicleData.mileage.toString() : '',
+          // Keep optionalNotes and image as they were (empty/default)
+        }));
+      } catch (error) {
+        console.error('Error parsing vehicle data:', error);
+      }
+    }
+  }, []);
+
+  // Cleanup localStorage when component unmounts
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('selectedVehicle');
+    };
+  }, []);
+
   return (
     <>
       <div className="vehicle-info-main">
         <p style={{ fontWeight: "700", fontSize: "20px", marginTop: "-15px" }}>Vehicle Information</p>
+        
+        {/* Show notification if form was auto-filled */}
+        {selectedVehicle && (
+          <div style={{ 
+            background: '#e8f5e9', 
+            padding: '8px 12px', 
+            borderRadius: '6px', 
+            marginBottom: '15px',
+            fontSize: '14px',
+            color: '#2e7d32',
+            border: '1px solid #c8e6c9'
+          }}>
+            ✓ Form auto-filled from your vehicle: <strong>{selectedVehicle.name}</strong> ({selectedVehicle.plateNumber})
+          </div>
+        )}
+        
         <div className="vehicle-info-first">
           <div className="vehicle-info-first-first">
-            <p className="vehicle-info-title"> Vehicle Info</p>
+            <p className="vehicle-info-title"> Vehicle Name</p>
             <input
               type="text"
-              className="vehicle-info-input"
+              className={`vehicle-info-input ${errors.vehicleInfo ? 'error' : ''}`}
               placeholder="e.g., Honda Activa 6G"
               value={formData.vehicleInfo}
               onChange={(e) => handleInputChange('vehicleInfo', e.target.value)}
             />
+            {errors.vehicleInfo && <div className="error-message">{errors.vehicleInfo}</div>}
           </div>
           <div className="vehicle-info-first-second">
             <p className="vehicle-info-title"> Version / Model</p>
             <input
               type="text"
-              className="vehicle-info-input"
+              className={`vehicle-info-input ${errors.versionModel ? 'error' : ''}`}
               placeholder="e.g., BS6 / 2023"
               value={formData.versionModel}
               onChange={(e) => handleInputChange('versionModel', e.target.value)}
             />
+            {errors.versionModel && <div className="error-message">{errors.versionModel}</div>}
           </div>
         </div>
         <div className="vehicle-info-first">
@@ -83,32 +172,35 @@ const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
             <p className="vehicle-info-title"> Color</p>
             <input
               type="text"
-              className="vehicle-info-input"
+              className={`vehicle-info-input ${errors.color ? 'error' : ''}`}
               placeholder="e.g., Red, Maroon, Blue, Black"
               value={formData.color}
               onChange={(e) => handleInputChange('color', e.target.value)}
             />
+            {errors.color && <div className="error-message">{errors.color}</div>}
           </div>
           <div className="vehicle-info-first-second">
             <p className="vehicle-info-title"> Number Plate</p>
             <input
               type="text"
-              className="vehicle-info-input"
+              className={`vehicle-info-input ${errors.numberPlate ? 'error' : ''}`}
               placeholder="e.g., Ba 6 Pa 9049"
               value={formData.numberPlate}
               onChange={(e) => handleInputChange('numberPlate', e.target.value)}
             />
+            {errors.numberPlate && <div className="error-message">{errors.numberPlate}</div>}
           </div>
         </div>
         <div className="vehicle-info-first-second">
           <p className="vehicle-info-title"> Kilometers Run</p>
           <input
             type="text"
-            className="vehicle-info-input2"
-            placeholder="e.g., 16720 km"
+            className={`vehicle-info-input2 ${errors.kilometers ? 'error' : ''}`}
+            placeholder="e.g.g., 16720 km"
             value={formData.kilometers}
             onChange={(e) => handleInputChange('kilometers', e.target.value)}
           />
+          {errors.kilometers && <div className="error-message">{errors.kilometers}</div>}
         </div>
         <div className="vehicle-info-first-second">
           <p className="vehicle-info-title"> Optional Notes</p>

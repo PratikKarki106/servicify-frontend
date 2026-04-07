@@ -4,11 +4,11 @@ import axiosInstance from './axiosInstance';
 export interface Package {
   _id: string;
   name: string;
-  price: number;
-  serviceCount: number;
-  purchaseDeadline: string;
   description: string;
-  benefits: string[];
+  actualPrice: number;
+  discountedPrice: number;
+  purchaseDeadline: string;
+  features: string[];
   serviceType: 'general' | 'premium' | 'detailing' | 'repair' | 'all';
   isActive: boolean;
   totalPurchases: number;
@@ -20,11 +20,11 @@ export interface Package {
 
 export interface CreatePackageData {
   name: string;
-  price: number;
-  serviceCount: number;
-  purchaseDeadline: string;
   description: string;
-  benefits: string[];
+  actualPrice: number;
+  discountedPrice: number;
+  purchaseDeadline: string;
+  features: string[];
   serviceType: 'general' | 'premium' | 'detailing' | 'repair' | 'all';
   isActive: boolean;
 }
@@ -192,6 +192,17 @@ export const packageService = {
         },
       }
     );
+    return response.data.data;
+  },
+
+  // User: Get user's purchased packages
+  getUserPackages: async (): Promise<any[]> => {
+    const token = getAuthToken();
+    const response = await axiosInstance.get('/api/packages/user/my-packages', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data.data;
   },
 };

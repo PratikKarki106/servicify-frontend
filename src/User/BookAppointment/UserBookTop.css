@@ -1,9 +1,10 @@
 .beginning{
-    padding: 50px 410px;
+    padding: 50px 250px;
 }
 .beginning-top{
     display: flex;
-    gap: 520px;
+    justify-content: space-between;
+    align-items: center;
 }
 .beginning-vehicle{
     display: flex;
@@ -18,7 +19,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .middle{
-    padding: 0px 425px;
+    padding: 0px 250px;
 }
 .options-button{
     margin-top: 15px;

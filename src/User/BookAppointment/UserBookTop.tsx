@@ -1,12 +1,13 @@
-import Bike from "../assets/Bike.png"
-import Cancel from "../assets/Cancel.png";
-import Servicing from "../assets/servicing.png";
-import Repair from "../assets/repair.png";
-import Checkup from "../assets/check-list.png";
-import Wash from "../assets/motorcycle.png";
+import Bike from "../../assets/Bike.png"
+import Cancel from "../../assets/Cancel.png";
+import Servicing from "../../assets/servicing.png";
+import Repair from "../../assets/repair.png";
+import Checkup from "../../assets/check-list.png";
+import Wash from "../../assets/motorcycle.png";
+import { useNavigate } from "react-router-dom";
 import "./UserBookTop.css";
 
-import type { ServiceType } from "../types/appointment";
+import type { ServiceType } from "../../types/appointment";
 
 interface UserBookTopProps {
   currentStep: number;
@@ -19,10 +20,11 @@ const UserBookTop: React.FC<UserBookTopProps> = ({
   selectedService, 
   onServiceChange 
 }) => {
+  const navigate = useNavigate();
     const services = [
         { name: "servicing", icon: Servicing },
         { name: "repair", icon: Repair },
-        { name: "check up", icon: Checkup },
+        { name: "checkup", icon: Checkup },
         { name: "wash", icon: Wash },
     ];
 
@@ -49,7 +51,7 @@ const UserBookTop: React.FC<UserBookTopProps> = ({
                   <p style={{fontWeight: "700", fontSize: "24px" }}> Servicify</p>
               </div>
 
-              <button>
+              <button onClick={() => navigate("/user/dashboard")}>
                   <img src={Cancel} alt="Cancel Icon" className="Cancel-button"/>
               </button>
           </div>       
@@ -66,7 +68,7 @@ const UserBookTop: React.FC<UserBookTopProps> = ({
                       onClick={() => handleServiceClick(service.name as ServiceType)}
                       >
                       <img src={service.icon} alt={service.name} style={{width: "20px", height: "20px"}}/>
-                      <p style={{fontSize: "14px", fontWeight:"700"}}>{service.name}</p>
+                      <p style={{fontSize: "14px", fontWeight:"700"}}>{service.name.charAt(0).toUpperCase() + service.name.slice(1)}</p>
                   </button>
               ))}
           </div>

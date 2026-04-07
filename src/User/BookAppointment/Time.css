@@ -4,10 +4,11 @@
     border-radius: 10px;
     height: fit-content;
     width: 730px;
-    margin-left: 410px;
+    margin-left: 250px;
     padding: 20px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    background-color: white;
 }
 
 /* Today's Date Display */
@@ -132,7 +133,7 @@
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 40px;
+    gap: 8px;
 }
 
 .calendar-day {
@@ -204,6 +205,7 @@
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid #e5e7eb;
+    padding-left: 10px; /* Add left padding to prevent time text from hitting container */
 }
 
 .slots-title {
@@ -217,17 +219,21 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
+    width: calc(100% - 10px); /* Adjust width to account for the left margin */
+    margin-left: 10px; /* Add left margin to prevent time text from hitting container */
 }
 
 .time-slot {
     border: 1px solid #d1d5db;
     border-radius: 20px;
-    padding: 10px 0;
+    padding: 10px 15px; /* Increased horizontal padding to prevent text from hitting edges */
     background: none;
     cursor: pointer;
     font-size: 13px;
     color: #6b7280;
     transition: all 0.2s ease;
+    text-align: center; /* Center the text */
+    min-width: 0; /* Allow flexbox/grid to control width */
 }
 
 .time-slot:hover:not(.disabled) {
@@ -251,6 +257,19 @@
 .time-slot.disabled:hover {
     border-color: #d1d5db;
     color: #6b7280;
+}
+
+.time-slot.time-passed {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: #f3f4f6;
+    color: #9ca3af;
+}
+
+.time-slot.time-passed:hover {
+    border-color: #d1d5db;
+    color: #9ca3af;
+    background-color: #f3f4f6;
 }
 
 /* Selection Display */

@@ -3,7 +3,7 @@ import Logo from "../assets/Servicify.png";
 import GoogleLogo from '../assets/GoogleImage.png';
 import Bubble from '../assets/Bubble.png';
 import SignInImage from '../assets/SignInImage.png';
-
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Login } from '../services/Auth';
@@ -14,6 +14,12 @@ const SignIn: React.FC = () => {
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  const PasswordSee = () => {
+    setShowPassword(!showPassword);
+  };
 
   useEffect(() => {
   const params = new URLSearchParams(window.location.search);
@@ -21,7 +27,7 @@ const SignIn: React.FC = () => {
   if (token) {
     localStorage.setItem('token', token);
     window.history.replaceState({}, document.title, window.location.pathname);
-    navigation('/home');
+    navigation('/user/dashboard');
   }
   }, [])
 
@@ -46,7 +52,18 @@ const SignIn: React.FC = () => {
 
     if (result.error) {
       console.error('Login error:', result.error);
-      alert(`Login Failed: ${result.error}`);
+      
+      // Check if the error is about email verification
+      if (result.error.includes('verify your email') || result.error.includes('Please verify your email')) {
+        alert(`Email Verification Required: ${result.error}\n\nPlease check your email for the verification code.`);
+        // Optionally redirect to verify email page if user has already signed up
+        const verificationEmail = localStorage.getItem('verificationEmail');
+        if (verificationEmail) {
+          navigation('/user/verify-email');
+        }
+      } else {
+        alert(`Login Failed: ${result.error}`);
+      }
       return;
     }
 
@@ -66,7 +83,7 @@ const SignIn: React.FC = () => {
       // Navigate to admin home
       navigation('/admin');
     } else {
-      navigation('/home');
+      navigation('/user/dashboard');
     }
   };
 
@@ -98,14 +115,26 @@ const SignIn: React.FC = () => {
         <div className="form-group">
           <label htmlFor="password">Password:</label>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             id="password"
             name="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <button
+          type="button"
+          className='password-see'
+          onClick={PasswordSee}
+          aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+
         </div>
+          <button className="signup-link" onClick={() => navigation('/user/Email')}>
+            <u>Forgot Password?</u>
+          </button>{" "}
 
         <div className="Sign-option">
           <button className="signin-btn" onClick={handleLogin}>Sign In</button>

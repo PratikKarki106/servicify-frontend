@@ -2,9 +2,9 @@ import { useState } from "react";
 import UserBookTop from "./UserBookTop";
 import VehicleInfo from "./VehicleInfo";
 import Time from "./Time";
-import HomeNav from "../components/HomeNav";
+import UserSideTop from "../UserSideTop";
 import UserInfo from "./UserInfo";
-import { bookAppointment } from "../services/bookAppointment";
+import { bookAppointment } from "../../services/bookAppointment";
 
 import type {
   ServiceType,
@@ -13,9 +13,9 @@ import type {
   TimeData,
   UserInfoData,
   FormData,
-} from "../types/appointment";
+} from "../../types/appointment";
 
-import { serviceMap } from "../types/appointment";
+import { serviceMap } from "../../types/appointment";
 
 const BookAppointment = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -88,6 +88,7 @@ const BookAppointment = () => {
       userId,
       serviceType,
       vehicleInfo: {
+        name: formData.vehicle.vehicleInfo,
         model: formData.vehicle.versionModel,
         color: formData.vehicle.color,
         numberPlate: formData.vehicle.numberPlate,
@@ -137,13 +138,14 @@ const BookAppointment = () => {
 
   return (
     <>
-      <HomeNav />
-      <UserBookTop
-        currentStep={currentStep}
-        selectedService={selectedService}
-        onServiceChange={handleServiceChange}
-      />
-      {renderStep()}
+      <UserSideTop>
+        <UserBookTop
+          currentStep={currentStep}
+          selectedService={selectedService}
+          onServiceChange={handleServiceChange}
+        />
+        {renderStep()}
+      </UserSideTop>
     </>
   );
 };

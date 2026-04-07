@@ -1,19 +1,20 @@
 import HomeNav from '../components/HomeNav';
 import './viewAppointment.css'
-import { FaChevronRight, FaCar, FaCalendarAlt, FaClock, FaStickyNote, FaMapMarkerAlt, FaEllipsisH } from 'react-icons/fa';
+import { FaChevronRight } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import { getAllAppointments, updateAppointmentStatus } from '../services/bookAppointment';
+import { getAllAppointments, updateBillItems, getAppointmentById, updateAppointmentStatus } from '../services/bookAppointment';
 import type { Appointment } from '../types/appointment';
 import Sidebar from '../components/Sidebar';
+import AppointmentDetails from './AppointmentDetails';
+import BillSection from './BillSection';
 
-// Define status options
-const STATUS_OPTIONS = [
-  { value: 'confirmed', label: 'Confirmed', short: 'Conf' },
-  { value: 'in-progress', label: 'In Progress', short: 'In Prog' },
-  { value: 'completed', label: 'Completed', short: 'Comp' },
-  { value: 'cancelled', label: 'Cancelled', short: 'Cancel' }
-];
-
+// Define BillItem interface
+interface BillItem {
+  id: string;
+  itemName: string;
+  itemPrice: number;
+  serviceCharge?: number;
+}
 
 const AdminAppointment = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -21,27 +22,37 @@ const AdminAppointment = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('All');
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [showStatusDropdown, setShowStatusDropdown] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>('');
+
+  // Bill state for selected appointment
+  const [billItems, setBillItems] = useState<BillItem[]>([]);
+  const [isSavingBill, setIsSavingBill] = useState<boolean>(false);
+  const [billSaveError, setBillSaveError] = useState<string | null>(null);
 
   // Fetch appointments from API - All statuses
-  const fetchAppointments = async (status?: string | null) => {
+  const fetchAppointments = async (status?: string | null, date?: string | null) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params: any = {
         sortBy: 'createdAt',
         sortOrder: 'desc'
       };
-      
+
       // Add status filter if provided
       if (status && status !== 'All') {
         params.status = status.toLowerCase();
       }
-      
+
+      // Add date filter if provided
+      if (date) {
+        params.date = date;
+      }
+
       const response = await getAllAppointments(params);
-      
+
       if (response.success) {
         setAppointments(response.appointments || []);
       } else {
@@ -55,63 +66,6 @@ const AdminAppointment = () => {
     }
   };
 
-  // Handle status change
-  const handleStatusChange = async (appointmentId: string, newStatus: string, fromTable: boolean = false) => {
-    try {
-      setIsUpdating(true);
-      
-      // Call API to update appointment status
-      const response = await updateAppointmentStatus(appointmentId, newStatus);
-      
-      if (response.success) {
-        // Update local state
-        const updatedAppointments = appointments.map(app => 
-          app._id === appointmentId ? { ...app, status: newStatus } : app
-        );
-        setAppointments(updatedAppointments);
-        
-        // Update selected appointment if it's the one being changed
-        if (selectedAppointment && selectedAppointment._id === appointmentId) {
-          setSelectedAppointment({ ...selectedAppointment, status: newStatus });
-        }
-        
-        // Show success message
-        if (!fromTable) {
-          alert(`Status updated to ${STATUS_OPTIONS.find(s => s.value === newStatus)?.label || newStatus}!`);
-        }
-        
-        // Close dropdown if changing from table
-        if (fromTable) {
-          setShowStatusDropdown(null);
-        }
-      } else {
-        alert('Failed to update status. Please try again.');
-      }
-    } catch (err: any) {
-      console.error('Error updating status:', err);
-      alert(err.message || 'Error updating status');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  // Toggle status dropdown in table
-  const toggleStatusDropdown = (appointmentId: string) => {
-    setShowStatusDropdown(showStatusDropdown === appointmentId ? null : appointmentId);
-  };
-
-  // Close dropdown when clicking elsewhere
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!(event.target as Element).closest('.status-cell')) {
-        setShowStatusDropdown(null);
-      }
-    };
-    
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
   // Initial fetch on component mount
   useEffect(() => {
     fetchAppointments();
@@ -119,48 +73,130 @@ const AdminAppointment = () => {
 
   const handleDetailsClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    setShowStatusDropdown(null); // Close any open dropdowns
+    // Load existing bill items from appointment if any
+    const existingBillItems: BillItem[] = (appointment.billItems || []).map((item: any, index: number) => ({
+      id: item._id || `item-${index}`,
+      itemName: item.itemName,
+      itemPrice: item.itemPrice,
+      serviceCharge: item.serviceCharge || 0
+    }));
+    setBillItems(existingBillItems);
+    setBillSaveError(null);
   };
 
   const handleCloseDetails = () => {
     setSelectedAppointment(null);
+    setBillItems([]);
+    setBillSaveError(null);
   };
 
   // Handle filter button clicks
   const handleFilterClick = (filterType: string) => {
     setFilter(filterType);
-    fetchAppointments(filterType === 'All' ? null : filterType);
+    fetchAppointments(filterType === 'All' ? null : filterType, dateFilter || null);
   };
 
-  // Get short form of status for table view
-  const getStatusShortForm = (status: string) => {
-    const statusOption = STATUS_OPTIONS.find(s => s.value === status);
-    return statusOption?.short || status.substring(0, 4);
+  // Handle date filter change
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value;
+    setDateFilter(date);
+    fetchAppointments(filter === 'All' ? null : filter, date);
   };
 
-  // Get full form of status for details view
-  // const getStatusFullForm = (status: string) => {
-  //   const statusOption = STATUS_OPTIONS.find(s => s.value === status);
-  //   return statusOption?.label || status.charAt(0).toUpperCase() + status.slice(1);
-  // };
+  // Clear date filter
+  const clearDateFilter = () => {
+    setDateFilter('');
+    fetchAppointments(filter === 'All' ? null : filter, null);
+  };
 
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
+  // Bill management functions
+  const handleAddBillItem = (item: Omit<BillItem, 'id'>) => {
+    const billItem: BillItem = {
+      id: Date.now().toString(),
+      itemName: item.itemName,
+      itemPrice: item.itemPrice,
+      serviceCharge: item.serviceCharge || 0
+    };
+
+    const newBillItems = [...billItems, billItem];
+    setBillItems(newBillItems);
+    
+    // Save to backend
+    saveBillItemsToBackend(newBillItems);
+  };
+
+  const handleRemoveBillItem = (id: string) => {
+    const newBillItems = billItems.filter(item => item.id !== id);
+    setBillItems(newBillItems);
+    
+    // Save to backend
+    saveBillItemsToBackend(newBillItems);
+  };
+
+  // Save bill items to backend
+  const saveBillItemsToBackend = async (items: BillItem[]) => {
+    if (!selectedAppointment) return;
     
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
+      setIsSavingBill(true);
+      setBillSaveError(null);
       
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      // Convert BillItem format to backend format (without id)
+      const billItemsForBackend = items.map(item => ({
+        itemName: item.itemName,
+        itemPrice: item.itemPrice,
+        serviceCharge: item.serviceCharge || 0
+      }));
+      
+      console.log('Saving bill items for appointment:', selectedAppointment.appointmentId);
+      console.log('Bill items:', billItemsForBackend);
+      
+      const response = await updateBillItems(selectedAppointment.appointmentId, billItemsForBackend);
+      console.log('Save response:', response);
+      
+      if (response.success) {
+        // Update the selected appointment with the new bill items
+        setSelectedAppointment(prev => prev ? {
+          ...prev,
+          billItems: billItemsForBackend
+        } : null);
+        console.log('Bill items saved successfully!');
+        
+        // Refresh the appointment from backend to get the latest data
+        await refreshSelectedAppointment();
+      } else {
+        throw new Error(response.message || 'Failed to save bill items');
+      }
+    } catch (error: any) {
+      console.error('Error saving bill items:', error);
+      setBillSaveError(error.message || 'Failed to save bill items');
+      alert('Failed to save bill: ' + (error.message || 'Unknown error'));
+    } finally {
+      setIsSavingBill(false);
+    }
+  };
+
+  // Refresh the selected appointment from backend
+  const refreshSelectedAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      const response = await getAppointmentById(selectedAppointment.appointmentId);
+
+      if (response.success && response.appointment) {
+        setSelectedAppointment(response.appointment);
+        // Update bill items from the refreshed appointment
+        const refreshedBillItems: BillItem[] = (response.appointment.billItems || []).map((item: any, index: number) => ({
+          id: item._id || `item-${index}`,
+          itemName: item.itemName,
+          itemPrice: item.itemPrice,
+          serviceCharge: item.serviceCharge || 0
+        }));
+        setBillItems(refreshedBillItems);
+        console.log('Appointment refreshed with bill items:', refreshedBillItems);
+      }
     } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid Date';
+      console.error('Error refreshing appointment:', error);
     }
   };
 
@@ -213,6 +249,58 @@ const AdminAppointment = () => {
     } catch (error) {
       console.error('Error getting display date:', error);
       return 'Invalid Date';
+    }
+  };
+
+  // Get status label for table display (long form)
+  const getStatusLabel = (status: string) => {
+    if (!status) return 'N/A';
+    
+    const statusMap: Record<string, string> = {
+      'booked': 'Booked',
+      'pending': 'Pending',
+      'confirmed': 'Confirmed',
+      'in-progress': 'In Progress',
+      'payment': 'Payment',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled'
+    };
+    
+    return statusMap[status.toLowerCase()] || status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  // Handle status change from dropdown
+  const handleStatusChange = async (appointmentId: number, newStatus: string) => {
+    try {
+      setUpdatingStatus(appointmentId.toString());
+      
+      const response = await updateAppointmentStatus(appointmentId, newStatus);
+      
+      if (response.success) {
+        // Update the appointments list with the new status
+        setAppointments(prev =>
+          prev.map(appt =>
+            appt.appointmentId === appointmentId
+              ? { ...appt, status: newStatus }
+              : appt
+          )
+        );
+        
+        // Update selected appointment if it's the current one
+        if (selectedAppointment && selectedAppointment.appointmentId === appointmentId) {
+          setSelectedAppointment({
+            ...selectedAppointment,
+            status: newStatus
+          });
+        }
+        
+        alert(`Appointment #${appointmentId} status updated to ${newStatus}`);
+      }
+    } catch (error: any) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status: ' + (error.message || 'Unknown error'));
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -289,11 +377,26 @@ const AdminAppointment = () => {
               Wash
             </button>
           </div>
-          <button className='new-appointment-button'>+ New Appointment</button>
+          <div className='filter-right-group'>
+            <div className='date-filter-wrapper'>
+              <input
+                type="date"
+                className='date-filter-input'
+                value={dateFilter}
+                onChange={handleDateFilterChange}
+              />
+              {dateFilter && (
+                <button className='clear-date-btn' onClick={clearDateFilter} title="Clear date filter">
+                  ×
+                </button>
+              )}
+            </div>
+            <button className='new-appointment-button'>+ New Appointment</button>
+          </div>
         </div>
         
         <div className='content-wrapper'>
-          {/* Left Side - Table (30-35% width when details open) */}
+          {/* Left Side - Table */}
           <div className='appointment-list-container'>
             <div className='appointments-header'>
               <div className='header-cell name-header'>NAME</div>
@@ -310,9 +413,9 @@ const AdminAppointment = () => {
                 </div>
               ) : (
                 appointments.map((appointment: Appointment) => (
-                  <div 
-                    key={appointment._id} 
-                    className={`appointment-row ${selectedAppointment?._id === appointment._id ? 'selected' : ''}`}
+                  <div
+                    key={appointment._id}
+                    className={`appointment-row ${selectedAppointment?.appointmentId === appointment.appointmentId ? 'selected' : ''}`}
                   >
                     <div className='cell name-cell'>
                       <div className='customer-name'>
@@ -329,34 +432,20 @@ const AdminAppointment = () => {
                     </div>
                     <div className='cell status-cell'>
                       <div className='status-container'>
-                        <div 
-                          className={`status-badge-table status-${appointment.status || 'confirmed'}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleStatusDropdown(appointment._id);
-                          }}
+                        <select
+                          className='status-dropdown'
+                          value={appointment.status || 'confirmed'}
+                          onChange={(e) => handleStatusChange(appointment.appointmentId, e.target.value)}
+                          disabled={updatingStatus === appointment.appointmentId.toString()}
                         >
-                          {getStatusShortForm(appointment.status || 'confirmed')}
-                          <FaEllipsisH className='status-dropdown-icon' />
-                        </div>
-                        
-                        {showStatusDropdown === appointment._id && (
-                          <div className='status-dropdown'>
-                            {STATUS_OPTIONS.map((statusOption) => (
-                              <div
-                                key={statusOption.value}
-                                className={`status-dropdown-item ${appointment.status === statusOption.value ? 'current' : ''}`}
-                                onClick={() => handleStatusChange(appointment._id, statusOption.value, true)}
-                              >
-                                <span className={`status-indicator status-${statusOption.value}`}></span>
-                                <span className='status-label'>{statusOption.label}</span>
-                                {appointment.status === statusOption.value && (
-                                  <span className='current-badge'>Current</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                          <option value="booked">Booked</option>
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="payment">Payment</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
                       </div>
                     </div>
                     <div className='cell time-cell'>
@@ -381,188 +470,23 @@ const AdminAppointment = () => {
             </div>
           </div>
 
-          {/* Right Side - Details Panel (65-70% width when open) */}
+          {/* Right Side - Details Panel with Bill Section */}
           {selectedAppointment && (
-            <div className='appointment-details-panel'>
-              <div className='details-header'>
-                <h2>Appointment Details</h2>
-                <button className='close-details-btn' onClick={handleCloseDetails}>
-                  ×
-                </button>
-              </div>
-              
-              <div className='details-content'>
-                {/* Customer Information */}
-                <div className='details-section'>
-                  <h3 className='section-title'>Customer Information</h3>
-                  <div className='info-grid'>
-                    <div className='info-item'>
-                      <span className='info-label'>Name:</span>
-                      <span className='info-value1'>
-                        {selectedAppointment.name || `User #${selectedAppointment.userId}`}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>Email:</span>
-                      <span className='info-value2'>
-                        {selectedAppointment.email || 'Not available'}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>User ID:</span>
-                      <span className='info-value1'>{selectedAppointment.userId}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Appointment Details */}
-                <div className='details-section'>
-                  <h3 className='section-title'>Appointment Details</h3>
-                  <div className='info-grid'>
-                    <div className='info-item'>
-                      <FaCalendarAlt className='info-icon' />
-                      <span className='info-label'>Date:</span>
-                      <span className='info-value1'>{formatDate(selectedAppointment.date)}</span>
-                    </div>
-                    <div className='info-item'>
-                      <FaClock className='info-icon' />
-                      <span className='info-label'>Time:</span>
-                      <span className='info-value1'>
-                        {selectedAppointment.time || formatTimeFromDate(selectedAppointment.date)}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>Status:</span>
-                      <div className='status-select-container'>
-                        <select 
-                          className='status-select'
-                          value={selectedAppointment.status || 'confirmed'}
-                          onChange={(e) => handleStatusChange(selectedAppointment._id, e.target.value)}
-                          disabled={isUpdating}
-                        >
-                          {STATUS_OPTIONS.map((statusOption) => (
-                            <option key={statusOption.value} value={statusOption.value}>
-                              {statusOption.label}
-                            </option>
-                          ))}
-                        </select>
-                        {isUpdating && (
-                          <div className="spinner-small"></div>
-                        )}
-                      </div>
-                    </div>
-                    <div className='info-item'>
-                      {selectedAppointment.pickupRequired ? (
-                        <>
-                          <FaMapMarkerAlt className='info-icon' />
-                          <span className='info-label'>Pickup:</span>
-                          <span className='info-value1 required'>Required</span>
-                          {selectedAppointment.pickupAddress && (
-                            <span className='info-address'>{selectedAppointment.pickupAddress}</span>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <FaMapMarkerAlt className='info-icon' />
-                          <span className='info-label'>Pickup:</span>
-                          <span className='info-value not-required'>Not Required</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Vehicle Information */}
-                <div className='details-section'>
-                  <h3 className='section-title'>Vehicle Information</h3>
-                  <div className='info-grid'>
-                    <div className='info-item'>
-                      <FaCar className='info-icon' />
-                      <span className='info-label'>Model:</span>
-                      <span className='info-value1'>
-                        {selectedAppointment.vehicleInfo?.model || 'Not specified'}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>Color:</span>
-                      <span className='info-value1'>
-                        {selectedAppointment.vehicleInfo?.color || 'Not specified'}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>Number Plate:</span>
-                      <span className='info-value'>
-                        {selectedAppointment.vehicleInfo?.numberPlate || 'Not specified'}
-                      </span>
-                    </div>
-                    <div className='info-item'>
-                      <span className='info-label'>Kilometer Run:</span>
-                      <span className='info-value'>
-                        {selectedAppointment.vehicleInfo?.kilometerRun 
-                          ? `${selectedAppointment.vehicleInfo.kilometerRun.toLocaleString()} km`
-                          : 'Not specified'
-                        }
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Service Details */}
-                <div className='details-section'>
-                  <h3 className='section-title'>Service Details</h3>
-                  <div className='info-grid'>
-                    <div className='info-item'>
-                      <span className='info-label'>Service Type:</span>
-                      <span className={`service-type-badge service-${selectedAppointment.serviceType ? selectedAppointment.serviceType.toLowerCase() : 'default'}`}>
-                        {selectedAppointment.serviceType || 'Unknown'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                {selectedAppointment.vehicleInfo?.notes && (
-                  <div className='details-section'>
-                    <h3 className='section-title'>Notes</h3>
-                    <div className='notes-container'>
-                      <FaStickyNote className='notes-icon' />
-                      <p className='notes-text'>{selectedAppointment.vehicleInfo.notes}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Timeline */}
-                <div className='details-section'>
-                  <h3 className='section-title'>Timeline</h3>
-                  <div className='timeline'>
-                    <div className='timeline-item'>
-                      <div className='timeline-dot created'></div>
-                      <div className='timeline-content'>
-                        <span className='timeline-event'>Appointment Created</span>
-                        <span className='timeline-date'>
-                          {selectedAppointment.createdAt 
-                            ? new Date(selectedAppointment.createdAt).toLocaleString()
-                            : 'Not available'
-                          }
-                        </span>
-                      </div>
-                    </div>
-                    <div className='timeline-item'>
-                      <div className='timeline-dot updated'></div>
-                      <div className='timeline-content'>
-                        <span className='timeline-event'>Last Updated</span>
-                        <span className='timeline-date'>
-                          {selectedAppointment.updatedAt 
-                            ? new Date(selectedAppointment.updatedAt).toLocaleString()
-                            : 'Not available'
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AppointmentDetails
+              appointment={selectedAppointment}
+              onClose={handleCloseDetails}
+              showDownloadButton={true}
+              billItems={billItems}
+              billSection={
+                <BillSection
+                  billItems={billItems}
+                  onAddBillItem={handleAddBillItem}
+                  onRemoveBillItem={handleRemoveBillItem}
+                  isSaving={isSavingBill}
+                  saveError={billSaveError}
+                />
+              }
+            />
           )}
         </div>
       </div>
