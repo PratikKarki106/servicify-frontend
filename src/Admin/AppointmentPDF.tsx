@@ -290,7 +290,7 @@ const AppointmentPDF = ({ appointment, billItems = [] }: AppointmentPDFProps) =>
             <View style={styles.gridItem}>
               <View style={styles.row}>
                 <Text style={styles.label}>Phone:</Text>
-                <Text style={styles.value}>{appointment.phone || 'N/A'}</Text>
+                <Text style={styles.value}>{appointment.phone || appointment.contactNumber || 'N/A'}</Text>
               </View>
             </View>
             <View style={styles.gridItem}>

@@ -6,13 +6,14 @@ import Services from "../components/Services";
 import Contact from "../components/Contact";
 
 // Libraries
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // CSS
 import './LandingPage.css';
 
 export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const aboutRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLDivElement>(null);
   const navigation = useNavigate();
@@ -27,6 +28,10 @@ export default function LandingPage() {
 
   const handleLogin = () => navigation("/signin");
   const handleSignUp = () => navigation("/signup");
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
 
   return (
     <>
@@ -45,11 +50,18 @@ export default function LandingPage() {
         {/* Navbar */}
         <header className="navbar">
           <img src={Logo} alt="Servicify Logo" className="logo" />
-          <nav className="nav-links">
-            <button className="navigation-button" onClick={scrollToAbout}>
+
+          <div className="hamburger" onClick={toggleMenu}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <nav className={`nav-links ${menuOpen ? 'active' : ''}`}>
+            <button className="navigation-button" onClick={() => { scrollToAbout(); setMenuOpen(false); }}>
               About Us
             </button>
-            <button className="navigation-button" onClick={scrollToContact}>
+            <button className="navigation-button" onClick={() => { scrollToContact(); setMenuOpen(false); }}>
               Contact
             </button>
           </nav>

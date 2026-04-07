@@ -163,7 +163,7 @@ const AppointmentDetails = ({
             <div className='info-item'>
               <span className='info-label'>Phone:</span>
               <span className='info-value2'>
-                {appointment.phone || 'Not available'}
+                {appointment.phone || appointment.contactNumber || 'Not available'}
               </span>
             </div>
             <div className='info-item'>

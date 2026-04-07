@@ -70,7 +70,28 @@ const PaymentSuccess: React.FC = () => {
         hour: '2-digit',
         minute: '2-digit'
       }));
-      
+
+      // Show success toast notification
+      if (type === 'appointment') {
+        toast.success('🎉 Payment successful! Your appointment has been confirmed.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      } else if (type === 'package') {
+        toast.success('📦 Package purchased successfully! Credits added to your account.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+
       // Fetch appointment details if it's an appointment payment
       if (type === 'appointment' && id) {
         fetchAppointmentDetails(id);
@@ -80,6 +101,16 @@ const PaymentSuccess: React.FC = () => {
     } else if (error) {
       setPaymentStatus('failed');
       setLoading(false);
+      
+      // Show error toast notification
+      toast.error('❌ Payment failed. Please try again.', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
     }
   }, [type, id, error]);
 

@@ -23,6 +23,56 @@
     flex-wrap: wrap;
 }
 
+.filter-right-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.date-filter-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.date-filter-input {
+    padding: 8px 12px;
+    border: 1px solid #a09e9e;
+    border-radius: 5px;
+    background-color: #ffffff;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.date-filter-input:focus {
+    outline: none;
+    border-color: #1094E6;
+    box-shadow: 0 0 0 2px rgba(16, 148, 230, 0.2);
+}
+
+.date-filter-input:hover {
+    border-color: #1094E6;
+}
+
+.clear-date-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.clear-date-btn:hover {
+    color: #dc3545;
+}
+
 .filter-button-appointment {
     border: 1px solid #a09e9e;
     border-radius: 5px;
@@ -345,13 +395,11 @@
 .info-value1 {
     color: #212529;
     font-weight: 400;
-    margin-left: -70px;
 }
 
 .info-value2 {
     color: #212529;
     font-weight: 400;
-    margin-left: -80px;
 }
 
 .info-value1.required {

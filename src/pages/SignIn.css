@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: flex-start; /* start from top */
   padding: 40px 30px;
-  gap: 20px; /* consistent spacing between children */
+  gap: 25px; /* consistent spacing between children */
 }
 
 .signin-logo {
@@ -36,7 +36,6 @@
   display: flex;
   flex-direction: column;
   width: 55%;
-  margin-bottom: 16px;
 }
 
 .form-group label {
@@ -135,4 +134,98 @@
   justify-content: flex-start; /* start from top */
   padding: 40px 30px;
   gap: 10px; /* consistent spacing between children */
+}
+
+.password-see {
+  position: absolute;
+  left: 38.5%;
+  top: 54.5%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.password-see1 {
+  position: absolute;
+  left: 38%;
+  top: 63.1%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+
+.password-see:hover {
+  color: #333;
+}
+
+.password-see:focus {
+  outline: 2px solid #007bff;
+  border-radius: 4px;
+}
+
+/* Responsive: make sign in / sign up layout usable on smaller screens */
+@media (max-width: 1024px) {
+  .signin-container {
+    width: calc(100% - 32px);
+    height: auto;
+    min-height: 80vh;
+  }
+
+  .form-group {
+    width: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  .signin-container {
+    flex-direction: column;
+    width: calc(100% - 24px);
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .signin-left,
+  .signin-right {
+    width: 100%;
+  }
+
+  .signin-left {
+    padding: 28px 20px;
+    gap: 18px;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .signin-image {
+    height: auto;
+    margin-top: 20px;
+    margin-left: 0;
+    max-width: 90%;
+  }
+
+  .signin-right {
+    padding-bottom: 30px;
+  }
+
+  .Bubble {
+    position: absolute;
+    width: 90%;
+    height: auto;
+    max-width: 450px;
+  }
 }

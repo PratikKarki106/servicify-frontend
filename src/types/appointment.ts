@@ -1,3 +1,75 @@
+// types/appointment.ts
+export interface VehicleInfo {
+  name: string;
+  model: string;
+  color: string;
+  numberPlate: string;
+  kilometerRun: number;
+  notes?: string;
+  imageUrl?: string;
+}
+
+export interface BillItemData {
+  itemName: string;
+  itemPrice: number;
+  serviceCharge: number;
+  _id?: string;
+}
+
+export interface AppointmentData {
+  userId: string;
+  serviceType: "servicing" | "repair" | "checkup" | "wash";
+  vehicleInfo: VehicleInfo;
+  date: string;
+  time: string;
+  pickupRequired: boolean;
+  pickupAddress?: string;
+  email?: string;
+  name?: string;
+  contactNumber?: string;
+}
+
+export interface Appointment {
+  _id: string;
+  appointmentId: number;
+  userId: number;
+  name?: string;
+  email?: string;
+  phone?: string;
+  contactNumber?: string;
+  serviceType: string;
+  vehicleInfo: VehicleInfo;
+  date: string;
+  time: string;
+  pickupRequired: boolean;
+  pickupAddress?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  billItems?: BillItemData[];
+}
+
+export interface ApiResponse {
+  success: boolean;
+  appointments: Appointment[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface GetAllAppointmentsParams {
+  page?: number;
+  limit?: number;
+  serviceType?: string;
+  status?: string;
+  date?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
 // Frontend display labels
 export type ServiceType = "servicing" | "repair" | "checkup" | "wash";
 
@@ -39,41 +111,4 @@ export interface FormData {
   vehicle: VehicleData;
   timeSlot: TimeData;
   userInfo: UserInfoData;
-}
-
-// types.ts
-export interface VehicleInfo {
-  model: string;
-  color: string;
-  numberPlate: string;
-  kilometerRun: number;
-  notes?: string;
-  imageUrl?: string;
-}
-
-export interface Appointment {
-  _id: string;
-  userId: number;
-  name?: string;
-  email?: string;
-  serviceType: string;
-  vehicleInfo: VehicleInfo;
-  date: string;
-  time: string;
-  pickupRequired: boolean;
-  pickupAddress?: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ApiResponse {
-  success: boolean;
-  appointments: Appointment[];
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
 }

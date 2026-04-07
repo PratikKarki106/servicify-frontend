@@ -204,3 +204,240 @@
   color: #111;
   margin-bottom: 20px;
 }
+
+/* Keep Landing page paragraph sizes consistent (global typography was changed) */
+.Landing-TextOnly p{
+  font-size: 18px;
+  line-height: 1.7;
+  color: #111;
+}
+
+.footer p{
+  font-size: 18px;
+  color: #888;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+  .navbar {
+    padding: 20px 40px;
+  }
+
+  .hero-text h1 {
+    font-size: 48px;
+  }
+
+  .hero-text p {
+    font-size: 18px;
+  }
+
+  .new-title {
+    font-size: 36px;
+  }
+
+  .Landing-TextOnly h1 {
+    font-size: 32px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .navbar {
+    padding: 15px 30px;
+  }
+
+  .nav-links {
+    gap: 20px;
+  }
+
+  .auth-buttons {
+    gap: 15px;
+  }
+
+  .hero-text h1 {
+    font-size: 42px;
+  }
+
+  .hero-text p {
+    font-size: 16px;
+    max-width: 600px;
+  }
+
+  .new-landing-section {
+    padding: 60px 20px;
+  }
+
+  .new-title {
+    font-size: 32px;
+  }
+
+  .new-subtitle {
+    font-size: 16px;
+  }
+
+  .Landing-TextOnly h1 {
+    font-size: 28px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    max-height: 40px;
+    margin-right: 10px;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .auth-buttons {
+    gap: 10px;
+  }
+
+  .navigation-button {
+    font-size: 14px;
+  }
+
+  .signup-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .hero-text h1 {
+    font-size: 36px;
+  }
+
+  .hero-text p {
+    font-size: 14px;
+    max-width: 90%;
+  }
+
+  .arrow-stack {
+    bottom: 80px;
+  }
+
+  .new-landing-section {
+    padding: 50px 15px;
+    margin: 15px;
+  }
+
+  .new-landing-container {
+    max-width: 100%;
+  }
+
+  .new-title {
+    font-size: 28px;
+  }
+
+  .new-subtitle {
+    font-size: 14px;
+  }
+
+  .new-book-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .Landing-TextOnly h1 {
+    font-size: 24px;
+  }
+
+  .Landing-TextOnly p {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  .logo {
+    max-height: 35px;
+  }
+
+  .hero-text h1 {
+    font-size: 28px;
+  }
+
+  .hero-text p {
+    font-size: 12px;
+  }
+
+  .arrow-stack {
+    bottom: 60px;
+  }
+
+  .new-landing-section {
+    padding: 40px 10px;
+    margin: 10px;
+  }
+
+  .new-title {
+    font-size: 24px;
+  }
+
+  .new-subtitle {
+    font-size: 12px;
+  }
+
+  .new-book-btn {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+
+  .Landing-TextOnly h1 {
+    font-size: 20px;
+  }
+
+  .Landing-TextOnly p {
+    font-size: 12px;
+  }
+}
+
+/* Mobile menu button for smaller screens */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 3px 0;
+  transition: 0.4s;
+}
+
+@media screen and (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 15px;
+  }
+}

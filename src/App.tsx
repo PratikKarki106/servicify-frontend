@@ -8,16 +8,35 @@ import Services from "./components/Services";
 import Contact from "./components/Contact";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import Home from "./pages/Home";
+import TrackService from "./User/TrackService";
 import AuthSuccess from "./services/AuthSuccess";
 import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
-import BookAppointment from "./User/BookAppointment";
+import BookAppointment from "./User/BookAppointment/BookAppointment";
 import ViewAppointment from "./Admin/viewAppointment";
 import AdminCatalog from './Admin/AdminCatalog';
 import UserCatalog from './User/UserCatalog';
 import AdminAppointment from "./Admin/AdminAppointment";
 import AdminPackage from "./Admin/AdminPackage";
+import AdminMessages from "./Admin/AdminMessages";
+import AdminNotificationsPage from "./Admin/AdminNotificationsPage";
+import UserSideTop from "./User/UserSideTop";
+import UserDashboard from "./User/Dashboard/UserDashboard";
+import EmailForgot from "./User/ForgotPassword/EmailForgot";
+import EnterOtp from "./User/ForgotPassword/EnterOtp";
+import ResetPassword from "./User/ForgotPassword/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import MyProfile from "./User/MyProfile";
+import PaymentSuccess from "./User/Payment/PaymentSuccess";
+import PaymentFailed from "./User/Payment/PaymentFailed";
+import UserHistory from "./User/UserHistory";
+import UserPackages from "./User/UserPackages";
+import AdminUsers from "./Admin/AdminUsers";
+import AdminUserDetails from "./Admin/AdminUserDetails";
+import Analytics from "./Admin/Analytics";
+import AdminHistory from "./Admin/AdminHistory";
+import UserAnalytics from "./User/UserAnalytics";
+
 
 function App() {
   function CirclePage() {
@@ -26,7 +45,7 @@ function App() {
 
   return (
     <>
-    <ToastContainer 
+    <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -35,16 +54,16 @@ function App() {
         rtl={false}
         pauseOnFocusLoss
         draggable
-        pauseOnHover   
+        pauseOnHover
     />
       <Routes>
-        <Route path="/" element={<LandingPage />} /> 
+        <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/home" element={<Home currentStatus="Pickup"/>} />
+        <Route path="/track-service" element={<TrackService />} />
         <Route path="/auth/success" element={<AuthSuccess />} />
         <Route path="/circle" element={<CirclePage />} />
         <Route path="/admin" element={<AdminHome />} />
@@ -54,6 +73,25 @@ function App() {
         <Route path="/catalog" element={<UserCatalog />} />
         <Route path="/admin/confirmed-appointments" element={<AdminAppointment />} />
         <Route path="/admin/packages" element={<AdminPackage />} />
+        <Route path="/admin/messages" element={<AdminMessages />} />
+        <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/users/:id" element={<AdminUserDetails />} />
+        <Route path="/user/sidebar" element={<UserSideTop><div></div></UserSideTop>} />
+        <Route path="/user/dashboard" element={<UserSideTop><UserDashboard /></UserSideTop>} />
+        <Route path="/user/messages" element={<UserSideTop><div /></UserSideTop>} />
+        <Route path="/profile" element={<UserSideTop><MyProfile /></UserSideTop>} />
+        <Route path="/user/Email" element={<EmailForgot />} />
+        <Route path="/user/EnterOtp" element={<EnterOtp />} />
+        <Route path="/user/reset-password" element={<ResetPassword />} />
+        <Route path="/user/verify-email" element={<VerifyEmail />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failed" element={<PaymentFailed />} />
+        <Route path="/user/history" element={<UserSideTop><UserHistory /></UserSideTop>} />
+        <Route path="/user/packages" element={<UserSideTop><UserPackages /></UserSideTop>} />
+        <Route path="/user/analytics" element={<UserAnalytics />} />
+        <Route path="/admin/analytics" element={<Analytics />} />
+        <Route path="/admin/history" element={<AdminHistory />} />
       </Routes>
     </>
   );

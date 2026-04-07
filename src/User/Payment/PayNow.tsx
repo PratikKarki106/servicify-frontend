@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import Modal from '../../components/Modal';
 import khalti from '../../assets/khalti.png';
 import './PayNow.css';
 import { initiatePayment } from '../../services/paymentService';
@@ -30,33 +31,6 @@ const PayNow: React.FC<PayNowProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle ESC key press
-  useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscKey);
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-    };
-  }, [isOpen, onClose]);
-
-  // Prevent body scroll when overlay is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -65,12 +39,6 @@ const PayNow: React.FC<PayNowProps> = ({
       setError(null);
     }
   }, [isOpen]);
-
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
 
   const handleMethodSelect = (method: string) => {
     setSelectedMethod(method);
@@ -122,15 +90,27 @@ const PayNow: React.FC<PayNowProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="paynow-overlay" onClick={handleOverlayClick}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Complete Payment"
+      footer={
+        <button
+          className="paynow-continue-btn"
+          onClick={handleContinue}
+          disabled={!selectedMethod || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <FontAwesomeIcon icon={faSpinner} spin /> Processing...
+            </>
+          ) : (
+            'Continue'
+          )}
+        </button>
+      }
+    >
       <div className="paynow-container">
-        <div className="paynow-header">
-          <h3>Complete Payment</h3>
-          <button className="paynow-close-btn" onClick={onClose}>
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-        </div>
-
         <div className="paynow-content">
           <div className="paynow-heading">
             <h3>Please choose your payment method</h3>
@@ -173,24 +153,8 @@ const PayNow: React.FC<PayNowProps> = ({
             </div>
           </div>
         </div>
-
-        <div className="paynow-footer">
-          <button
-            className="paynow-continue-btn"
-            onClick={handleContinue}
-            disabled={!selectedMethod || isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} spin /> Processing...
-              </>
-            ) : (
-              'Continue'
-            )}
-          </button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

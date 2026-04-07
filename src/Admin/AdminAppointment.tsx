@@ -23,6 +23,7 @@ const AdminAppointment = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('All');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>('');
 
   // Bill state for selected appointment
   const [billItems, setBillItems] = useState<BillItem[]>([]);
@@ -30,7 +31,7 @@ const AdminAppointment = () => {
   const [billSaveError, setBillSaveError] = useState<string | null>(null);
 
   // Fetch appointments from API - All statuses
-  const fetchAppointments = async (status?: string | null) => {
+  const fetchAppointments = async (status?: string | null, date?: string | null) => {
     try {
       setLoading(true);
       setError(null);
@@ -43,6 +44,11 @@ const AdminAppointment = () => {
       // Add status filter if provided
       if (status && status !== 'All') {
         params.status = status.toLowerCase();
+      }
+
+      // Add date filter if provided
+      if (date) {
+        params.date = date;
       }
 
       const response = await getAllAppointments(params);
@@ -87,7 +93,20 @@ const AdminAppointment = () => {
   // Handle filter button clicks
   const handleFilterClick = (filterType: string) => {
     setFilter(filterType);
-    fetchAppointments(filterType === 'All' ? null : filterType);
+    fetchAppointments(filterType === 'All' ? null : filterType, dateFilter || null);
+  };
+
+  // Handle date filter change
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value;
+    setDateFilter(date);
+    fetchAppointments(filter === 'All' ? null : filter, date);
+  };
+
+  // Clear date filter
+  const clearDateFilter = () => {
+    setDateFilter('');
+    fetchAppointments(filter === 'All' ? null : filter, null);
   };
 
   // Bill management functions
@@ -358,7 +377,22 @@ const AdminAppointment = () => {
               Wash
             </button>
           </div>
-          <button className='new-appointment-button'>+ New Appointment</button>
+          <div className='filter-right-group'>
+            <div className='date-filter-wrapper'>
+              <input
+                type="date"
+                className='date-filter-input'
+                value={dateFilter}
+                onChange={handleDateFilterChange}
+              />
+              {dateFilter && (
+                <button className='clear-date-btn' onClick={clearDateFilter} title="Clear date filter">
+                  ×
+                </button>
+              )}
+            </div>
+            <button className='new-appointment-button'>+ New Appointment</button>
+          </div>
         </div>
         
         <div className='content-wrapper'>

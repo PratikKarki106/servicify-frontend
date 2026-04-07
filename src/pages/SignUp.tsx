@@ -9,6 +9,7 @@ import { Register } from '../services/Auth';
 
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { FaEyeSlash, FaEye } from 'react-icons/fa';
 
 
 const SignUp: React.FC = () => {
@@ -19,7 +20,13 @@ const SignUp: React.FC = () => {
   const [name, setname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
 
+
+  const PasswordSee = () => {
+    setShowPassword(!showPassword);
+  };
   //oauth
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/auth/google";
@@ -32,7 +39,10 @@ const SignUp: React.FC = () => {
       alert(`Sign Up Failed: ${result.error}`);
       return;
     }
-    navigation('/signin');
+    
+    // Store email in localStorage for verification
+    localStorage.setItem('verificationEmail', email);
+    navigation('/user/verify-email');
   }
 
   return (
@@ -69,14 +79,24 @@ const SignUp: React.FC = () => {
 
         <div className="form-group">
           <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className='password-see1'
+              onClick={PasswordSee}
+              aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
         </div>
 
         <div className="Sign-option">

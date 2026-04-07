@@ -147,16 +147,20 @@
 /* Fixed info-grid layout */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-left: 20px;
 }
 
 /* Fixed info-item layout */
 .info-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 130px 1fr;
   align-items: flex-start;
-  gap: 30px;
-  padding: 4px 0;
+  gap: 12px;
+  padding: 8px 0;
   border-bottom: 1px dashed #f0f0f0;
 }
 
@@ -168,13 +172,12 @@
   color: #666;
   font-size: 14px;
   margin-top: 3px;
-  min-width: 16px;
 }
 
 .info-label {
   font-weight: 600;
   color: #555;
-  min-width: 100px; /* Fixed width for labels */
+  white-space: nowrap;
   font-size: 0.9rem;
 }
 
@@ -195,13 +198,11 @@
 
 /* Special handling for pickup address */
 .info-address {
-  width: 100%;
-  margin-left: 24px;
+  grid-column: 2 / 4;
   color: #666;
   font-style: italic;
   font-size: 0.9rem;
   margin-top: 4px;
-  padding-left: 84px; /* Align with label width + icon */
 }
 
 /* Status badge in info item */
