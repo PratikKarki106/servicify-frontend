@@ -24,7 +24,7 @@ export const Register = async (formData: AuthPayload): Promise<AuthResponse> => 
     const response = await axiosInstance.post('/auth/signup', formData);
     return response.data;
   } catch (err: any) {
-    return { error: err.response?.data?.error || 'Signup failed' };
+    return { error: err.response?.data?.error || err.response?.data?.message || 'Signup failed' };
   }
 };
 
@@ -46,6 +46,10 @@ export const Login = async (formData: AuthPayload): Promise<AuthResponse> => {
     return data;
   } catch (err: any) {
     if (err.response && err.response.data) {
+      // Handle specific email verification error
+      if (err.response.data.error && err.response.data.error.includes('verify your email')) {
+        return { error: err.response.data.error };
+      }
       return err.response.data;
     }
     return { error: err.message || 'Login failed' };
