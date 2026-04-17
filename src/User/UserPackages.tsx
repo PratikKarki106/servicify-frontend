@@ -6,6 +6,7 @@ import PayNow from './Payment/PayNow';
 
 interface UserPackage {
   _id: string;
+  packageId: string;
   packageName: string;
   totalCredits: number;
   usedCredits: number;
@@ -37,15 +38,20 @@ const UserPackages: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-packages' | 'available'>('my-packages');
   const [selectedPackage, setSelectedPackage] = useState<AvailablePackage | null>(null);
   const [isPayNowOpen, setIsPayNowOpen] = useState(false);
+  const [purchasedPackageIds, setPurchasedPackageIds] = useState<Set<string>>(new Set());
 
   // Fetch user's purchased packages and available packages
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch user's packages
       const userPackages = await packageService.getUserPackages();
       setMyPackages(userPackages);
+
+      // Extract purchased package IDs
+      const purchasedIds = new Set<string>(userPackages.map((pkg: UserPackage) => pkg.packageId).filter(Boolean));
+      setPurchasedPackageIds(purchasedIds);
 
       // Fetch available packages
       const response = await fetch('http://localhost:5000/api/packages');
@@ -257,48 +263,68 @@ const UserPackages: React.FC = () => {
                 const daysUntilDeadline = Math.ceil(
                   (new Date(pkg.purchaseDeadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
                 );
+                const isAlreadyPurchased = purchasedPackageIds.has(pkg.id);
 
                 return (
                   <div key={pkg.id} style={styles.availableCard}>
                     <div style={styles.availableHeader}>
                       <h3 style={styles.availableName}>{pkg.name}</h3>
-                      <div style={styles.priceSection}>
-                        <span style={styles.originalPrice}>Rs. {pkg.actualPrice.toLocaleString('en-IN')}</span>
-                        <span style={styles.discountedPrice}>Rs. {pkg.discountedPrice.toLocaleString('en-IN')}</span>
-                        <span style={styles.discountBadge}>
-                          Save {Math.round(((pkg.actualPrice - pkg.discountedPrice) / pkg.actualPrice) * 100)}%
-                        </span>
-                      </div>
+                      {isAlreadyPurchased && (
+                        <div style={styles.alreadyPurchasedBadge}>
+                          <FontAwesomeIcon icon={faCheckCircle} /> Already Purchased
+                        </div>
+                      )}
+                      {!isAlreadyPurchased && (
+                        <div style={styles.priceSection}>
+                          <span style={styles.originalPrice}>Rs. {pkg.actualPrice.toLocaleString('en-IN')}</span>
+                          <span style={styles.discountedPrice}>Rs. {pkg.discountedPrice.toLocaleString('en-IN')}</span>
+                          <span style={styles.discountBadge}>
+                            Save {Math.round(((pkg.actualPrice - pkg.discountedPrice) / pkg.actualPrice) * 100)}%
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <p style={styles.availableDescription}>{pkg.description}</p>
 
-                    <ul style={styles.featuresList}>
-                      {pkg.features.map((feature, index) => (
-                        <li key={index} style={styles.featureItem}>
-                          <FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4CAF50', marginRight: '8px' }} />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                    {!isAlreadyPurchased && (
+                      <ul style={styles.featuresList}>
+                        {pkg.features.map((feature, index) => (
+                          <li key={index} style={styles.featureItem}>
+                            <FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4CAF50', marginRight: '8px' }} />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
-                    <div style={styles.availableFooter}>
-                      <div style={styles.deadline}>
-                        <FontAwesomeIcon icon={faClock} style={{ marginRight: '8px' }} />
-                        <span>
-                          {daysUntilDeadline > 0
-                            ? `${daysUntilDeadline} days left to purchase`
-                            : 'Deadline passed'}
-                        </span>
+                    {isAlreadyPurchased ? (
+                      <div style={styles.alreadyPurchasedMessage}>
+                        <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '8px' }} />
+                        You have already purchased this package
                       </div>
-                      <button
-                        style={styles.buyButton}
-                        onClick={() => handleBuyNow(pkg)}
-                        disabled={daysUntilDeadline <= 0}
-                      >
-                        Buy Now
-                      </button>
-                    </div>
+                    ) : (
+                      <div style={styles.availableFooter}>
+                        <div style={styles.deadline}>
+                          <FontAwesomeIcon icon={faClock} style={{ marginRight: '8px' }} />
+                          <span>
+                            {daysUntilDeadline > 0
+                              ? `${daysUntilDeadline} days left to purchase`
+                              : 'Deadline passed'}
+                          </span>
+                        </div>
+                        <button
+                          style={{
+                            ...styles.buyButton,
+                            ...(daysUntilDeadline <= 0 ? styles.buyButtonDisabled : {})
+                          }}
+                          onClick={() => handleBuyNow(pkg)}
+                          disabled={daysUntilDeadline <= 0}
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -582,6 +608,33 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'background-color 0.2s'
+  },
+  buyButtonDisabled: {
+    backgroundColor: '#ccc',
+    cursor: 'not-allowed'
+  },
+  alreadyPurchasedBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: '500'
+  },
+  alreadyPurchasedMessage: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '16px',
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    textAlign: 'center',
+    justifyContent: 'center'
   }
 };
 

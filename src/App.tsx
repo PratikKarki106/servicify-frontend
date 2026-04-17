@@ -10,6 +10,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import TrackService from "./User/TrackService";
 import AuthSuccess from "./services/AuthSuccess";
+import OAuthCallback from "./components/OAuthCallback";
 import Circle from "./components/Circle"
 import AdminHome from "./pages/AdminHome";
 import BookAppointment from "./User/BookAppointment/BookAppointment";
@@ -35,7 +36,10 @@ import AdminUsers from "./Admin/AdminUsers";
 import AdminUserDetails from "./Admin/AdminUserDetails";
 import Analytics from "./Admin/Analytics";
 import AdminHistory from "./Admin/AdminHistory";
+import AdminManageVehicles from "./Admin/AdminManageVehicles";
 import UserAnalytics from "./User/UserAnalytics";
+import MainSettings from "./User/Settings/MainSettings";
+import AppDialogHost from "./components/AppDialogHost";
 
 
 function App() {
@@ -56,6 +60,7 @@ function App() {
         draggable
         pauseOnHover
     />
+      <AppDialogHost />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -65,6 +70,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/track-service" element={<TrackService />} />
         <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/auth/callback" element={<OAuthCallback />} />
         <Route path="/circle" element={<CirclePage />} />
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/book-appointment" element={<BookAppointment />} />
@@ -92,6 +98,8 @@ function App() {
         <Route path="/user/analytics" element={<UserAnalytics />} />
         <Route path="/admin/analytics" element={<Analytics />} />
         <Route path="/admin/history" element={<AdminHistory />} />
+        <Route path="/admin/manage-vehicles" element={<AdminManageVehicles />} />
+        <Route path="/user/settings" element={<UserSideTop><MainSettings /></UserSideTop>} />
       </Routes>
     </>
   );

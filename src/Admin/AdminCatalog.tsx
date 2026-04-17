@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import './AdminCatalog.css';
-import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
   FaSearch,
-  FaRegClock
+  FaRegClock,
+  FaToggleOn,
+  FaToggleOff
 } from 'react-icons/fa';
-import { getAllCatalogItems, deleteCatalogItem } from '../services/catalogService';
+import { getAllCatalogItems, deleteCatalogItem, updateCatalogItem } from '../services/catalogService';
 import type { CatalogItem } from '../services/catalogService';
 import CatalogModal from '../components/CatalogModal';
 import Sidebar from '../components/Sidebar';
+import { appAlert, appConfirm } from '../services/dialogService';
 
 const AdminCatalog = () => {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
@@ -23,14 +26,14 @@ const AdminCatalog = () => {
   const fetchCatalogItems = async () => {
     try {
       setLoading(true);
-      
+
       const params: any = {
         sortBy: 'createdAt',
         sortOrder: 'desc'
       };
-      
+
       const response = await getAllCatalogItems(params);
-      
+
       if (response.success) {
         setCatalogItems(response.catalogItems || []);
       } else {
@@ -38,7 +41,7 @@ const AdminCatalog = () => {
       }
     } catch (err: any) {
       console.error('Error fetching catalog items:', err);
-      alert(err.message || 'Error loading catalog items');
+      await appAlert({ title: 'Error', message: err.message || 'Error loading catalog items', variant: 'danger' });
     } finally {
       setLoading(false);
     }
@@ -61,17 +64,43 @@ const AdminCatalog = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) {
+    const confirmed = await appConfirm({
+      title: 'Delete item',
+      message: 'Are you sure you want to delete this item?',
+      confirmText: 'Delete item',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
-    
+
     try {
       await deleteCatalogItem(id);
       setCatalogItems(prev => prev.filter(item => item._id !== id));
-      alert('Item deleted successfully');
+      await appAlert({ title: 'Deleted', message: 'Item deleted successfully', variant: 'success' });
     } catch (err: any) {
       console.error('Error deleting item:', err);
-      alert(err.message || 'Failed to delete item');
+      await appAlert({ title: 'Error', message: err.message || 'Failed to delete item', variant: 'danger' });
+    }
+  };
+
+  const handleToggleActive = async (item: CatalogItem) => {
+    const newStatus = !item.isActive;
+    try {
+      await updateCatalogItem(item._id, { isActive: newStatus });
+      setCatalogItems(prev => 
+        prev.map(i => 
+          i._id === item._id ? { ...i, isActive: newStatus } : i
+        )
+      );
+      await appAlert({ 
+        title: 'Success', 
+        message: newStatus ? 'Item activated successfully' : 'Item deactivated successfully', 
+        variant: 'success' 
+      });
+    } catch (err: any) {
+      console.error('Error toggling item status:', err);
+      await appAlert({ title: 'Error', message: err.message || 'Failed to update item status', variant: 'danger' });
     }
   };
 
@@ -94,10 +123,19 @@ const AdminCatalog = () => {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const filteredItems = catalogItems.filter(item => 
-    item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems = catalogItems.filter(item => {
+    const companyName = typeof item.companyId === 'object' && item.companyId ? item.companyId.name : '';
+    const productName = typeof item.productId === 'object' && item.productId ? item.productId.name : '';
+    const versionName = typeof item.versionId === 'object' && item.versionId ? item.versionId.name : '';
+
+    return (
+      item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      versionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   if (loading) {
     return (
@@ -132,18 +170,22 @@ const AdminCatalog = () => {
             <FaPlus /> New Item
           </button>
         </div>
-        
+
         <div className='admin-catalog-content-wrapper'>
           <div className='admin-catalog-list-container'>
             <div className='admin-catalog-header'>
-              <div className='admin-header-cell admin-name-header'>NAME</div>
-              <div className='admin-header-cell admin-price-header'>ITEM PRICE</div>
-              <div className='admin-header-cell admin-charge-header'>SERVICE CHARGE</div>
-              <div className='admin-header-cell admin-charge-header'>TOTAL COST</div>
-              <div className='admin-header-cell admin-time-header'>ESTIMATED TIME</div>
+              <div className='admin-header-cell admin-image-header'>IMAGE</div>
+              <div className='admin-header-cell admin-name-header'>COMPANY</div>
+              <div className='admin-header-cell admin-price-header'>PRODUCT</div>
+              <div className='admin-header-cell admin-charge-header'>VERSION</div>
+              <div className='admin-header-cell admin-charge-header'>CC</div>
+              <div className='admin-header-cell admin-charge-header'>ITEM NAME</div>
+              <div className='admin-header-cell admin-time-header'>SERVICE CHARGE</div>
+              <div className='admin-header-cell admin-time-header'>TOTAL COST</div>
+              <div className='admin-header-cell admin-time-header'>EST. TIME</div>
               <div className='admin-header-cell admin-actions-header'>ACTIONS</div>
             </div>
-            
+
             <div className='admin-catalog-list'>
               {filteredItems.length === 0 ? (
                 <div className="admin-no-items">
@@ -153,19 +195,46 @@ const AdminCatalog = () => {
                   </button>
                 </div>
               ) : (
-                filteredItems.map((item: CatalogItem) => (
-                  <div key={item._id} className='admin-catalog-row'>
+                filteredItems.map((item: CatalogItem) => {
+                  const companyName = typeof item.companyId === 'object' && item.companyId ? item.companyId.name : 'N/A';
+                  const productName = typeof item.productId === 'object' && item.productId ? item.productId.name : 'N/A';
+                  const versionName = typeof item.versionId === 'object' && item.versionId ? item.versionId.name : 'N/A';
+                  const ccName = typeof item.ccId === 'object' && item.ccId ? item.ccId.name : 'N/A';
+
+                  return (
+                  <div key={item._id} className={`admin-catalog-row ${!item.isActive ? 'admin-row-inactive' : ''}`}>
+                    <div className='admin-cell admin-image-cell'>
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.itemName} className="admin-item-image" />
+                      ) : (
+                        <div className="admin-item-image-placeholder">
+                          <FaPlus className="placeholder-icon" />
+                        </div>
+                      )}
+                    </div>
                     <div className='admin-cell admin-name-cell'>
                       <div className='admin-service-name'>
-                        <span>{item.itemName}</span>
-                      </div>
-                      <div className='admin-service-description'>
-                        {item.description || 'No description'}
+                        <span>{companyName}</span>
                       </div>
                     </div>
                     <div className='admin-cell admin-price-cell'>
-                      <div className='admin-price-amount'>
-                        Nrs {item.itemPrice.toFixed(2)}
+                      <div className='admin-service-name'>
+                        {productName}
+                      </div>
+                    </div>
+                    <div className='admin-cell admin-charge-cell'>
+                      <div className='admin-service-name'>
+                        {versionName}
+                      </div>
+                    </div>
+                    <div className='admin-cell admin-charge-cell'>
+                      <div className='admin-service-name'>
+                        {ccName}
+                      </div>
+                    </div>
+                    <div className='admin-cell admin-charge-cell'>
+                      <div className='admin-service-name'>
+                        <span>{item.itemName}</span>
                       </div>
                     </div>
                     <div className='admin-cell admin-charge-cell'>
@@ -186,14 +255,21 @@ const AdminCatalog = () => {
                     </div>
                     <div className='admin-cell admin-actions-cell'>
                       <div className='admin-action-buttons'>
-                        <button 
+                        <button
+                          className={`admin-action-btn admin-toggle-btn ${item.isActive ? 'admin-active' : 'admin-inactive'}`}
+                          onClick={() => handleToggleActive(item)}
+                          title={item.isActive ? 'Deactivate' : 'Activate'}
+                        >
+                          {item.isActive ? <FaToggleOn /> : <FaToggleOff />}
+                        </button>
+                        <button
                           className='admin-action-btn admin-edit-btn'
                           onClick={() => handleEdit(item)}
                           title="Edit"
                         >
                           <FaEdit />
                         </button>
-                        <button 
+                        <button
                           className='admin-action-btn admin-delete-btn'
                           onClick={() => handleDelete(item._id)}
                           title="Delete"
@@ -203,7 +279,8 @@ const AdminCatalog = () => {
                       </div>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

@@ -1,0 +1,99 @@
+.app-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: appDialogFadeIn 180ms ease;
+}
+
+.app-dialog-card {
+  width: min(480px, 92vw);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.22);
+  padding: 24px;
+  text-align: center;
+  animation: appDialogPop 220ms ease;
+}
+
+.app-dialog-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.app-dialog-icon.info { background: #e0f2fe; color: #0369a1; }
+.app-dialog-icon.success { background: #dcfce7; color: #15803d; }
+.app-dialog-icon.warning { background: #fef3c7; color: #b45309; }
+.app-dialog-icon.danger { background: #fee2e2; color: #b91c1c; }
+
+.app-dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.app-dialog-message {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.app-dialog-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.app-dialog-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.app-dialog-btn.secondary {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.app-dialog-btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+.app-dialog-btn.primary {
+  color: #fff;
+  background: #1094e6;
+}
+.app-dialog-btn.primary:hover { background: #0d7dc2; }
+.app-dialog-btn.primary.success { background: #16a34a; }
+.app-dialog-btn.primary.warning { background: #d97706; }
+.app-dialog-btn.primary.danger { background: #dc2626; }
+
+@keyframes appDialogFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes appDialogPop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+

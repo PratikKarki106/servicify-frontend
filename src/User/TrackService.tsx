@@ -466,7 +466,8 @@ const TrackService: React.FC = () => {
       <PayNow
         isOpen={isPayNowOpen}
         onClose={() => setIsPayNowOpen(false)}
-        appointmentId={selectedAppointment?.appointmentId}
+        paymentType="appointment"
+        itemId={selectedAppointment?.appointmentId}
         amount={billTotal}
         onPaymentSuccess={handlePaymentSuccess}
       />

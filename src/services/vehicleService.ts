@@ -9,6 +9,16 @@ export interface Vehicle {
   version: string;
   plateNumber: string;
   mileage: number;
+  bluebookImage: string | null;
+  bluebookImageUrl?: string;
+  status: 'pending' | 'verified' | 'rejected';
+  rejectionReason?: string | null;
+  userDetails?: {
+    name: string;
+    email: string;
+    phone: string | null;
+    profilePicture: string | null;
+  };
   lastService: string;
   nextService: string;
   createdAt: string;
@@ -122,16 +132,77 @@ export const editVehicle = async (vehicleId: string, vehicleData: UpdateVehicleD
 export const deleteVehicle = async (vehicleId: string): Promise<boolean> => {
   try {
     const userId = getUserId();
-    
+
     await axiosInstance.delete(`/vehicles/${vehicleId}`, {
       headers: { 'X-User-Id': userId }
     });
-    
+
     toast.success('Vehicle deleted successfully!');
     return true;
   } catch (error: any) {
     console.error('Error deleting vehicle:', error);
     toast.error(error.response?.data?.message || 'Failed to delete vehicle');
+    return false;
+  }
+};
+
+// Admin: Get all vehicles by status (pending, verified, rejected)
+export const getVehiclesByStatus = async (status: 'pending' | 'verified' | 'rejected' = 'pending'): Promise<Vehicle[]> => {
+  try {
+    const response = await axiosInstance.get('/vehicles/admin/vehicles', {
+      params: { status }
+    });
+
+    return response.data.data || [];
+  } catch (error: any) {
+    console.error('Error fetching vehicles:', error);
+    toast.error('Failed to fetch vehicles');
+    return [];
+  }
+};
+
+// Admin: Verify a vehicle
+export const verifyVehicle = async (vehicleId: string): Promise<boolean> => {
+  try {
+    await axiosInstance.put(`/vehicles/admin/vehicles/${vehicleId}/verify`);
+    toast.success('Vehicle verified successfully!');
+    return true;
+  } catch (error: any) {
+    console.error('Error verifying vehicle:', error);
+    toast.error(error.response?.data?.message || 'Failed to verify vehicle');
+    return false;
+  }
+};
+
+// Admin: Reject a vehicle
+export const rejectVehicle = async (vehicleId: string, reason: string): Promise<boolean> => {
+  try {
+    await axiosInstance.put(`/vehicles/admin/vehicles/${vehicleId}/reject`, { reason });
+    toast.success('Vehicle rejected successfully!');
+    return true;
+  } catch (error: any) {
+    console.error('Error rejecting vehicle:', error);
+    toast.error(error.response?.data?.message || 'Failed to reject vehicle');
+    return false;
+  }
+};
+
+// Admin: Update vehicle status (can change to any status)
+export const updateVehicleStatus = async (
+  vehicleId: string,
+  status: 'pending' | 'verified' | 'rejected',
+  reason?: string
+): Promise<boolean> => {
+  try {
+    await axiosInstance.put(`/vehicles/admin/vehicles/${vehicleId}/update-status`, {
+      status,
+      reason
+    });
+    toast.success(`Vehicle status updated to ${status} successfully!`);
+    return true;
+  } catch (error: any) {
+    console.error('Error updating vehicle status:', error);
+    toast.error(error.response?.data?.message || 'Failed to update vehicle status');
     return false;
   }
 };

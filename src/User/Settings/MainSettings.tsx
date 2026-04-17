@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faArrowLeft,
   faLock,
   faBell,
   faEye,
@@ -10,7 +12,8 @@ import {
   faShieldAlt,
   faEnvelope,
   faCheck,
-  faTimes
+  faTimes,
+  faGift
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,6 +35,7 @@ interface NotificationSettings {
 }
 
 const MainSettings: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'password' | 'notifications' | 'privacy' | 'appearance'>('password');
   const [loading, setLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -183,6 +187,7 @@ const MainSettings: React.FC = () => {
   return (
     <div className="settings-container">
       <div className="settings-card">
+
         {/* Header */}
         <div className="settings-header">
           <h1>Settings</h1>

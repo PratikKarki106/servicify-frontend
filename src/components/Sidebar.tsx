@@ -12,6 +12,7 @@ import {
   FaTools,
   FaComments,
   FaChartBar,
+  FaCar,
 } from 'react-icons/fa'
 import Logo from '../assets/Servicify.png';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -49,6 +50,8 @@ const Sidebar = () => {
       setActiveItem('manage-packages');
     } else if (path.includes('messages')) {
       setActiveItem('messages');
+    } else if (path.includes('manage-vehicles')) {
+      setActiveItem('manage-vehicles');
     }
   }, [location.pathname]);
 
@@ -97,6 +100,12 @@ const Sidebar = () => {
       path: 'admin/packages'
     },
     {
+      id: 'manage-vehicles',
+      label: 'Manage Vehicles',
+      icon: <FaCar />,
+      path: '/admin/manage-vehicles'
+    },
+    {
       id: 'messages',
       label: 'Messages',
       icon: <FaComments />,
@@ -135,6 +144,9 @@ const Sidebar = () => {
         break;
       case 'messages':
         navigate('/admin/messages');
+        break;
+      case 'manage-vehicles':
+        navigate('/admin/manage-vehicles');
         break;
       case 'logout':
         // Clear all stored data

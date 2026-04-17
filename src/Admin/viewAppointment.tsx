@@ -6,6 +6,7 @@ import { getAllAppointments, updateAppointmentStatus } from '../services/bookApp
 import type { Appointment } from '../types/appointment';
 import Sidebar from '../components/Sidebar';
 import AppointmentDetails from './AppointmentDetails';
+import { appAlert, appConfirm } from '../services/dialogService';
 
 const ViewAppointment = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -65,18 +66,18 @@ const ViewAppointment = () => {
         // Remove from list since it's no longer in "booked" status
         setAppointments(prev => prev.filter(app => app.appointmentId !== selectedAppointment.appointmentId));
         setSelectedAppointment(null);
-        alert('Appointment confirmed successfully!');
+        await appAlert({ title: 'Success', message: 'Appointment confirmed successfully!', variant: 'success' });
       } else {
-        alert('Failed to confirm appointment. Please try again.');
+        await appAlert({ title: 'Action failed', message: 'Failed to confirm appointment. Please try again.', variant: 'danger' });
       }
     } catch (err: any) {
       console.error('Error confirming appointment:', err);
       
       if (err.message?.includes('cancelled') || err.code === 'APPOINTMENT_CANCELLED') {
-        alert('This appointment was cancelled and cannot be confirmed. Please refresh the page.');
+        await appAlert({ title: 'Cannot confirm', message: 'This appointment was cancelled and cannot be confirmed. Please refresh the page.', variant: 'warning' });
         fetchAppointments();
       } else {
-        alert(err.message || 'Error confirming appointment');
+        await appAlert({ title: 'Error', message: err.message || 'Error confirming appointment', variant: 'danger' });
       }
     } finally {
       setIsUpdating(false);
@@ -87,7 +88,13 @@ const ViewAppointment = () => {
   const handleCancelAppointment = async () => {
     if (!selectedAppointment) return;
     
-    if (!window.confirm('Are you sure you want to cancel this appointment?')) {
+    const shouldCancel = await appConfirm({
+      title: 'Cancel appointment',
+      message: 'Are you sure you want to cancel this appointment?',
+      confirmText: 'Yes, cancel',
+      variant: 'warning',
+    });
+    if (!shouldCancel) {
       return;
     }
     
@@ -100,13 +107,13 @@ const ViewAppointment = () => {
         // Remove from list since it's no longer in "booked" status
         setAppointments(prev => prev.filter(app => app.appointmentId !== selectedAppointment.appointmentId));
         setSelectedAppointment(null);
-        alert('Appointment cancelled successfully!');
+        await appAlert({ title: 'Success', message: 'Appointment cancelled successfully!', variant: 'success' });
       } else {
-        alert('Failed to cancel appointment. Please try again.');
+        await appAlert({ title: 'Action failed', message: 'Failed to cancel appointment. Please try again.', variant: 'danger' });
       }
     } catch (err: any) {
       console.error('Error cancelling appointment:', err);
-      alert(err.message || 'Error cancelling appointment');
+      await appAlert({ title: 'Error', message: err.message || 'Error cancelling appointment', variant: 'danger' });
     } finally {
       setIsUpdating(false);
     }

@@ -22,6 +22,7 @@ import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
 import adminUserService from '../services/adminUserService';
 import type { UserDetails } from '../services/adminUserService';
+import { appConfirm } from '../services/dialogService';
 import './AdminUserDetails.css';
 
 const AdminUserDetails: React.FC = () => {
@@ -54,7 +55,13 @@ const AdminUserDetails: React.FC = () => {
   const handleDeleteUser = async () => {
     if (!userDetails) return;
     
-    if (!window.confirm(`Are you sure you want to delete "${userDetails.user.name || userDetails.user.email}"? This action cannot be undone.`)) {
+    const confirmed = await appConfirm({
+      title: 'Delete user',
+      message: `Are you sure you want to delete "${userDetails.user.name || userDetails.user.email}"? This action cannot be undone.`,
+      confirmText: 'Delete user',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -71,7 +78,13 @@ const AdminUserDetails: React.FC = () => {
     if (!userDetails) return;
 
     const newRole = userDetails.user.role === 'user' ? 'admin' : 'user';
-    if (!window.confirm(`Change ${userDetails.user.name}'s role to ${newRole}?`)) {
+    const confirmed = await appConfirm({
+      title: 'Change role',
+      message: `Change ${userDetails.user.name}'s role to ${newRole}?`,
+      confirmText: 'Change role',
+      variant: 'warning',
+    });
+    if (!confirmed) {
       return;
     }
 
