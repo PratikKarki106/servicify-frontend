@@ -77,7 +77,12 @@ const TrackService: React.FC = () => {
         userAppointments = response;
       }
 
-      const sortedAppointments = userAppointments.sort(
+      // Filter out completed appointments
+      const activeAppointments = userAppointments.filter(
+        (appt: Appointment) => !appt.status.toLowerCase().includes('complete')
+      );
+
+      const sortedAppointments = activeAppointments.sort(
         (a: Appointment, b: Appointment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
@@ -115,30 +120,38 @@ const TrackService: React.FC = () => {
       (data) => {
         console.log('Received status update:', data);
 
+        const isCompleted = data.status.toLowerCase().includes('complete');
+
         // Update appointments list
-        setAppointments(prev =>
-          prev.map(appt =>
+        setAppointments(prev => {
+          if (isCompleted) {
+            // Remove from active list
+            return prev.filter(appt => appt.appointmentId.toString() !== data.appointmentId);
+          }
+          return prev.map(appt =>
             appt.appointmentId.toString() === data.appointmentId
               ? { ...appt, status: data.status }
               : appt
-          )
-        );
+          );
+        });
 
         // Update selected appointment if it's the current one
         setSelectedAppointment(prev => {
-          const updated = prev && prev.appointmentId.toString() === data.appointmentId
-            ? { ...prev, status: data.status }
-            : prev;
-          if (updated) {
+          if (prev && prev.appointmentId.toString() === data.appointmentId) {
+            if (isCompleted) {
+              return null; // deselect if completed
+            }
+            const updated = { ...prev, status: data.status };
             setBillTotal(calculateBillTotal(updated));
+            return updated;
           }
-          return updated;
+          return prev;
         });
       },
       // Handle new appointments
       (data) => {
         console.log('Received new appointment:', data);
-        if (data.appointment) {
+        if (data.appointment && !data.appointment.status.toLowerCase().includes('complete')) {
           setAppointments(prev => {
             // Check if already exists
             const exists = prev.some(a => a.appointmentId.toString() === data.appointment.appointmentId.toString());
