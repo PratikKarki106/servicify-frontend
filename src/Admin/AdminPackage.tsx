@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import packageService from '../services/Package';
 import type{   Package, CreatePackageData } from '../services/Package';
+import { appConfirm } from '../services/dialogService';
 
 interface FormData {
   name: string;
@@ -266,7 +267,13 @@ const AdminPackage: React.FC = () => {
 
   // Delete package
   const handleDeletePackage = async (pkg: Package) => {
-    if (!window.confirm(`Are you sure you want to delete "${pkg.name}"?`)) {
+    const confirmed = await appConfirm({
+      title: 'Delete package',
+      message: `Are you sure you want to delete "${pkg.name}"?`,
+      confirmText: 'Delete package',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
 

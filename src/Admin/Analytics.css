@@ -347,6 +347,13 @@
   flex-shrink: 0;
 }
 
+.analytics-refresh-hint {
+  max-width: 1400px;
+  margin: -8px 0 16px;
+  color: #6c757d;
+  font-size: 13px;
+}
+
 /* ── Chart tooltip (Recharts) — light theme ── */
 .dark-tooltip {
   background: #fff;

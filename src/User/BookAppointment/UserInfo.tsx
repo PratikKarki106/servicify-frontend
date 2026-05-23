@@ -79,19 +79,13 @@ const UserInfo: React.FC<UserInfoProps> = ({
   }, []);
 
   const handleInputChange = (field: keyof UserFormData, value: string | boolean) => {
-    // Only allow phone number to be changed
-    if (field === 'phoneNumber') {
-      setUserData({
-        ...userData,
-        [field]: value as string,
-      });
-    } else if (field === 'needPickup') {
+    if (field === 'needPickup') {
       setUserData({
         ...userData,
         [field]: value as boolean,
+        pickupAddress: value ? userData.pickupAddress : ''
       });
-    } else if (field === 'pickupAddress') {
-      // Allow pickup-related fields to be changed
+    } else {
       setUserData({
         ...userData,
         [field]: value as string,
@@ -109,16 +103,13 @@ const UserInfo: React.FC<UserInfoProps> = ({
   };
 
   const handleSubmit = () => {
-    // Submit only the phone number and pickup-related data
-    const submitData = {
-      fullName: userProfile?.name || userData.fullName, // Use the original profile data
-      phoneNumber: userData.phoneNumber,
-      email: userProfile?.email || userData.email, // Use the original profile data
-      needPickup: userData.needPickup,
-      pickupAddress: userData.pickupAddress,
-    };
+    // Basic validation
+    if (!userData.phoneNumber || userData.phoneNumber.trim() === '') {
+      alert('Phone number is required!');
+      return;
+    }
     
-    onSubmit(submitData);
+    onSubmit(userData);
     navigate('/user/dashboard');
   };
 
@@ -164,13 +155,12 @@ const UserInfo: React.FC<UserInfoProps> = ({
             className="vehicle-info-input2"
             placeholder="John Doe"
             value={userData.fullName}
-            readOnly
-            style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+            onChange={(e) => handleInputChange('fullName', e.target.value)}
           />
         </div>
 
         <div className="vehicle-info-first-second">
-          <p className="vehicle-info-title">Phone Number</p>
+          <p className="vehicle-info-title">Phone Number <span style={{color: '#ff4d4d'}}>*</span></p>
           <input
             type="text"
             className="vehicle-info-input2"
@@ -187,8 +177,7 @@ const UserInfo: React.FC<UserInfoProps> = ({
             className="vehicle-info-input2"
             placeholder="you@example.com"
             value={userData.email}
-            readOnly
-            style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+            onChange={(e) => handleInputChange('email', e.target.value)}
           />
         </div>
 

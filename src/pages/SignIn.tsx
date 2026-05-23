@@ -21,16 +21,6 @@ const SignIn: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
-  useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  if (token) {
-    localStorage.setItem('token', token);
-    window.history.replaceState({}, document.title, window.location.pathname);
-    navigation('/user/dashboard');
-  }
-  }, [])
-
 
   const handleGoogleLogin = () => {
   window.location.href = 'http://localhost:5000/auth/google';

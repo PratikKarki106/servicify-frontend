@@ -19,10 +19,11 @@ import { getAppointmentsByUser, cancelAppointment } from '../../services/bookApp
 import type { Appointment } from '../../types/appointment';
 import { websocketService } from '../../services/websocketService';
 import PayNow from '../Payment/PayNow';
+import { useNavigate } from 'react-router-dom';
 
 interface ActiveBookingsProps {
   onBookService: () => void;
-  onTrackService: (appointmentId: string | number) => void;
+  
   onViewDetails: (appointmentId: string | number) => void;
   onReschedule: (appointmentId: string | number) => void;
   onCancelBooking: (appointmentId: string | number) => void;
@@ -31,11 +32,11 @@ interface ActiveBookingsProps {
 
 const ActiveBookings: React.FC<ActiveBookingsProps> = ({
   onBookService,
-  onTrackService,
   onViewDetails,
   onReschedule,
   onCancelBooking
 }) => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -420,7 +421,7 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
             <div style={{
               fontSize: '48px',
               color: '#adb5bd',
-              marginBottom: '20px'
+              marginBottom: '10px'
             }}>
               <FontAwesomeIcon icon={faCalendarCheck} />
             </div>
@@ -445,7 +446,7 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
               style={{
                 backgroundColor: '#007bff',
                 color: 'white',
-                padding: '12px 24px',
+                padding: '12px 20px',
                 fontSize: '16px',
                 fontWeight: '600',
                 borderRadius: '6px',
@@ -453,13 +454,13 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '6px',
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
             >
-              <FontAwesomeIcon icon={faCalendarPlus} />
+              <FontAwesomeIcon icon={faCalendarPlus}  style={{height: "24px", paddingTop: "10px"}}/>
               Book Appointment
             </button>
           </div>
@@ -501,7 +502,7 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
                 <div className="userdashboard-booking-actions">
                   <button
                     className="userdashboard-action-btn track"
-                    onClick={() => onTrackService(booking.id)}
+                    onClick={() => navigate('/track-service')}
                     disabled={cancellingId === booking.id || booking.status === 'cancelled'}
                   >
                     <FontAwesomeIcon icon={faMapMarkerAlt} /> Track

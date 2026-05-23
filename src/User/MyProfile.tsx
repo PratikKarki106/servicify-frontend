@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faArrowLeft,
   faUserCircle,
   faCamera,
   faTrash,
@@ -16,9 +18,11 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as ProfileService from '../services/Profile';
 import type { UserProfile } from '../services/Profile';
+import { appConfirm } from '../services/dialogService';
 import './MyProfile.css';
 
 const MyProfile: React.FC = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -107,7 +111,13 @@ const MyProfile: React.FC = () => {
 
   // Handle delete profile picture
   const handleDeleteProfilePicture = async () => {
-    if (!window.confirm('Are you sure you want to delete your profile picture?')) {
+    const confirmed = await appConfirm({
+      title: 'Delete profile picture',
+      message: 'Are you sure you want to delete your profile picture?',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -189,6 +199,8 @@ const MyProfile: React.FC = () => {
   return (
     <div className="myprofile-container">
       <div className="myprofile-card">
+
+
         {/* Profile Header */}
         <div className="myprofile-header">
           <h1>My Profile</h1>

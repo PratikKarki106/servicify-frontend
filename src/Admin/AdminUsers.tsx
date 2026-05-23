@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
 import adminUserService from '../services/adminUserService';
 import type { User, UserStatistics } from '../services/adminUserService';
+import { appConfirm } from '../services/dialogService';
 import './AdminUsers.css';
 
 const AdminUsers: React.FC = () => {
@@ -79,7 +80,13 @@ const AdminUsers: React.FC = () => {
   };
 
   const handleDeleteUser = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete user "${name}"? This will also delete all their appointments, payments, and packages.`)) {
+    const confirmed = await appConfirm({
+      title: 'Delete user',
+      message: `Are you sure you want to delete user "${name}"? This will also delete all their appointments, payments, and packages.`,
+      confirmText: 'Delete user',
+      variant: 'danger',
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -95,7 +102,13 @@ const AdminUsers: React.FC = () => {
 
   const handleRoleChange = async (id: string, currentRole: 'user' | 'admin') => {
     const newRole: 'user' | 'admin' = currentRole === 'user' ? 'admin' : 'user';
-    if (!window.confirm(`Change this user's role to ${newRole}?`)) {
+    const confirmed = await appConfirm({
+      title: 'Change user role',
+      message: `Change this user's role to ${newRole}?`,
+      confirmText: 'Change role',
+      variant: 'warning',
+    });
+    if (!confirmed) {
       return;
     }
 

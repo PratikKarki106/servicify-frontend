@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMotorcycle } from '@fortawesome/free-solid-svg-icons';
 import { fetchVehicles, deleteVehicle, type Vehicle } from '../../services/vehicleService';
+import { appConfirm } from '../../services/dialogService';
 
 interface VehiclesSectionProps {
   onAddVehicleClick: () => void;
@@ -48,15 +49,21 @@ const VehiclesSection: React.FC<VehiclesSectionProps> = ({
   };
 
   const handleDeleteVehicle = async (vehicleId: string) => {
-    if (window.confirm('Are you sure you want to delete this vehicle?')) {
-      try {
-        const isDeleted = await deleteVehicle(vehicleId);
-        if (isDeleted) {
-          loadVehicles(); // Refresh list
-        }
-      } catch (error) {
-        console.error('Delete error:', error);
+    const confirmed = await appConfirm({
+      title: 'Delete vehicle',
+      message: 'Are you sure you want to delete this vehicle?',
+      confirmText: 'Delete vehicle',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      const isDeleted = await deleteVehicle(vehicleId);
+      if (isDeleted) {
+        loadVehicles(); // Refresh list
       }
+    } catch (error) {
+      console.error('Delete error:', error);
     }
   };
 
@@ -96,7 +103,7 @@ const VehiclesSection: React.FC<VehiclesSectionProps> = ({
           </div>
         ) : (
           vehicles.map(vehicle => (
-            <div key={vehicle._id} className="userdashboard-vehicle-card">
+            <div key={vehicle._id} className={`userdashboard-vehicle-card ${vehicle.status !== 'verified' ? 'vehicle-not-verified' : ''}`}>
               <div className="userdashboard-vehicle-header">
                 <div className="userdashboard-vehicle-icon">
                   <FontAwesomeIcon icon={faMotorcycle} />
@@ -106,7 +113,23 @@ const VehiclesSection: React.FC<VehiclesSectionProps> = ({
                   <p>{vehicle.color} • {vehicle.version}</p>
                   <p className="userdashboard-vehicle-plate1">{vehicle.plateNumber}</p>
                 </div>
+                <div className="vehicle-status-badge">
+                  {vehicle.status === 'pending' && (
+                    <span className="status-badge pending">Pending</span>
+                  )}
+                  {vehicle.status === 'verified' && (
+                    <span className="status-badge verified">Verified</span>
+                  )}
+                  {vehicle.status === 'rejected' && (
+                    <span className="status-badge rejected">Rejected</span>
+                  )}
+                </div>
               </div>
+              {vehicle.status === 'rejected' && vehicle.rejectionReason && (
+                <div className="vehicle-rejection-message">
+                  <p><strong>Rejection Reason:</strong> {vehicle.rejectionReason}</p>
+                </div>
+              )}
               <div className="userdashboard-vehicle-stats">
                 <div className="userdashboard-vehicle-stat">
                   <span className="userdashboard-stat-label">Mileage</span>
@@ -122,24 +145,48 @@ const VehiclesSection: React.FC<VehiclesSectionProps> = ({
                 </div>
               </div>
               <div className="userdashboard-vehicle-actions">
-                <button 
-                  className="userdashboard-action-btn service"
-                  onClick={() => handleBookService(vehicle)}
-                >
-                  Book Service
-                </button>
-                <button 
-                  className="userdashboard-action-btn view"
-                  onClick={() => handleEditClick(vehicle._id)}
-                >
-                  Edit Details
-                </button>
-                <button 
-                  className="userdashboard-action-btn cancel"
-                  onClick={() => handleDeleteVehicle(vehicle._id)}
-                >
-                  Delete Vehicle
-                </button>
+                {vehicle.status === 'verified' ? (
+                  <>
+                    <button
+                      className="userdashboard-action-btn service"
+                      onClick={() => handleBookService(vehicle)}
+                    >
+                      Book Service
+                    </button>
+                    <button
+                      className="userdashboard-action-btn view"
+                      onClick={() => handleEditClick(vehicle._id)}
+                    >
+                      Edit Details
+                    </button>
+                    <button
+                      className="userdashboard-action-btn cancel"
+                      onClick={() => handleDeleteVehicle(vehicle._id)}
+                    >
+                      Delete Vehicle
+                    </button>
+                  </>
+                ) : vehicle.status === 'pending' ? (
+                  <div className="vehicle-pending-message">
+                    <p>⏳ Awaiting admin verification. You will be able to book services once verified.</p>
+                    <button
+                      className="userdashboard-action-btn cancel"
+                      onClick={() => handleDeleteVehicle(vehicle._id)}
+                    >
+                      Delete Vehicle
+                    </button>
+                  </div>
+                ) : (
+                  <div className="vehicle-rejected-actions">
+                    <p>🚫 This vehicle has been rejected. Please delete and add again with correct information.</p>
+                    <button
+                      className="userdashboard-action-btn cancel"
+                      onClick={() => handleDeleteVehicle(vehicle._id)}
+                    >
+                      Delete Vehicle
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))

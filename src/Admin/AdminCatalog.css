@@ -116,7 +116,7 @@
 
 .admin-catalog-header {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 01fr 0.8fr 0.8fr 0.63fr;
+  grid-template-columns: 0.5fr 0.9fr 0.9fr 0.9fr 0.7fr 1.1fr 0.8fr 0.8fr 0.6fr 0.6fr;
   padding: 15px 20px;
   background-color: #f8f9fa;
   border-bottom: 2px solid #e9ecef;
@@ -136,10 +136,15 @@
 
 .admin-catalog-row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr 0.4fr 0.8fr;
+  grid-template-columns: 0.5fr 0.9fr 0.9fr 0.9fr 0.7fr 1.1fr 0.8fr 0.8fr 0.6fr 0.6fr;
   padding: 15px 20px;
   border-bottom: 1px solid #e9ecef;
   transition: background-color 0.2s;
+}
+
+.admin-row-inactive {
+  opacity: 0.6;
+  background-color: #f8f9fa;
 }
 
 .admin-catalog-row:hover {
@@ -147,21 +152,48 @@
 }
 
 .admin-cell {
-  padding: 0 10px;
+  padding: 0 15px;
   display: flex;
   align-items: center;
+}
+
+.admin-image-cell {
+  justify-content: center;
+}
+
+.admin-item-image {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-item-image-placeholder {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 18px;
 }
 
 .admin-name-cell {
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
 }
 
 .admin-service-name {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   font-weight: 500;
   color: #212529;
+  width: 100%;
 }
 
 .admin-service-icon {
@@ -185,6 +217,7 @@
   font-size: 12px;
   color: #6c757d;
   line-height: 1.4;
+  display: none;
 }
 
 .admin-price-amount, .admin-charge-amount {
@@ -268,6 +301,33 @@
   background-color: #ffcdd2;
 }
 
+.admin-toggle-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  transition: all 0.2s;
+}
+
+.admin-toggle-btn.admin-active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.admin-toggle-btn.admin-active:hover {
+  background-color: #c8e6c9;
+  transform: scale(1.1);
+}
+
+.admin-toggle-btn.admin-inactive {
+  background-color: #ffebee;
+  color: #e53935;
+}
+
+.admin-toggle-btn.admin-inactive:hover {
+  background-color: #ffcdd2;
+  transform: scale(1.1);
+}
+
 .admin-no-items {
   text-align: center;
   padding: 40px 20px;
@@ -314,13 +374,35 @@
 @media (max-width: 1200px) {
   .admin-catalog-header,
   .admin-catalog-row {
-    grid-template-columns: 2fr 1fr 1fr 1fr 0.8fr;
+    grid-template-columns: 0.5fr 0.9fr 0.9fr 0.9fr 0.7fr 1.1fr 0.8fr 0.8fr 0.6fr 0.6fr;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 992px) {
   .admin-catalog-header,
   .admin-catalog-row {
-    grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .admin-catalog-header {
+    display: none;
+  }
+  
+  .admin-catalog-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 20px;
+  }
+  
+  .admin-cell {
+    justify-content: space-between;
+  }
+  
+  .admin-cell::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #495057;
   }
 }

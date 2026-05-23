@@ -20,11 +20,13 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
     version: '',
     plateNumber: '',
     mileage: 0,
-    image: null
+    image: null,
+    optionalImage: null
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [optionalPreviewImage, setOptionalPreviewImage] = useState<string | null>(null);
 
   if (!show) return null;
 
@@ -84,6 +86,42 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
     }
   };
 
+  const handleOptionalImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file type
+      if (!file.type.match('image.*')) {
+        setErrors(prev => ({ ...prev, optionalImage: 'Please select an image file' }));
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, optionalImage: 'File size exceeds 5MB limit' }));
+        return;
+      }
+      
+      // Clear previous errors for optional image
+      if (errors.optionalImage) {
+        setErrors(prev => ({ ...prev, optionalImage: '' }));
+      }
+      
+      // Set the file and create preview
+      setFormData(prev => ({
+        ...prev,
+        optionalImage: file
+      }));
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setOptionalPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -134,9 +172,11 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
           version: '',
           plateNumber: '',
           mileage: 0,
-          image: null
+          image: null,
+          optionalImage: null
         });
         setPreviewImage(null); // Clear the image preview
+        setOptionalPreviewImage(null); // Clear optional preview
         
         // Notify parent component
         if (onVehicleAdded) {
@@ -247,30 +287,61 @@ const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
 
           {/* Image Upload */}
           <div className="userdashboard-form-group">
-            <label htmlFor="image">Bluebook *</label>
-            <div className="image-upload-container">
-              <label htmlFor="image-upload" className={`image-upload-area ${errors.image ? 'error' : ''}`}>
-                {previewImage ? (
-                  <div className="image-preview">
-                    <img src={previewImage} alt="Vehicle preview" className="preview-img" />
-                  </div>
-                ) : (
-                  <div className="upload-placeholder">
-                    <span>+</span>
-                    <p>Click to upload bluebook image</p>
-                    <p className="upload-hint">(JPG, PNG, GIF up to 5MB)</p>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  id="image-upload"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: 'none' }}
-                />
-              </label>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="image">Bluebook *</label>
+                <div className="image-upload-container">
+                  <label htmlFor="image-upload" className={`image-upload-area ${errors.image ? 'error' : ''}`} style={{ padding: '20px', minHeight: '150px' }}>
+                    {previewImage ? (
+                      <div className="image-preview" style={{ maxHeight: '120px' }}>
+                        <img src={previewImage} alt="Vehicle preview" className="preview-img" style={{ maxHeight: '120px', objectFit: 'contain' }} />
+                      </div>
+                    ) : (
+                      <div className="upload-placeholder">
+                        <span>+</span>
+                        <p style={{ fontSize: '0.85rem' }}>Upload bluebook</p>
+                        <p className="upload-hint" style={{ fontSize: '0.75rem' }}>(Max 5MB)</p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+                {errors.image && <span className="form-error">{errors.image}</span>}
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <label htmlFor="optional-image-upload">Vehicle Image (Optional)</label>
+                <div className="image-upload-container">
+                  <label htmlFor="optional-image-upload" className={`image-upload-area ${errors.optionalImage ? 'error' : ''}`} style={{ padding: '20px', minHeight: '150px' }}>
+                    {optionalPreviewImage ? (
+                      <div className="image-preview" style={{ maxHeight: '120px' }}>
+                        <img src={optionalPreviewImage} alt="Optional preview" className="preview-img" style={{ maxHeight: '120px', objectFit: 'contain' }} />
+                      </div>
+                    ) : (
+                      <div className="upload-placeholder">
+                        <span>+</span>
+                        <p style={{ fontSize: '0.85rem' }}>Upload vehicle photo</p>
+                        <p className="upload-hint" style={{ fontSize: '0.75rem' }}>(Max 5MB)</p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="optional-image-upload"
+                      accept="image/*"
+                      onChange={handleOptionalImageChange}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+                {errors.optionalImage && <span className="form-error">{errors.optionalImage}</span>}
+              </div>
             </div>
-            {errors.image && <span className="form-error">{errors.image}</span>}
           </div>
 
           <div className="userdashboard-form-actions">

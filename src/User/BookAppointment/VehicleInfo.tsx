@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './VehicleInfo.css';
 import type { VehicleData } from '../../types/appointment';
 import { type Vehicle } from '../../services/vehicleService';
+import { useNavigate } from 'react-router-dom';
 
 export interface VehicleInfoProps {
   onNext: (data: VehicleData) => void;
@@ -20,6 +21,7 @@ interface VehicleFormData {
 
 const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<VehicleFormData>({
     vehicleInfo: '',
     versionModel: '',
@@ -90,7 +92,7 @@ const VehicleInfo: React.FC<VehicleInfoProps> = ({ onNext, onBack }) => {
   };
 
   const handleBackClick = () => {
-    onBack();
+    navigate('/user/dashboard');
   };
 
   // Load vehicle data from localStorage when component mounts

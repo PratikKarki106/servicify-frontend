@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./TrackService.css";
 import UserSideTop from "./UserSideTop";
 import PayNow from "./Payment/PayNow";
@@ -17,9 +17,7 @@ import {
   faTools,
   faExclamationTriangle,
   faSpinner,
-  faWifi,
   faFileInvoiceDollar,
-  faRupeeSign,
 } from '@fortawesome/free-solid-svg-icons';
 
 type Status = 'Booked' | 'Confirmed' | 'In Progress' | 'Payment' | 'Completed' | 'Cancelled';
@@ -45,7 +43,6 @@ const TrackService: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const [billTotal, setBillTotal] = useState<number>(0);
-  const [isPaying, setIsPaying] = useState<boolean>(false);
   const [isPayNowOpen, setIsPayNowOpen] = useState<boolean>(false);
 
   const rawUserId = localStorage.getItem('userId');
@@ -62,44 +59,49 @@ const TrackService: React.FC = () => {
   };
 
   // Fetch initial appointments
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      if (!userId || userId === 'null' || userId === 'undefined') {
-        setError('User not authenticated. Please log in.');
-        setLoading(false);
-        return;
+  const fetchAppointments = useCallback(async () => {
+    if (!userId || userId === 'null' || userId === 'undefined') {
+      setError('User not authenticated. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await getAppointmentsByUser(userId);
+      let userAppointments = [];
+
+      if (response.success && Array.isArray(response.appointments)) {
+        userAppointments = response.appointments;
+      } else if (Array.isArray(response)) {
+        userAppointments = response;
       }
 
-      try {
-        setLoading(true);
-        const response = await getAppointmentsByUser(userId);
-        let userAppointments = [];
+      // Filter out completed appointments
+      const activeAppointments = userAppointments.filter(
+        (appt: Appointment) => !appt.status.toLowerCase().includes('complete')
+      );
 
-        if (response.success && Array.isArray(response.appointments)) {
-          userAppointments = response.appointments;
-        } else if (Array.isArray(response)) {
-          userAppointments = response;
-        }
+      const sortedAppointments = activeAppointments.sort(
+        (a: Appointment, b: Appointment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
-        const sortedAppointments = userAppointments.sort(
-          (a: Appointment, b: Appointment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        setAppointments(sortedAppointments);
-        if (sortedAppointments.length > 0) {
-          setSelectedAppointment(sortedAppointments[0]);
-          setBillTotal(calculateBillTotal(sortedAppointments[0]));
-        }
-      } catch (err) {
-        console.error('Error fetching appointments:', err);
-        setError('Failed to load appointments');
-      } finally {
-        setLoading(false);
+      setAppointments(sortedAppointments);
+      if (sortedAppointments.length > 0) {
+        setSelectedAppointment(sortedAppointments[0]);
+        setBillTotal(calculateBillTotal(sortedAppointments[0]));
       }
-    };
-
-    fetchAppointments();
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError('Failed to load appointments');
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -118,30 +120,38 @@ const TrackService: React.FC = () => {
       (data) => {
         console.log('Received status update:', data);
 
+        const isCompleted = data.status.toLowerCase().includes('complete');
+
         // Update appointments list
-        setAppointments(prev =>
-          prev.map(appt =>
+        setAppointments(prev => {
+          if (isCompleted) {
+            // Remove from active list
+            return prev.filter(appt => appt.appointmentId.toString() !== data.appointmentId);
+          }
+          return prev.map(appt =>
             appt.appointmentId.toString() === data.appointmentId
               ? { ...appt, status: data.status }
               : appt
-          )
-        );
+          );
+        });
 
         // Update selected appointment if it's the current one
         setSelectedAppointment(prev => {
-          const updated = prev && prev.appointmentId.toString() === data.appointmentId
-            ? { ...prev, status: data.status }
-            : prev;
-          if (updated) {
+          if (prev && prev.appointmentId.toString() === data.appointmentId) {
+            if (isCompleted) {
+              return null; // deselect if completed
+            }
+            const updated = { ...prev, status: data.status };
             setBillTotal(calculateBillTotal(updated));
+            return updated;
           }
-          return updated;
+          return prev;
         });
       },
       // Handle new appointments
       (data) => {
         console.log('Received new appointment:', data);
-        if (data.appointment) {
+        if (data.appointment && !data.appointment.status.toLowerCase().includes('complete')) {
           setAppointments(prev => {
             // Check if already exists
             const exists = prev.some(a => a.appointmentId.toString() === data.appointment.appointmentId.toString());
@@ -466,7 +476,8 @@ const TrackService: React.FC = () => {
       <PayNow
         isOpen={isPayNowOpen}
         onClose={() => setIsPayNowOpen(false)}
-        appointmentId={selectedAppointment?.appointmentId}
+        paymentType="appointment"
+        itemId={selectedAppointment?.appointmentId}
         amount={billTotal}
         onPaymentSuccess={handlePaymentSuccess}
       />

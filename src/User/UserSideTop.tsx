@@ -24,6 +24,7 @@ import type{  Notification } from '../services/notifications';
 import Servicify from '../assets/Servicify.png';
 import UserMessagesPage from './UserMessagesPage';
 import * as ProfileService from '../services/Profile';
+import { appConfirm } from '../services/dialogService';
 
 interface NavItem {
   id: string;
@@ -167,15 +168,20 @@ const UserSideTop: React.FC<UserSideTopProps> = ({
     setIsMobileSidebarOpen(false);
   };
 
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      // Add your logout logic here
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userEmail');
-      navigate('/signin');
-    }
+  const handleLogout = async () => {
+    const shouldLogout = await appConfirm({
+      title: 'Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      variant: 'warning',
+    });
+    if (!shouldLogout) return;
+    // Add your logout logic here
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    navigate('/signin');
   };
 
   const isActive = (path: string) => {
@@ -372,7 +378,7 @@ const UserSideTop: React.FC<UserSideTopProps> = ({
                   <button
                     className="usertop-usermenu-item"
                     onClick={() => {
-                      navigate('/settings');
+                      navigate('/user/settings');
                       setShowUserMenu(false);
                     }}
                   >

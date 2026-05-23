@@ -168,14 +168,13 @@ export const packageService = {
     return response.data.data;
   },
 
-  // User: Get user's packages
-  getUserPackages: async (status?: 'active' | 'used' | 'inactive'): Promise<any[]> => {
+  // User: Get user's purchased packages
+  getUserPackages: async (): Promise<any[]> => {
     const token = getAuthToken();
-    const response = await axiosInstance.get('/api/packages/user/packages', {
+    const response = await axiosInstance.get('/api/packages/user/my-packages', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      params: { status },
     });
     return response.data.data;
   },
@@ -192,17 +191,6 @@ export const packageService = {
         },
       }
     );
-    return response.data.data;
-  },
-
-  // User: Get user's purchased packages
-  getUserPackages: async (): Promise<any[]> => {
-    const token = getAuthToken();
-    const response = await axiosInstance.get('/api/packages/user/my-packages', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
     return response.data.data;
   },
 };

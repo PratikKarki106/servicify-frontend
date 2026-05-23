@@ -300,11 +300,15 @@ const UserAnalytics: React.FC = () => {
   // Fetch analytics data
   const loadData = useCallback(async () => {
     try {
+      console.log('[UserAnalytics] Loading data with spendingRange:', spendingRange, 'dateRange:', dateRange);
       setLoading(true);
       setError(null);
       const analyticsData = await fetchUserAnalyticsData(dateRange, spendingRange);
+      console.log('[UserAnalytics] Data received:', analyticsData);
+      console.log('[UserAnalytics] spendingHistory:', analyticsData.spendingHistory);
       setData(analyticsData);
     } catch (err: any) {
+      console.error('[UserAnalytics] Error fetching data:', err);
       setError(err.message || 'Failed to load analytics data');
       setData(null);
     } finally {
@@ -313,8 +317,9 @@ const UserAnalytics: React.FC = () => {
   }, [dateRange, spendingRange]);
 
   useEffect(() => {
+    console.log('[UserAnalytics] useEffect triggered - spendingRange:', spendingRange);
     loadData();
-  }, [loadData]);
+  }, [spendingRange, loadData]);
 
   // Handle export
   const handleExport = async (format: 'csv' | 'pdf') => {
@@ -380,21 +385,21 @@ const UserAnalytics: React.FC = () => {
             {
               icon: <FaWallet />,
               label: 'Total Spent',
-              value: `Rs. ${(data!.kpiMetrics.totalSpent / 1000).toFixed(1)}k`,
+              value: `Rs. ${(data!.kpiMetrics.totalSpent).toLocaleString()}`,
               color: USER_COLORS.primary,
               trend: data!.kpiMetrics.spendingTrend
             },
             {
               icon: <FaCalendarCheck />,
               label: 'Total Services',
-              value: data!.kpiMetrics.totalServices,
+              value: data!.kpiMetrics.totalServices.toLocaleString(),
               color: USER_COLORS.success,
               trend: data!.kpiMetrics.serviceTrend
             },
             {
               icon: <FaClock />,
               label: 'Active Services',
-              value: data!.kpiMetrics.activeServices,
+              value: data!.kpiMetrics.activeServices.toLocaleString(),
               color: USER_COLORS.info,
               trend: 'stable'
             },
