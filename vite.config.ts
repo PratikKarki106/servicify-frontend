@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
   server: {
     allowedHosts: [
-      'effectiveness-badge-representative-criticism.trycloudflare.com'
+      '192.168.254.9'
     ],
     host: true,
     port: 5173,

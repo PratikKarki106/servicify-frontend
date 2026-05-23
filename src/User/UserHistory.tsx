@@ -21,6 +21,7 @@ import type { ServiceBooking } from '../types/dashboardTypes';
 import { getAppointmentsByUser } from '../services/bookAppointment';
 import type { Appointment } from '../types/appointment';
 import { packageService } from '../services/Package';
+import { getMyPurchases } from '../services/cartPurchaseService';
 
 interface UserPackage {
   _id: string;
@@ -34,12 +35,18 @@ interface UserPackage {
   isActive: boolean;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 const UserHistory: React.FC = () => {
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
   const [packages, setPackages] = useState<UserPackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'appointments' | 'packages'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'packages' | 'purchases'>('appointments');
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
+  const [purchases, setPurchases] = useState<any[]>([]);
+  const [appointmentPage, setAppointmentPage] = useState(1);
+  const [packagePage, setPackagePage] = useState(1);
+  const [purchasePage, setPurchasePage] = useState(1);
 
   // Helper function to map status string
   const mapToServiceBookingStatus = (status: string): ServiceBooking['status'] => {
@@ -130,7 +137,7 @@ const UserHistory: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      await Promise.all([fetchAppointments(), fetchPackages()]);
+      await Promise.all([fetchAppointments(), fetchPackages(), fetchPurchases()]);
     } catch (err: any) {
       console.error('Error fetching history:', err);
       toast.error('Failed to load history');
@@ -139,9 +146,30 @@ const UserHistory: React.FC = () => {
     }
   };
 
+  const fetchPurchases = async () => {
+    try {
+      const response = await getMyPurchases();
+      setPurchases(response?.data || []);
+    } catch (_err) {
+      setPurchases([]);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setAppointmentPage(1);
+  }, [filter, bookings.length]);
+
+  useEffect(() => {
+    setPackagePage(1);
+  }, [packages.length]);
+
+  useEffect(() => {
+    setPurchasePage(1);
+  }, [purchases.length]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -464,10 +492,95 @@ const UserHistory: React.FC = () => {
     toast.success('Receipt PDF opened!');
   };
 
+  const handleOpenPurchaseBill = (purchase: any) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("SERVICIFY PURCHASE BILL", 20, 20);
+    doc.setFontSize(11);
+    doc.text(`Bill No: ${purchase.purchaseCode}`, 20, 30);
+    doc.text(`Date: ${new Date(purchase.createdAt).toLocaleString()}`, 20, 38);
+
+    const rows = (purchase.items || []).map((i: any) => [
+      i.itemName,
+      String(i.quantity),
+      `Rs. ${Number(i.unitPrice || 0).toFixed(2)}`,
+      `Rs. ${Number(i.totalPrice || 0).toFixed(2)}`
+    ]);
+
+    autoTable(doc, {
+      startY: 48,
+      head: [["Item", "Qty", "Unit", "Total"]],
+      body: rows,
+      theme: "striped"
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.text(`Total Paid: Rs. ${Number(purchase.totalAmount || 0).toFixed(2)}`, 20, finalY);
+    const blob = doc.output('blob');
+    window.open(URL.createObjectURL(blob), '_blank');
+  };
+
   const filteredBookings = bookings.filter(booking => {
     if (filter === 'all') return true;
     return booking.status === filter;
   });
+
+  const appointmentTotalPages = Math.max(1, Math.ceil(filteredBookings.length / ITEMS_PER_PAGE));
+  const packageTotalPages = Math.max(1, Math.ceil(packages.length / ITEMS_PER_PAGE));
+  const purchaseTotalPages = Math.max(1, Math.ceil(purchases.length / ITEMS_PER_PAGE));
+
+  const safeAppointmentPage = Math.min(appointmentPage, appointmentTotalPages);
+  const safePackagePage = Math.min(packagePage, packageTotalPages);
+  const safePurchasePage = Math.min(purchasePage, purchaseTotalPages);
+
+  const paginatedBookings = filteredBookings.slice(
+    (safeAppointmentPage - 1) * ITEMS_PER_PAGE,
+    safeAppointmentPage * ITEMS_PER_PAGE
+  );
+  const paginatedPackages = packages.slice(
+    (safePackagePage - 1) * ITEMS_PER_PAGE,
+    safePackagePage * ITEMS_PER_PAGE
+  );
+  const paginatedPurchases = purchases.slice(
+    (safePurchasePage - 1) * ITEMS_PER_PAGE,
+    safePurchasePage * ITEMS_PER_PAGE
+  );
+
+  const renderPagination = (
+    currentPage: number,
+    totalPages: number,
+    onPageChange: (page: number) => void
+  ) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="history-pagination-controls">
+        <button
+          className="history-pagination-btn"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+        >
+          {'<'}
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+          <button
+            key={pageNum}
+            className={`history-pagination-btn ${pageNum === currentPage ? 'active' : ''}`}
+            onClick={() => onPageChange(pageNum)}
+          >
+            {pageNum}
+          </button>
+        ))}
+        <button
+          className="history-pagination-btn"
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+        >
+          {'>'}
+        </button>
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -497,6 +610,12 @@ const UserHistory: React.FC = () => {
             onClick={() => setActiveTab('packages')}
           >
             <FontAwesomeIcon icon={faBox} /> Packages ({packages.length})
+          </button>
+          <button
+            className={`history-tab ${activeTab === 'purchases' ? 'active' : ''}`}
+            onClick={() => setActiveTab('purchases')}
+          >
+            <FontAwesomeIcon icon={faCreditCard} /> Purchases ({purchases.length})
           </button>
         </div>
       </div>
@@ -537,7 +656,7 @@ const UserHistory: React.FC = () => {
             </div>
           ) : (
             <div className="userdashboard-bookings">
-              {filteredBookings.map(booking => (
+              {paginatedBookings.map(booking => (
                 <div key={booking.id} className="userdashboard-booking-card">
                   <div className="userdashboard-booking-header">
                     <div>
@@ -587,6 +706,7 @@ const UserHistory: React.FC = () => {
               ))}
             </div>
           )}
+          {renderPagination(safeAppointmentPage, appointmentTotalPages, setAppointmentPage)}
         </>
       )}
 
@@ -604,7 +724,7 @@ const UserHistory: React.FC = () => {
               <p>Your purchased packages will appear here</p>
             </div>
           ) : (
-            packages.map((pkg) => {
+            paginatedPackages.map((pkg) => {
               const daysRemaining = getDaysRemaining(pkg.expiryDate);
               const usagePercent = (pkg.usedCredits / pkg.totalCredits) * 100;
               const isExpired = !pkg.isActive;
@@ -695,6 +815,47 @@ const UserHistory: React.FC = () => {
           )}
         </div>
       )}
+      {activeTab === 'packages' && renderPagination(safePackagePage, packageTotalPages, setPackagePage)}
+
+      {activeTab === 'purchases' && (
+        <div className="packages-history-grid">
+          {purchases.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <h3>No purchase history found</h3>
+            </div>
+          ) : (
+            paginatedPurchases.map((purchase) => (
+              <div key={purchase._id} className="package-history-card">
+                <div className="package-history-header">
+                  <div className="package-history-title">
+                    <FontAwesomeIcon icon={faCreditCard} style={{ marginRight: '10px', color: '#667eea' }} />
+                    <h4>{purchase.purchaseCode}</h4>
+                  </div>
+                  <span className="status-badge active">{purchase.paymentStatus}</span>
+                </div>
+                <div className="package-detail-row">
+                  <span className="detail-label">Items</span>
+                  <span className="detail-value">{purchase.items?.length || 0}</span>
+                </div>
+                <div className="package-detail-row">
+                  <span className="detail-label">Date</span>
+                  <span className="detail-value">{formatDate(purchase.createdAt)}</span>
+                </div>
+                <div className="package-detail-row">
+                  <span className="detail-label">Amount</span>
+                  <span className="detail-value">Rs. {Number(purchase.totalAmount || 0).toFixed(2)}</span>
+                </div>
+                <div className="package-history-actions">
+                  <button className="package-action-btn" onClick={() => handleOpenPurchaseBill(purchase)}>
+                    <FontAwesomeIcon icon={faFilePdf} /> Open Bill PDF
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {activeTab === 'purchases' && renderPagination(safePurchasePage, purchaseTotalPages, setPurchasePage)}
 
       <style>{`
         .history-tabs {
@@ -754,6 +915,44 @@ const UserHistory: React.FC = () => {
           background: #667eea;
           color: white;
           border-color: #667eea;
+        }
+
+        .history-pagination-controls {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          margin-top: 16px;
+          margin-bottom: 8px;
+        }
+
+        .history-pagination-btn {
+          min-width: 34px;
+          height: 34px;
+          border: 1px solid #d1d5db;
+          background: #fff;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          transition: all 0.2s ease;
+        }
+
+        .history-pagination-btn:hover:not(:disabled) {
+          border-color: #667eea;
+          color: #667eea;
+        }
+
+        .history-pagination-btn.active {
+          background: #667eea;
+          border-color: #667eea;
+          color: #fff;
+        }
+
+        .history-pagination-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .packages-history-grid {

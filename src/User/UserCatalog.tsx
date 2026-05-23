@@ -10,12 +10,16 @@ import {
 import { getUserCatalogItems, getCompanies, getProducts, getVersions } from '../services/catalogService';
 import type { CatalogItem, Company, Product, Version } from '../services/catalogService';
 import UserSideTop from './UserSideTop';
+import { addToCart, getCart, updateCartItem } from '../services/cartPurchaseService';
+import { toast } from 'react-toastify';
+import PayNow from './Payment/PayNow';
 
 interface PartCardProps {
   item: CatalogItem;
+  onAddToCart: (itemId: string) => void;
 }
 
-const PartCard: React.FC<PartCardProps> = ({ item }) => {
+const PartCard: React.FC<PartCardProps> = ({ item, onAddToCart }) => {
   const companyName = typeof item.companyId === 'object' && item.companyId ? item.companyId.name : 'N/A';
   const productName = typeof item.productId === 'object' && item.productId ? item.productId.name : 'N/A';
   const versionName = typeof item.versionId === 'object' && item.versionId ? item.versionId.name : 'N/A';
@@ -40,8 +44,8 @@ const PartCard: React.FC<PartCardProps> = ({ item }) => {
           </div>
         )}
         {item.isActive ? (
-          <span className="part-card-status-badge status-available">
-            Available
+          <span className="part-card-status-badge status-in-stock">
+            In Stock
           </span>
         ) : (
           <span className="part-card-status-badge status-out-of-stock">
@@ -49,7 +53,7 @@ const PartCard: React.FC<PartCardProps> = ({ item }) => {
           </span>
         )}
       </div>
-      
+
       <div className="part-card-content">
         <div className="part-card-header">
           <span className="part-card-brand">
@@ -60,19 +64,20 @@ const PartCard: React.FC<PartCardProps> = ({ item }) => {
             {formatTime(item.estimatedTime)} min
           </span>
         </div>
-        
+
         <h3 className="part-card-title">{item.itemName}</h3>
-        
+
         <div className="part-card-footer">
           <span className="part-card-price">
             Nrs {item.totalCost.toLocaleString()}
           </span>
-          <button 
+          <button
             className={`part-card-select-button ${!item.isActive ? 'button-disabled' : ''}`}
             disabled={!item.isActive}
+            onClick={() => item.isActive && onAddToCart(item._id)}
           >
             <FaShoppingCart size={14} />
-            {item.isActive ? 'Select Service' : 'Out of Stock'}
+            {item.isActive ? 'Buy' : 'Out of Stock'}
           </button>
         </div>
       </div>
@@ -85,23 +90,28 @@ const UserCatalog = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  
+
   // Filter states
   const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [versions, setVersions] = useState<Version[]>([]);
-  
+
   // Selected filter values
   const [selectedCompany, setSelectedCompany] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedVersion, setSelectedVersion] = useState<string>('');
-  
+
   // Applied filter values (used for actual filtering)
   const [appliedCompany, setAppliedCompany] = useState<string>('');
   const [appliedProduct, setAppliedProduct] = useState<string>('');
   const [appliedVersion, setAppliedVersion] = useState<string>('');
-  
+  const [cartCount, setCartCount] = useState(0);
+  const [showCartDrawer, setShowCartDrawer] = useState(false);
+  const [showPayNow, setShowPayNow] = useState(false);
+  const [cartSubtotal, setCartSubtotal] = useState(0);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+
   const filterContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchCatalogItems = async () => {
@@ -131,7 +141,7 @@ const UserCatalog = () => {
         getProducts(),
         getVersions()
       ]);
-      
+
       if (companiesRes.success) {
         setCompanies(companiesRes.companies || []);
       }
@@ -149,7 +159,40 @@ const UserCatalog = () => {
   useEffect(() => {
     fetchCatalogItems();
     fetchFilterData();
+    fetchCart();
   }, []);
+
+  const fetchCart = async () => {
+    try {
+      const response = await getCart();
+      const items = response?.data?.items || [];
+      setCartItems(items);
+      setCartCount(items.reduce((sum: number, i: any) => sum + (i.quantity || 0), 0));
+      setCartSubtotal(response?.data?.subtotal || 0);
+    } catch (_error) {
+      setCartCount(0);
+      setCartSubtotal(0);
+    }
+  };
+
+  const handleAddToCart = async (itemId: string) => {
+    try {
+      await addToCart(itemId, 1);
+      await fetchCart();
+      toast.success('Item added to cart');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to add item');
+    }
+  };
+
+  const handleAdjustQuantity = async (catalogItemId: string, nextQuantity: number) => {
+    try {
+      await updateCartItem(catalogItemId, nextQuantity);
+      await fetchCart();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to update cart');
+    }
+  };
 
   // Handle company selection change
   const handleCompanyChange = (companyId: string) => {
@@ -208,21 +251,21 @@ const UserCatalog = () => {
   // Get filtered versions based on selected company and product
   const getFilteredVersions = () => {
     let filtered = versions;
-    
+
     if (selectedCompany) {
       filtered = filtered.filter(v => {
         const verCompanyId = typeof v.companyId === 'object' && v.companyId ? v.companyId._id : v.companyId;
         return verCompanyId === selectedCompany;
       });
     }
-    
+
     if (selectedProduct) {
       filtered = filtered.filter(v => {
         const verProductId = typeof v.productId === 'object' && v.productId ? v.productId._id : v.productId;
         return verProductId === selectedProduct;
       });
     }
-    
+
     return filtered;
   };
 
@@ -293,7 +336,7 @@ const UserCatalog = () => {
     <UserSideTop>
       <div className="user-catalog-container">
         <div className="catalog-header-section">
-          <p style={{fontWeight: "600", fontSize: "20px"}}>Available Items</p>
+          <p style={{ fontWeight: "600", fontSize: "20px" }}>Available Items</p>
           <p className="catalog-subtitle">Browse our complete range of automotive parts and services</p>
         </div>
 
@@ -400,6 +443,9 @@ const UserCatalog = () => {
           <div className="catalog-results-count">
             Showing {filteredItems.length} services
           </div>
+          <button className="catalog-cart-button" onClick={() => setShowCartDrawer(true)}>
+            <FaShoppingCart /> Cart ({cartCount})
+          </button>
         </div>
 
         <div className="parts-grid">
@@ -409,10 +455,62 @@ const UserCatalog = () => {
             </div>
           ) : (
             filteredItems.map((item: CatalogItem) => (
-              <PartCard key={item._id} item={item} />
+              <PartCard key={item._id} item={item} onAddToCart={handleAddToCart} />
             ))
           )}
         </div>
+
+        {showCartDrawer && (
+          <div className="catalog-checkout-overlay" onClick={() => setShowCartDrawer(false)}>
+            <div className="catalog-cart-drawer" onClick={(e) => e.stopPropagation()}>
+              <div className="catalog-drawer-header">
+                <h3>Your Cart</h3>
+                <button onClick={() => setShowCartDrawer(false)} className="filter-close-button"><FaTimes /></button>
+              </div>
+              <div className="catalog-drawer-items">
+                {cartItems.length === 0 ? (
+                  <p>No items in cart.</p>
+                ) : (
+                  cartItems.map((item: any) => (
+                    <div key={item.catalogItemId?._id || item.catalogItemId} className="catalog-drawer-item">
+                      <div>
+                        <strong>{item.itemSnapshot?.itemName || item.catalogItemId?.itemName || 'Item'}</strong>
+                        <p>Nrs {Number(item.totalPrice || 0).toFixed(2)}</p>
+                      </div>
+                      <div className="catalog-qty-controls">
+                        <button onClick={() => handleAdjustQuantity(item.catalogItemId?._id || item.catalogItemId, item.quantity - 1)}>-</button>
+                        <span>{item.quantity}</span>
+                        <button onClick={() => handleAdjustQuantity(item.catalogItemId?._id || item.catalogItemId, item.quantity + 1)}>+</button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="catalog-drawer-footer">
+                <h4>Total: Nrs {cartSubtotal.toFixed(2)}</h4>
+                <button
+                  onClick={() => {
+                    setShowPayNow(true);
+                    setShowCartDrawer(false);
+                  }}
+                  className="filter-apply-button"
+                  disabled={cartItems.length === 0}
+                >
+                  Proceed to Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <PayNow
+          isOpen={showPayNow}
+          onClose={() => setShowPayNow(false)}
+          paymentType="purchase"
+          itemId="cart"
+          amount={cartSubtotal}
+          itemName="Cart Purchase"
+        />
 
         <div className='catalog-footer'>
           <div className='footer-note'>

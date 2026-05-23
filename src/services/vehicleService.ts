@@ -11,6 +11,8 @@ export interface Vehicle {
   mileage: number;
   bluebookImage: string | null;
   bluebookImageUrl?: string;
+  vehicleImage: string | null;
+  vehicleImageUrl?: string;
   status: 'pending' | 'verified' | 'rejected';
   rejectionReason?: string | null;
   userDetails?: {
@@ -32,6 +34,7 @@ export interface NewVehicleData {
   plateNumber: string;
   mileage: number;
   image?: File | null;
+  optionalImage?: File | null;
   lastService?: string;
   nextService?: string;
 }
@@ -83,9 +86,9 @@ export const addVehicle = async (vehicleData: NewVehicleData): Promise<Vehicle |
     // Append all vehicle data to FormData
     Object.entries(vehicleData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (key === 'image' && value instanceof File) {
+        if ((key === 'image' || key === 'optionalImage') && value instanceof File) {
           formData.append(key, value, value.name);
-        } else if (key !== 'image') {
+        } else if (key !== 'image' && key !== 'optionalImage') {
           formData.append(key, String(value));
         }
       }

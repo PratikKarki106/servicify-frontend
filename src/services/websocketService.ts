@@ -92,7 +92,8 @@ class WebSocketService {
 
   subscribeToAppointmentUpdates(
     onStatusUpdate: (data: AppointmentUpdate) => void,
-    onNewAppointment: (data: AppointmentCreated) => void
+    onNewAppointment: (data: AppointmentCreated) => void,
+    onCancellation?: (data: { appointmentId: string; message: string }) => void
   ) {
     if (!this.socket) {
       console.error('WebSocket not connected');
@@ -110,6 +111,14 @@ class WebSocketService {
       console.log('New appointment created:', data);
       onNewAppointment(data);
     });
+
+    // Listen for appointment cancellations
+    if (onCancellation) {
+      this.socket.on('appointment_cancelled', (data: { appointmentId: string; message: string }) => {
+        console.log('Appointment cancelled:', data);
+        onCancellation(data);
+      });
+    }
   }
 
   subscribeToBillUpdates(
@@ -132,6 +141,7 @@ class WebSocketService {
 
     this.socket.off('appointment_status_updated');
     this.socket.off('appointment_created');
+    this.socket.off('appointment_cancelled');
     this.socket.off('bill_updated');
   }
 }

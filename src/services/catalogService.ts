@@ -13,6 +13,8 @@ export interface CatalogItem {
   estimatedTime: number;
   totalCost: Number;
   imageUrl?: string;
+  /** MinIO object key; sent on create/update. API returns imageUrl as a presigned URL for display. */
+  imageObjectKey?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -49,7 +51,7 @@ export interface CreateCatalogItemData {
   itemPrice: number;
   serviceCharge: number;
   estimatedTime: number;
-  imageUrl?: string;
+  imageObjectKey?: string;
   isActive?: boolean;
 }
 
@@ -105,6 +107,37 @@ export const deleteCatalogItem = async (id: string) => {
     throw {
       success: false,
       message: error.response?.data?.message || 'Failed to delete catalog item',
+      error: error.message
+    };
+  }
+};
+
+/** Admin: upload image to MinIO; returns object key and presigned URL for preview */
+export const uploadCatalogItemImage = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await axiosInstance.post('/api/catalog/upload-image', formData, {
+      transformRequest: [
+        (data, headers) => {
+          if (headers && typeof headers === 'object' && 'Content-Type' in headers) {
+            delete (headers as Record<string, unknown>)['Content-Type'];
+          }
+          return data;
+        }
+      ]
+    });
+    return response.data as {
+      success: boolean;
+      imageObjectKey: string;
+      imageUrl: string;
+      message?: string;
+    };
+  } catch (error: any) {
+    console.error('Error uploading catalog image:', error);
+    throw {
+      success: false,
+      message: error.response?.data?.message || 'Failed to upload image',
       error: error.message
     };
   }

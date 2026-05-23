@@ -67,8 +67,8 @@ export interface HistoryGroup {
 }
 
 export interface HistoryFilters {
-  type?: 'all' | 'appointment' | 'package';
-  status?: 'all' | 'booked' | 'confirmed' | 'in-progress' | 'payment' | 'completed' | 'cancelled';
+  type?: 'all' | 'appointment' | 'package' | 'catalog';
+  status?: 'all' | 'booked' | 'confirmed' | 'in-progress' | 'payment' | 'completed' | 'cancelled' | 'pending' | 'failed' | 'refunded';
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -102,17 +102,21 @@ export interface HistoryResponse {
  */
 export const fetchHistory = async (filters: HistoryFilters = {}): Promise<HistoryResponse> => {
   try {
+    const backendType = filters.type === 'catalog' ? 'all' : filters.type;
+    const backendStatusAllowed = ['booked', 'confirmed', 'in-progress', 'payment', 'completed', 'cancelled'];
+    const backendStatus = filters.status && backendStatusAllowed.includes(filters.status) ? filters.status : 'all';
+
     const params: any = {
       page: filters.page || 1,
       limit: filters.limit || 50,
     };
 
-    if (filters.type && filters.type !== 'all') {
-      params.type = filters.type;
+    if (backendType && backendType !== 'all') {
+      params.type = backendType;
     }
 
-    if (filters.status && filters.status !== 'all') {
-      params.status = filters.status;
+    if (backendStatus && backendStatus !== 'all') {
+      params.status = backendStatus;
     }
 
     if (filters.startDate) {
@@ -154,8 +158,14 @@ export const fetchPackageHistory = async (
  */
 export const exportHistoryToCSV = async (filters: HistoryFilters = {}): Promise<void> => {
   try {
+    const backendType = filters.type === 'catalog' ? 'all' : filters.type;
+    const backendStatusAllowed = ['booked', 'confirmed', 'in-progress', 'payment', 'completed', 'cancelled'];
+    const backendStatus = filters.status && backendStatusAllowed.includes(filters.status) ? filters.status : 'all';
+
     const params: any = {
       ...filters,
+      type: backendType,
+      status: backendStatus,
       export: 'csv',
     };
 

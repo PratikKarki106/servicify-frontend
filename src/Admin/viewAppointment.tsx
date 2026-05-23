@@ -1,45 +1,59 @@
 import HomeNav from '../components/HomeNav';
 import './viewAppointment.css'
 import { FaChevronRight, FaCalendarAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAllAppointments, updateAppointmentStatus } from '../services/bookAppointment';
 import type { Appointment } from '../types/appointment';
 import Sidebar from '../components/Sidebar';
 import AppointmentDetails from './AppointmentDetails';
 import { appAlert, appConfirm } from '../services/dialogService';
+import { websocketService } from '../services/websocketService';
 
 const ViewAppointment = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);       // true only on initial mount
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);  // subtle indicator for background refreshes
   const [error, setError] = useState<string | null>(null);
   const [serviceTypeFilter, setServiceTypeFilter] = useState<string>('All');
   const [dateFilter, setDateFilter] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
+  const isInitialLoad = useRef(true);
+  const currentFilters = useRef({ serviceType: 'All', date: '' });
 
-  // Fetch appointments from API - Only "booked" status
-  const fetchAppointments = async (serviceType: string | null = null, date: string | null = null) => {
+  // Fetch appointments — shows full spinner only on initial load, subtle sync indicator on refresh
+  const fetchAppointments = async (serviceType: string | null = null, date: string | null = null, silent = false) => {
     try {
-      setLoading(true);
+      if (isInitialLoad.current) {
+        setLoading(true);
+      } else if (!silent) {
+        setIsSyncing(true);
+      }
       setError(null);
-      
+
+      // Keep ref in sync so WebSocket callbacks can re-use current filters
+      currentFilters.current = {
+        serviceType: serviceType ?? 'All',
+        date: date ?? ''
+      };
+
       const params: any = {
         sortBy: 'createdAt',
         sortOrder: 'desc',
         status: 'booked'
       };
-      
+
       if (serviceType && serviceType !== 'All') {
         params.serviceType = serviceType.toLowerCase();
       }
-      
+
       if (date) {
         params.date = date;
       }
-      
+
       const response = await getAllAppointments(params);
-      
+
       if (response.success) {
         setAppointments(response.appointments || []);
       } else {
@@ -50,6 +64,8 @@ const ViewAppointment = () => {
       setError(err.message || 'Error loading appointments');
     } finally {
       setLoading(false);
+      setIsSyncing(false);
+      isInitialLoad.current = false;
     }
   };
 
@@ -207,9 +223,41 @@ const ViewAppointment = () => {
     );
   };
 
-  // Initial fetch on component mount
+  // Initial fetch + WebSocket real-time subscription
   useEffect(() => {
     fetchAppointments();
+
+    const socket = websocketService.connectForAdmin();
+
+    websocketService.subscribeToAppointmentUpdates(
+      // Status updated — remove from "booked" list if it's no longer booked
+      (data) => {
+        setAppointments(prev => prev.filter(
+          appt => appt.appointmentId !== Number(data.appointmentId)
+        ));
+        setSelectedAppointment(prev =>
+          prev && prev.appointmentId === Number(data.appointmentId) ? null : prev
+        );
+      },
+      // New appointment created — silently refresh to pick it up
+      () => {
+        const { serviceType, date } = currentFilters.current;
+        fetchAppointments(serviceType === 'All' ? null : serviceType, date || null, true);
+      },
+      // Appointment cancelled — remove from list
+      (data) => {
+        setAppointments(prev => prev.filter(
+          appt => appt.appointmentId !== Number(data.appointmentId)
+        ));
+        setSelectedAppointment(prev =>
+          prev && prev.appointmentId === Number(data.appointmentId) ? null : prev
+        );
+      }
+    );
+
+    return () => {
+      websocketService.unsubscribeFromUpdates();
+    };
   }, []);
 
   const handleDetailsClick = (appointment: Appointment) => {
@@ -311,6 +359,11 @@ const ViewAppointment = () => {
       <Sidebar />
       <div className={`main-container-viewappointment ${selectedAppointment ? 'details-open' : ''}`}>
         <div className='filter-section'>
+          {isSyncing && (
+            <div className="sync-indicator">
+              <span className="sync-dot"></span> Syncing...
+            </div>
+          )}
           <div className='filter-dropdown-container'>
             <label>Service Type</label>
             <select 

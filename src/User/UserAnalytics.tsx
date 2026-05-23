@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './UserAnalytics.css';
 import UserSideTop from './UserSideTop';
 import {
@@ -40,14 +40,6 @@ const USER_COLORS = {
   pink: '#ec4899',
 };
 
-// const STATUS_COLORS: Record<string, string> = {
-//   'Completed': USER_COLORS.success,
-//   'In Progress': USER_COLORS.info,
-//   'Pending': USER_COLORS.warning,
-//   'Cancelled': USER_COLORS.danger,
-//   'Confirmed': USER_COLORS.primary,
-// };
-
 const SERVICE_COLORS: Record<string, string> = {
   'Servicing': USER_COLORS.primary,
   'Repair': USER_COLORS.secondary,
@@ -87,29 +79,31 @@ const UserChartTooltip: React.FC<UserTooltipProps> = ({ active, payload, label, 
 // ─── Loading Skeleton Component ──────────────────────────────────────────────
 
 const UserAnalyticsSkeleton: React.FC = () => (
-  <div className="useranalytics-container">
-    <div className="useranalytics-header">
-      <div className="useranalytics-skeleton-title-group">
-        <div className="useranalytics-skeleton useranalytics-skeleton-title" />
-        <div className="useranalytics-skeleton useranalytics-skeleton-subtitle" />
+  <UserSideTop>
+    <div className="useranalytics-container">
+      <div className="useranalytics-header">
+        <div className="useranalytics-skeleton-title-group">
+          <div className="useranalytics-skeleton useranalytics-skeleton-title" />
+          <div className="useranalytics-skeleton useranalytics-skeleton-subtitle" />
+        </div>
+      </div>
+      <div className="useranalytics-kpi-row">
+        {[...Array(4)].map((_, i) => (
+          <div className="useranalytics-kpi-card useranalytics-skeleton-card" key={i}>
+            <div className="useranalytics-skeleton useranalytics-skeleton-icon" />
+            <div className="useranalytics-skeleton-group">
+              <div className="useranalytics-skeleton useranalytics-skeleton-label" />
+              <div className="useranalytics-skeleton useranalytics-skeleton-value" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="useranalytics-card useranalytics-full-width">
+        <div className="useranalytics-skeleton useranalytics-skeleton-chart-header" />
+        <div className="useranalytics-skeleton useranalytics-skeleton-chart" />
       </div>
     </div>
-    <div className="useranalytics-kpi-row">
-      {[...Array(4)].map((_, i) => (
-        <div className="useranalytics-kpi-card useranalytics-skeleton-card" key={i}>
-          <div className="useranalytics-skeleton useranalytics-skeleton-icon" />
-          <div className="useranalytics-skeleton-group">
-            <div className="useranalytics-skeleton useranalytics-skeleton-label" />
-            <div className="useranalytics-skeleton useranalytics-skeleton-value" />
-          </div>
-        </div>
-      ))}
-    </div>
-    <div className="useranalytics-card useranalytics-full-width">
-      <div className="useranalytics-skeleton useranalytics-skeleton-chart-header" />
-      <div className="useranalytics-skeleton useranalytics-skeleton-chart" />
-    </div>
-  </div>
+  </UserSideTop>
 );
 
 // ─── Error State Component ───────────────────────────────────────────────────
@@ -120,16 +114,18 @@ interface UserErrorStateProps {
 }
 
 const UserAnalyticsError: React.FC<UserErrorStateProps> = ({ message, onRetry }) => (
-  <div className="useranalytics-container">
-    <div className="useranalytics-error-state">
-      <div className="useranalytics-error-icon">⚠️</div>
-      <h2 className="useranalytics-error-title">Failed to Load Analytics</h2>
-      <p className="useranalytics-error-message">{message}</p>
-      <button className="useranalytics-retry-btn" onClick={onRetry}>
-        <FaSpinner className="useranalytics-retry-icon" /> Try Again
-      </button>
+  <UserSideTop>
+    <div className="useranalytics-container">
+      <div className="useranalytics-error-state">
+        <div className="useranalytics-error-icon">⚠️</div>
+        <h2 className="useranalytics-error-title">Failed to Load Analytics</h2>
+        <p className="useranalytics-error-message">{message}</p>
+        <button className="useranalytics-retry-btn" onClick={onRetry}>
+          <FaSpinner className="useranalytics-retry-icon" /> Try Again
+        </button>
+      </div>
     </div>
-  </div>
+  </UserSideTop>
 );
 
 // ─── Empty State Component ───────────────────────────────────────────────────
@@ -139,13 +135,15 @@ interface UserEmptyStateProps {
 }
 
 const UserAnalyticsEmpty: React.FC<UserEmptyStateProps> = ({ message }) => (
-  <div className="useranalytics-container">
-    <div className="useranalytics-empty-state">
-      <div className="useranalytics-empty-icon">📊</div>
-      <h2 className="useranalytics-empty-title">No Data Available</h2>
-      <p className="useranalytics-empty-message">{message}</p>
+  <UserSideTop>
+    <div className="useranalytics-container">
+      <div className="useranalytics-empty-state">
+        <div className="useranalytics-empty-icon">📊</div>
+        <h2 className="useranalytics-empty-title">No Data Available</h2>
+        <p className="useranalytics-empty-message">{message}</p>
+      </div>
     </div>
-  </div>
+  </UserSideTop>
 );
 
 // ─── Date Range Picker Component ─────────────────────────────────────────────
@@ -286,26 +284,22 @@ const UserSpendingComparison: React.FC<SpendingComparisonProps> = ({ currentPeri
 
 type RangeKey = 'weekly' | 'monthly';
 
+const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+const YEAR_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
+
 const UserAnalytics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<UserAnalyticsResponse | null>(null);
   const [spendingRange, setSpendingRange] = useState<RangeKey>('weekly');
-  const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
-  });
   const [exportLoading, setExportLoading] = useState(false);
 
   // Fetch analytics data
   const loadData = useCallback(async () => {
     try {
-      console.log('[UserAnalytics] Loading data with spendingRange:', spendingRange, 'dateRange:', dateRange);
       setLoading(true);
       setError(null);
-      const analyticsData = await fetchUserAnalyticsData(dateRange, spendingRange);
-      console.log('[UserAnalytics] Data received:', analyticsData);
-      console.log('[UserAnalytics] spendingHistory:', analyticsData.spendingHistory);
+      const analyticsData = await fetchUserAnalyticsData(undefined, spendingRange);
       setData(analyticsData);
     } catch (err: any) {
       console.error('[UserAnalytics] Error fetching data:', err);
@@ -314,10 +308,9 @@ const UserAnalytics: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [dateRange, spendingRange]);
+  }, [spendingRange]);
 
   useEffect(() => {
-    console.log('[UserAnalytics] useEffect triggered - spendingRange:', spendingRange);
     loadData();
   }, [spendingRange, loadData]);
 
@@ -338,10 +331,43 @@ const UserAnalytics: React.FC = () => {
 
   // Get spending data key based on range
   const spendingKey = spendingRange === 'weekly' ? 'day' : 'month';
+  const normalizedSpendingHistory = useMemo(() => {
+    if (!data?.spendingHistory?.length) {
+      return spendingRange === 'weekly'
+        ? WEEK_DAYS.map((day) => ({ day, amount: 0 }))
+        : YEAR_MONTHS.map((month) => ({ month, amount: 0 }));
+    }
+
+    if (spendingRange === 'weekly') {
+      const totalsByDay = new Map<string, number>();
+      data.spendingHistory.forEach((point) => {
+        const key = point.day || '';
+        if (!key) return;
+        totalsByDay.set(key, (totalsByDay.get(key) || 0) + Number(point.amount || 0));
+      });
+
+      return WEEK_DAYS.map((day) => ({
+        day,
+        amount: totalsByDay.get(day) || 0,
+      }));
+    }
+
+    const totalsByMonth = new Map<string, number>();
+    data.spendingHistory.forEach((point) => {
+      const key = point.month || '';
+      if (!key) return;
+      totalsByMonth.set(key, (totalsByMonth.get(key) || 0) + Number(point.amount || 0));
+    });
+
+    return YEAR_MONTHS.map((month) => ({
+      month,
+      amount: totalsByMonth.get(month) || 0,
+    }));
+  }, [data?.spendingHistory, spendingRange]);
 
   // Check if data is empty
   const isEmpty = !data || (
-    data.spendingHistory.length === 0 &&
+    normalizedSpendingHistory.every((point) => point.amount === 0) &&
     data.serviceUsage.length === 0 &&
     data.monthlyComparison.length === 0
   );
@@ -373,10 +399,6 @@ const UserAnalytics: React.FC = () => {
             </h1>
             <p className="useranalytics-page-subtitle">Track your service usage and spending patterns</p>
           </div>
-          {/* <div className="useranalytics-header-actions">
-            <UserDateRangePicker dateRange={dateRange} onChange={setDateRange} />
-            <UserExportMenu onExport={handleExport} isLoading={exportLoading} />
-          </div> */}
         </div>
 
         {/* ── Summary KPI Row ── */}
@@ -447,7 +469,7 @@ const UserAnalytics: React.FC = () => {
           </div>
 
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data!.spendingHistory} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+            <AreaChart data={normalizedSpendingHistory} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="spendingGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={USER_COLORS.primary} stopOpacity={0.4} />

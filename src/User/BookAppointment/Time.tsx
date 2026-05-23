@@ -22,7 +22,10 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
   if (!selectedDate) return;
   const fetchAvailability = async () => {
     try {
-      const dateStr = selectedDate.toISOString().split("T")[0];
+      const year = selectedDate.getFullYear();
+      const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = selectedDate.getDate().toString().padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const res = await axiosInstance.get(
         `/appointments/availability?date=${dateStr}&serviceType=${selectedService}` );
         const slots = res.data?.availability?.filter((s: any) => s.available).map((s: any) => s.time) ?? [];
@@ -45,7 +48,7 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
   const getIntervalByService = (service: ServiceType): number => {
     switch (service) {
       case "repair":
-        return 90;
+        return 60;
       case "wash":
         return 20;
       case "servicing":
@@ -243,8 +246,12 @@ const Time: React.FC<TimeProps> = ({ selectedService, onNext, onBack }) => {
             return (
               <button
                 key={time}
-                className={`time-slot ${selectedTime === time ? "selected" : ""} ${isTimePassed ? "time-passed" : ""}`}
-                onClick={() => !isTimePassed && setSelectedTime(time)}
+                className={`time-slot 
+                  ${selectedTime === time ? "selected" : ""} 
+                  ${isTimePassed ? "time-passed" : ""} 
+                  ${isDisabled ? "disabled" : ""}
+                `}
+                onClick={() => !isDisabled && setSelectedTime(time)}
                 disabled={isDisabled}
                 title={isTimePassed ? "Time has already passed" : (!availableSlots.includes(time) ? "Slot full" : "")}
               >

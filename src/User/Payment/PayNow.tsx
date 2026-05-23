@@ -1,18 +1,21 @@
 // servicify-frontend/src/User/Payment/PayNow.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../../components/Modal';
 import khalti from '../../assets/khalti.png';
+import esewa from '../../assets/esewa.png';
 import './PayNow.css';
 import { initiatePayment } from '../../services/paymentService';
+import RedeemSelector from '../Loyalty/RedeemSelector';
+import PointsEarnedBadge from '../Loyalty/PointsEarnedBadge';
 
 interface PayNowProps {
   isOpen: boolean;
   onClose: () => void;
-  paymentType: 'appointment' | 'package';
-  itemId: string | number | undefined;      // appointmentId or packageId
+  paymentType: 'appointment' | 'package' | 'purchase';
+  itemId: string | number | undefined;
   amount: number | undefined;
   itemName?: string;
   onPaymentSuccess?: (referenceId: string) => void;
@@ -30,13 +33,19 @@ const PayNow: React.FC<PayNowProps> = ({
   const [selectedMethod, setSelectedMethod] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [redemptionSummary, setRedemptionSummary] = useState<{ pointsUsed: number; discountApplied: number } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  // Reset state when modal opens
+  const baseAmount = amount || 0;
+  const appliedDiscount = Math.min(redemptionSummary?.discountApplied || 0, baseAmount);
+  const payableAmount = Math.max(0, baseAmount - appliedDiscount);
+
   useEffect(() => {
     if (isOpen) {
       setSelectedMethod('');
       setIsProcessing(false);
       setError(null);
+      setRedemptionSummary(null);
     }
   }, [isOpen]);
 
@@ -45,45 +54,110 @@ const PayNow: React.FC<PayNowProps> = ({
     setError(null);
   };
 
+  /**
+   * Submit eSewa v2 form to payment gateway
+   * eSewa v2 API requires form submission with specific fields
+   */
+  const submitEsewaForm = (payload: any, actionUrl: string) => {
+    try {
+      console.log('Submitting eSewa v2 form to:', actionUrl, 'with payload:', payload);
+      
+      // Create hidden form
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = actionUrl || 'https://rc-epay.esewa.com.np/api/epay/main/v2/form';
+      form.style.display = 'none';
+
+      // Add all required fields to form
+      Object.keys(payload).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = payload[key];
+        form.appendChild(input);
+      });
+
+      // Append to body and submit
+      document.body.appendChild(form);
+      console.log('eSewa form submitted to:', form.action);
+      form.submit();
+
+      // Clean up
+      document.body.removeChild(form);
+    } catch (err) {
+      console.error('eSewa form submission error:', err);
+      setError('Failed to submit payment form');
+      setIsProcessing(false);
+    }
+  };
+
   const handleContinue = async () => {
     if (!selectedMethod) return;
 
-    if (selectedMethod === 'khalti') {
-      setIsProcessing(true);
-      setError(null);
+    if (!itemId || amount === undefined || amount <= 0) {
+      setError('Invalid payment details');
+      return;
+    }
 
-      try {
-        // Validate itemId and amount before proceeding
-        if (!itemId || amount === undefined || amount <= 0) {
-          setError('Invalid payment details');
-          setIsProcessing(false);
-          return;
-        }
+    console.log('Initiating payment:', { paymentType, itemId, payableAmount, selectedMethod });
 
-        console.log('Initiating payment with:', { paymentType, itemId, amount });
+    setIsProcessing(true);
+    setError(null);
 
-        const result = await initiatePayment(paymentType, itemId, amount);
+    try {
+      const result = await initiatePayment(
+        paymentType,
+        itemId,
+        payableAmount,
+        appliedDiscount,
+        selectedMethod
+      );
 
-        if (result.success && result.paymentUrl) {
-          // Store current payment info in sessionStorage for after redirect
+      if (!result.success) {
+        setError(result.error || 'Failed to initiate payment');
+        setIsProcessing(false);
+        return;
+      }
+
+      if (selectedMethod === 'khalti') {
+        // Khalti: Store payment info and redirect to Khalti
+        if (result.paymentUrl) {
           sessionStorage.setItem('pendingPayment', JSON.stringify({
             pidx: result.pidx,
             purchaseOrderId: result.purchaseOrderId,
             paymentType,
             itemId
           }));
-
-          // Redirect to Khalti payment page
           window.location.href = result.paymentUrl;
         } else {
-          setError(result.error || 'Failed to initiate payment');
+          setError('Payment URL not received from server');
           setIsProcessing(false);
         }
-      } catch (err) {
-        console.error('Payment error:', err);
-        setError('An unexpected error occurred');
-        setIsProcessing(false);
+      } else if (selectedMethod === 'esewa') {
+        // eSewa v2 API: Submit form directly to eSewa endpoint
+        if (result.esewaPayload && result.esewaFormEndpoint) {
+          console.log('eSewa payload received:', result.esewaPayload);
+
+          // Store transaction info for tracking
+          sessionStorage.setItem('pendingEsewaPayment', JSON.stringify({
+            transactionUuid: result.transactionUuid,
+            purchaseOrderId: result.purchaseOrderId,
+            paymentType,
+            itemId,
+            amount: payableAmount
+          }));
+
+          // Submit form to eSewa (user will be redirected by eSewa after payment)
+          submitEsewaForm(result.esewaPayload, result.esewaFormEndpoint);
+        } else {
+          setError('eSewa form data not received from server');
+          setIsProcessing(false);
+        }
       }
+    } catch (err) {
+      console.error('Payment error:', err);
+      setError('An unexpected error occurred');
+      setIsProcessing(false);
     }
   };
 
@@ -94,6 +168,7 @@ const PayNow: React.FC<PayNowProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Complete Payment"
+      maxWidth="600px"
       footer={
         <button
           className="paynow-continue-btn"
@@ -139,18 +214,59 @@ const PayNow: React.FC<PayNowProps> = ({
               </div>
             </div>
 
-            {/* You can add more payment methods here */}
+            {/* eSewa Payment Option */}
+            <div
+              className={`paynow-method-item ${selectedMethod === 'esewa' ? 'selected' : ''}`}
+              onClick={() => handleMethodSelect('esewa')}
+            >
+              <div className="paynow-radio">
+                <div className={`paynow-radio-dot ${selectedMethod === 'esewa' ? 'selected' : ''}`}></div>
+              </div>
+              <div className="paynow-method-icon">
+                <img src={esewa} alt="eSewa" />
+              </div>
+              <div className="paynow-method-label">
+                Pay with eSewa
+              </div>
+            </div>
           </div>
 
           <div className="paynow-details">
             <div className="paynow-item">
               <span>Item:</span>
-              <strong>{itemName || (paymentType === 'appointment' ? 'Appointment' : 'Package')}</strong>
+              <strong>{
+                itemName ||
+                (paymentType === 'appointment'
+                  ? 'Appointment'
+                  : paymentType === 'package'
+                    ? 'Package'
+                    : 'Purchase')
+              }</strong>
             </div>
             <div className="paynow-amount">
-              <span>Amount:</span>
-              <strong>Rs. {amount !== undefined ? amount.toFixed(2) : '0.00'}</strong>
+              <span>Original Amount:</span>
+              <strong>Rs. {baseAmount.toFixed(2)}</strong>
             </div>
+            <div className="paynow-amount">
+              <span>Discount:</span>
+              <strong>Rs. {appliedDiscount.toFixed(2)}</strong>
+            </div>
+            <div className="paynow-amount">
+              <span>Payable Amount:</span>
+              <strong>Rs. {payableAmount.toFixed(2)}</strong>
+            </div>
+            {!!baseAmount && <PointsEarnedBadge totalExpenditure={baseAmount} redeemedValue={appliedDiscount} />}
+            {itemId && (
+              <RedeemSelector
+                orderId={itemId}
+                onRedeemed={(summary) => setRedemptionSummary(summary)}
+              />
+            )}
+            {redemptionSummary && (
+              <p className="paynow-redemption-summary">
+                You saved Rs. {redemptionSummary.discountApplied} using {redemptionSummary.pointsUsed} points
+              </p>
+            )}
           </div>
         </div>
       </div>

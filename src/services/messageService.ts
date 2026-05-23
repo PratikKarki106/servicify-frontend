@@ -89,3 +89,14 @@ export const getUserById = async (
     return { success: false };
   }
 };
+
+export const markMessagesAsRead = async (senderId: string): Promise<{ success: boolean }> => {
+  const token = getAuthToken();
+  if (!token) return { success: false };
+  const { data } = await axiosInstance.patch(
+    `/messages/read/${encodeURIComponent(senderId)}`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return data;
+};

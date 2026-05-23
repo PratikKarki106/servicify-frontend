@@ -30,6 +30,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import MyProfile from "./User/MyProfile";
 import PaymentSuccess from "./User/Payment/PaymentSuccess";
 import PaymentFailed from "./User/Payment/PaymentFailed";
+import InvoiceViewer from "./User/Payment/InvoiceViewer";
 import UserHistory from "./User/UserHistory";
 import UserPackages from "./User/UserPackages";
 import AdminUsers from "./Admin/AdminUsers";
@@ -37,6 +38,7 @@ import AdminUserDetails from "./Admin/AdminUserDetails";
 import Analytics from "./Admin/Analytics";
 import AdminHistory from "./Admin/AdminHistory";
 import AdminManageVehicles from "./Admin/AdminManageVehicles";
+import AdminLoyalty from "./Admin/AdminLoyalty";
 import UserAnalytics from "./User/UserAnalytics";
 import MainSettings from "./User/Settings/MainSettings";
 import AppDialogHost from "./components/AppDialogHost";
@@ -93,12 +95,14 @@ function App() {
         <Route path="/user/verify-email" element={<VerifyEmail />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
+        <Route path="/invoice/:appointmentId" element={<InvoiceViewer />} />
         <Route path="/user/history" element={<UserSideTop><UserHistory /></UserSideTop>} />
         <Route path="/user/packages" element={<UserSideTop><UserPackages /></UserSideTop>} />
         <Route path="/user/analytics" element={<UserAnalytics />} />
         <Route path="/admin/analytics" element={<Analytics />} />
         <Route path="/admin/history" element={<AdminHistory />} />
         <Route path="/admin/manage-vehicles" element={<AdminManageVehicles />} />
+        <Route path="/admin/manage-redeem" element={<AdminLoyalty />} />
         <Route path="/user/settings" element={<UserSideTop><MainSettings /></UserSideTop>} />
       </Routes>
     </>

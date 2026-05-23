@@ -2,37 +2,58 @@
 
 import axiosInstance from './axiosInstance';
 
+export interface EsewaFormPayload {
+  amount: string;
+  tax_amount: string;
+  product_service_charge: string;
+  product_delivery_charge: string;
+  total_amount: string;
+  transaction_uuid: string;
+  product_code: string;
+  success_url: string;
+  failure_url: string;
+  signed_field_names: string;
+  signature: string;
+}
+
 export interface InitiatePaymentResponse {
   success: boolean;
   paymentUrl?: string;
   pidx?: string;
   purchaseOrderId?: string;
+  esewaPayload?: EsewaFormPayload;
+  esewaFormEndpoint?: string;
+  transactionUuid?: string;
   error?: string;
 }
 
 export interface VerifyPaymentResponse {
   success: boolean;
   status?: string;
-  paymentType?: 'appointment' | 'package';
+  paymentType?: 'appointment' | 'package' | 'purchase';
   referenceId?: string;
   error?: string;
 }
 
 // Initiate payment (for both appointment and package)
 export const initiatePayment = async (
-  paymentType: 'appointment' | 'package',
+  paymentType: 'appointment' | 'package' | 'purchase',
   itemId: string | number,
-  amount: number
+  amount: number,
+  redeemedValue: number = 0,
+  gateway: string = 'khalti'
 ): Promise<InitiatePaymentResponse> => {
   try {
     const token = localStorage.getItem('token');
     console.log('Payment token:', token ? 'Token exists' : 'No token');
-    console.log('Payment request:', { paymentType, itemId, amount });
-    
+    console.log('Payment request:', { paymentType, itemId, amount, redeemedValue, gateway });
+
     const response = await axiosInstance.post('/payment/initiate', {
       paymentType,
       itemId,
-      amount
+      amount,
+      redeemedValue,
+      gateway
     });
     return response.data;
   } catch (error: any) {
@@ -44,7 +65,7 @@ export const initiatePayment = async (
   }
 };
 
-// Verify payment status after callback
+// Verify payment status after callback (works for both Khalti and eSewa)
 export const verifyPayment = async (
   pidx: string,
   purchaseOrderId?: string

@@ -23,15 +23,15 @@ import { useNavigate } from 'react-router-dom';
 
 interface ActiveBookingsProps {
   onBookService: () => void;
-  
+  onTrackService: (appointmentId: string | number) => void;
   onViewDetails: (appointmentId: string | number) => void;
   onReschedule: (appointmentId: string | number) => void;
   onCancelBooking: (appointmentId: string | number) => void;
-
 }
 
 const ActiveBookings: React.FC<ActiveBookingsProps> = ({
   onBookService,
+  onTrackService,
   onViewDetails,
   onReschedule,
   onCancelBooking
@@ -327,15 +327,45 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
       console.log('🔔 Bill update received:', data);
       
       // Show notification to user
-      setCancelSuccess(`Your appointment #${data.appointmentId} bill has been updated. Refreshing...`);
+      toast.info(`Your appointment #${data.appointmentId} bill has been updated.`, {
+        position: "top-right",
+        autoClose: 5000
+      });
       
       // Refresh the bookings list to get updated bill amount
-      setTimeout(() => {
-        fetchAppointments();
-      }, 1000);
+      fetchAppointments();
+    };
+
+    // Subscribe to appointment status updates
+    const handleStatusUpdate = (data: { appointmentId: string; status: string; message: string }) => {
+      console.log('🔔 Status update received:', data);
+      
+      toast.info(`Appointment #${data.appointmentId} status updated to ${data.status}`, {
+        position: "top-right",
+        autoClose: 5000
+      });
+      
+      fetchAppointments();
+    };
+
+    const handleNewAppointment = (data: any) => {
+      console.log('🔔 New appointment received:', data);
+      fetchAppointments();
+    };
+
+    const handleCancellation = (data: { appointmentId: string; message: string }) => {
+      console.log('🔔 Appointment cancelled:', data);
+      
+      toast.warning(`Appointment #${data.appointmentId} has been cancelled`, {
+        position: "top-right",
+        autoClose: 5000
+      });
+      
+      fetchAppointments();
     };
 
     websocketService.subscribeToBillUpdates(handleBillUpdate);
+    websocketService.subscribeToAppointmentUpdates(handleStatusUpdate, handleNewAppointment, handleCancellation);
 
     // Cleanup on unmount
     return () => {
@@ -502,7 +532,7 @@ const ActiveBookings: React.FC<ActiveBookingsProps> = ({
                 <div className="userdashboard-booking-actions">
                   <button
                     className="userdashboard-action-btn track"
-                    onClick={() => navigate('/track-service')}
+                    onClick={() => onTrackService(booking.id)}
                     disabled={cancellingId === booking.id || booking.status === 'cancelled'}
                   >
                     <FontAwesomeIcon icon={faMapMarkerAlt} /> Track

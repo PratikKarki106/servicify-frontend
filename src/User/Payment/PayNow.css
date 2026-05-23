@@ -1,11 +1,7 @@
 /* PayNow Container - used inside Modal */
 .paynow-container {
-  background: white;
-  border-radius: 24px;
   width: 100%;
-  max-width: 400px;
   margin: 0 auto;
-  overflow: hidden;
 }
 
 .paynow-content {
@@ -21,6 +17,20 @@
   font-size: 16px;
   font-weight: 500;
   color: var(--slate-600);
+}
+
+.paynow-error {
+  background-color: #fdf2f2;
+  border: 1px solid #fde8e8;
+  color: #9b1c1c;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .paynow-methods {
@@ -137,41 +147,6 @@
   opacity: 0.6;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .paynow-container {
-    max-width: 100%;
-    margin: 0 16px;
-  }
-  
-  .paynow-header {
-    padding: 16px 20px;
-  }
-  
-  .paynow-content {
-    padding: 20px;
-  }
-  
-  .paynow-footer {
-    padding: 16px 20px 20px;
-  }
-  
-  .paynow-method-item {
-    padding: 14px;
-  }
-  
-  .paynow-method-icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 12px;
-  }
-  
-  .paynow-method-label {
-    font-size: 14px;
-  }
-}
-
-/* Add to existing PayNow.css */
 .paynow-details {
   margin-top: 20px;
   padding: 16px;
@@ -204,4 +179,134 @@
 .paynow-amount strong {
   color: #5e17eb;
   font-size: 1.2rem;
+}
+
+.paynow-redemption-summary {
+  margin: 10px 0 0;
+  color: #1f7a1f;
+  font-weight: 600;
+}
+
+.paynow-redemption-error {
+  color: #c53030;
+}
+
+.loyalty-earned-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eee8ff;
+  color: #4b2abf;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.loyalty-redeem-card {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.loyalty-redeem-label {
+  font-size: 0.9rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.loyalty-redeem-select {
+  min-height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.loyalty-redeem-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #5e17eb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.loyalty-redeem-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Scaling */
+@media (max-width: 1024px) {
+  .paynow-content {
+    padding: 16px;
+  }
+  .paynow-method-item {
+    padding: 12px;
+  }
+  .paynow-details {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .paynow-content {
+    padding: 12px;
+  }
+  .paynow-method-item {
+    padding: 10px;
+  }
+  .paynow-method-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .paynow-method-label {
+    font-size: 14px;
+  }
+}
+
+/* Vertical Responsiveness for Laptop Screens */
+@media (max-height: 800px) {
+  .paynow-content {
+    padding: 15px 20px;
+  }
+  .paynow-heading {
+    margin-bottom: 12px;
+  }
+  .paynow-methods {
+    margin-bottom: 15px;
+    gap: 8px;
+  }
+  .paynow-method-item {
+    padding: 10px 16px;
+  }
+  .paynow-details {
+    margin-top: 12px;
+    padding: 12px;
+  }
+  .paynow-item, .paynow-amount {
+    padding: 6px 0;
+  }
+  .paynow-amount strong {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-height: 650px) {
+  .paynow-content {
+    padding: 10px 15px;
+  }
+  .paynow-methods {
+    margin-bottom: 10px;
+  }
+  .paynow-method-item {
+    padding: 8px 12px;
+  }
+  .paynow-details {
+    margin-top: 8px;
+    padding: 10px;
+  }
+  .paynow-item, .paynow-amount {
+    padding: 4px 0;
+  }
 }

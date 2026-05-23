@@ -7,6 +7,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Login } from '../services/Auth';
+import { BASE_URL } from '../services/axiosInstance';
 
 const SignIn: React.FC = () => {
   const navigation = useNavigate();
@@ -23,8 +24,8 @@ const SignIn: React.FC = () => {
 
 
   const handleGoogleLogin = () => {
-  window.location.href = 'http://localhost:5000/auth/google';
-};
+    window.location.href = `${BASE_URL}/auth/google`;
+  };
 
   // Handle login
   const handleLogin = async () => {
@@ -42,7 +43,7 @@ const SignIn: React.FC = () => {
 
     if (result.error) {
       console.error('Login error:', result.error);
-      
+
       // Check if the error is about email verification
       if (result.error.includes('verify your email') || result.error.includes('Please verify your email')) {
         alert(`Email Verification Required: ${result.error}\n\nPlease check your email for the verification code.`);
@@ -104,27 +105,28 @@ const SignIn: React.FC = () => {
 
         <div className="form-group">
           <label htmlFor="password">Password:</label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-          type="button"
-          className='password-see'
-          onClick={PasswordSee}
-          aria-label={showPassword ? 'Hide Password' : 'Show Password'}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
-
+          <div className="password-input-container">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className='password-see'
+              onClick={PasswordSee}
+              aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
         </div>
-          <button className="signup-link" onClick={() => navigation('/user/Email')}>
-            <u>Forgot Password?</u>
-          </button>{" "}
+        <button className="signup-link" onClick={() => navigation('/user/Email')}>
+          <u>Forgot Password?</u>
+        </button>{" "}
 
         <div className="Sign-option">
           <button className="signin-btn" onClick={handleLogin}>Sign In</button>

@@ -7,9 +7,10 @@ interface ModalProps {
   children: React.ReactNode;
   title?: string;
   footer?: React.ReactNode;
+  maxWidth?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, footer }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, footer, maxWidth }) => {
   if (!isOpen) return null;
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -20,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, footer 
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
+      <div className="modal-content" style={maxWidth ? { maxWidth } : {}}>
         {title && (
           <div className="modal-header">
             <h2>{title}</h2>

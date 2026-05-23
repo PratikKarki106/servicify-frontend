@@ -235,6 +235,32 @@
   border-radius: 50%;
 }
 
+/* Sidebar Badge (pending count pill) */
+.sidebar-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.3);
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+
 /* Collapsed State */
 .sidebar-container.collapsed .menu-label,
 .sidebar-container.collapsed .profile-name,

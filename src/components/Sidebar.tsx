@@ -1,7 +1,7 @@
 // Sidebar.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Sidebar.css'
-import { useState, useEffect } from 'react'
+import useSidebarBadges from '../hooks/useSidebarBadges';
 import {
   FaTachometerAlt,
   FaCalendarAlt,
@@ -13,6 +13,7 @@ import {
   FaComments,
   FaChartBar,
   FaCar,
+  FaGift,
 } from 'react-icons/fa'
 import Logo from '../assets/Servicify.png';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -23,12 +24,22 @@ interface MenuItem {
   label: string;
   icon: React.ReactElement;
   path?: string;
+  badge?: number;
 }
+
+// Maps sidebar item id -> which badge key it uses
+const BADGE_ITEM_IDS = new Set(['appointments', 'manage-vehicles', 'messages']);
 
 const Sidebar = () => {
   const [activeItem, setActiveItem] = useState('dashboard')
   const navigate = useNavigate();
   const location = useLocation();
+  const badges = useSidebarBadges();
+
+  // seenCounts stores the badge value at the moment the admin clicked the item.
+  // Badge is hidden as long as the live count <= seenCounts[id].
+  // If a new request arrives (count exceeds seenCount), the badge reappears.
+  const [seenCounts, setSeenCounts] = useState<Record<string, number>>({});
 
   // Update active item based on current route
   useEffect(() => {
@@ -52,8 +63,20 @@ const Sidebar = () => {
       setActiveItem('messages');
     } else if (path.includes('manage-vehicles')) {
       setActiveItem('manage-vehicles');
+    } else if (path.includes('manage-redeem')) {
+      setActiveItem('manage-redeem');
     }
   }, [location.pathname]);
+
+  // Returns the visible badge count for a menu item:
+  // 0   → badge hidden (admin has already seen this count)
+  // N   → N new/pending items arrived since admin last visited this section
+  const getEffectiveBadge = (itemId: string, rawBadge: number): number => {
+    const seen = seenCounts[itemId] ?? -1;
+    if (rawBadge <= 0) return 0;
+    // Only show badge if current count exceeds what was seen when admin last clicked
+    return rawBadge > seen ? rawBadge : 0;
+  };
 
   // Menu items - updated with correct routes
   const menuItems = [
@@ -70,16 +93,11 @@ const Sidebar = () => {
       path: '/admin/analytics'
     },
     {
-      id: 'history',
-      label: 'History',
-      icon: <FaHistory />,
-      path: '/admin/history'
-    },
-    {
       id: 'appointments',
       label: 'Appointments',
       icon: <FaCalendarAlt />,
-      path: '/admin/view-appointment' // Fixed: matches your route
+      path: '/admin/view-appointment',
+      badge: badges.appointments
     },
     {
       id: 'ongoing-service',
@@ -91,7 +109,7 @@ const Sidebar = () => {
       id: 'catalogue',
       label: 'Catalogue',
       icon: <FaBox />,
-      path: '/admin/catalog' // Fixed: matches your route
+      path: '/admin/catalog'
     },
     {
       id: 'manage-packages',
@@ -103,13 +121,27 @@ const Sidebar = () => {
       id: 'manage-vehicles',
       label: 'Manage Vehicles',
       icon: <FaCar />,
-      path: '/admin/manage-vehicles'
+      path: '/admin/manage-vehicles',
+      badge: badges.manageVehicles
+    },
+    {
+      id: 'manage-redeem',
+      label: 'Manage Redeem',
+      icon: <FaGift />,
+      path: '/admin/manage-redeem'
+    },
+    {
+      id: 'history',
+      label: 'History',
+      icon: <FaHistory />,
+      path: '/admin/history'
     },
     {
       id: 'messages',
       label: 'Messages',
       icon: <FaComments />,
-      path: 'admin/messages'
+      path: 'admin/messages',
+      badge: badges.messages
     },
     {
       id: 'logout',
@@ -121,6 +153,12 @@ const Sidebar = () => {
 
   const handleItemClick = (item: MenuItem) => {
     setActiveItem(item.id)
+
+    // If this item has a badge, record the current count as "seen"
+    // so the badge disappears until a higher count arrives
+    if (BADGE_ITEM_IDS.has(item.id) && item.badge != null && item.badge > 0) {
+      setSeenCounts(prev => ({ ...prev, [item.id]: item.badge as number }));
+    }
 
     // Handle navigation based on item id
     switch(item.id) {
@@ -134,10 +172,10 @@ const Sidebar = () => {
         navigate('/admin/history');
         break;
       case 'appointments':
-        navigate('/admin/view-appointment'); // Fixed route
+        navigate('/admin/view-appointment');
         break;
       case 'catalogue':
-        navigate('/admin/catalog'); // Fixed route
+        navigate('/admin/catalog');
         break;
       case 'manage-packages':
         navigate('/admin/packages');
@@ -148,6 +186,9 @@ const Sidebar = () => {
       case 'manage-vehicles':
         navigate('/admin/manage-vehicles');
         break;
+      case 'manage-redeem':
+        navigate('/admin/manage-redeem');
+        break;
       case 'logout':
         // Clear all stored data
         localStorage.clear();
@@ -156,13 +197,8 @@ const Sidebar = () => {
         console.log('Logging out...')
         break;
       case 'ongoing-service':
-        // Add navigation when you create this page
         console.log('Navigate to Ongoing Service - Page not created yet');
         navigate('/admin/confirmed-appointments');
-        break;
-      case 'manage-packages':
-        // Add navigation when you create this page
-        console.log('Navigate to Manage Packages - Page not created yet');
         break;
       default:
         // If there's a path property, use it
@@ -191,19 +227,30 @@ const Sidebar = () => {
         <div className="sidebar-content">
           {/* Navigation Menu */}
           <nav className="sidebar-menu">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                className={`menu-item ${activeItem === item.id ? 'active' : ''}`}
-                onClick={() => handleItemClick(item)}
-              >
-                <span className="menu-icon">{item.icon}</span>
-                <span className="menu-label">{item.label}</span>
-                {activeItem === item.id && (
-                  <span className="active-indicator"></span>
-                )}
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const effectiveBadge = item.badge != null
+                ? getEffectiveBadge(item.id, item.badge)
+                : 0;
+
+              return (
+                <button
+                  key={item.id}
+                  className={`menu-item ${activeItem === item.id ? 'active' : ''}`}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <span className="menu-icon">{item.icon}</span>
+                  <span className="menu-label">{item.label}</span>
+                  {effectiveBadge > 0 && (
+                    <span className="sidebar-badge">
+                      {effectiveBadge > 99 ? '99+' : effectiveBadge}
+                    </span>
+                  )}
+                  {activeItem === item.id && effectiveBadge === 0 && (
+                    <span className="active-indicator"></span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </div>

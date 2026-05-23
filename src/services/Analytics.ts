@@ -34,6 +34,7 @@ export interface KpiMetrics {
   totalAppointments: number;
   completionRate: number;
   avgDailyServices: number;
+  remainingServices: number;
 }
 
 export interface AnalyticsResponse {
@@ -65,7 +66,7 @@ export interface ExportOptions {
  */
 export const fetchAnalyticsData = async (
   dateRange?: DateRange,
-  timeFrame: 'weekly' | 'monthly' = 'weekly'
+  timeFrame: 'daily' | 'weekly' | 'monthly' = 'weekly'
 ): Promise<AnalyticsResponse> => {
   try {
     const params: any = { timeFrame };
@@ -89,7 +90,7 @@ export const fetchAnalyticsData = async (
  */
 export const fetchRevenueData = async (
   dateRange?: DateRange,
-  timeFrame: 'weekly' | 'monthly' = 'weekly'
+  timeFrame: 'daily' | 'weekly' | 'monthly' = 'weekly'
 ): Promise<RevenueDataPoint[]> => {
   try {
     const params: any = { timeFrame };
@@ -185,7 +186,7 @@ export const exportToCSV = (data: AnalyticsResponse, filename: string = 'analyti
   try {
     // Create CSV content for Revenue
     let csvContent = 'data:text/csv;charset=utf-8,';
-    
+
     // Revenue Section
     csvContent += '\n=== REVENUE DATA ===\n';
     csvContent += 'Period,Revenue,Last Week\n';
